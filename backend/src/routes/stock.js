@@ -31,7 +31,7 @@ router.post('/upload-image', stockItemManage, upload.single('image'), async (req
     if (!req.file) {
       return res.status(400).json({ message: 'No file uploaded' });
     }
-    const result = await compressAndUpload(req.file, { folder: 'solarji/stock' });
+    const result = await compressAndUpload(req.file, { folder: 'kalpanasolar/stock' });
     res.json({ imageUrl: result.url });
   } catch (err) {
     sendError(res, err, 'Could not upload image.');

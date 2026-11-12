@@ -2,12 +2,12 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, Send, CheckCircle, AlertCircle } from 'lucide-react';
 import axios from 'axios';
-import logo from '../../assets/solarji logo.jpeg';
+import logo from '../../assets/kalpana-logo.png';
 import { COMPLAINT_CATEGORIES } from '../../constants/complaints';
 import { API_BASE_URL } from '../../config/api';
 import { getApiErrorMessage } from '../../utils/apiError';
 
-const ORANGE = '#f7941d';
+const BLUE = '#4758da';
 const BLACK = '#111111';
 
 export default function RegisterComplaint() {
@@ -50,8 +50,8 @@ export default function RegisterComplaint() {
       <div style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", minHeight: '100vh', background: '#f9fafb' }}>
         <header style={{ background: '#fff', borderBottom: '1px solid #eee', padding: '16px 24px' }}>
           <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', width: 'fit-content' }}>
-            <img src={logo} alt="SolarJi" style={{ width: 36, height: 36, borderRadius: 10, border: `2px solid ${ORANGE}` }} />
-            <span style={{ fontWeight: 900, color: BLACK }}>SolarJi</span>
+            <img src={logo} alt="Kalpana Solar" style={{ width: 36, height: 36, borderRadius: 10, border: `2px solid ${BLUE}` }} />
+            <span style={{ fontWeight: 900, color: BLACK }}>Kalpana Solar</span>
           </Link>
         </header>
         <div className="max-w-lg mx-auto px-4 py-12">
@@ -96,8 +96,8 @@ export default function RegisterComplaint() {
       <header style={{ background: '#fff', borderBottom: '1px solid #eee', padding: '16px 24px', position: 'sticky', top: 0, zIndex: 40 }}>
         <div style={{ maxWidth: 720, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
-            <img src={logo} alt="SolarJi" style={{ width: 36, height: 36, borderRadius: 10, border: `2px solid ${ORANGE}` }} />
-            <span style={{ fontWeight: 900, color: BLACK }}>SolarJi</span>
+            <img src={logo} alt="Kalpana Solar" style={{ width: 36, height: 36, borderRadius: 10, border: `2px solid ${BLUE}` }} />
+            <span style={{ fontWeight: 900, color: BLACK }}>Kalpana Solar</span>
           </Link>
           <button type="button" onClick={() => navigate('/')} className="btn-secondary text-sm py-2 px-3">
             <ArrowLeft className="w-4 h-4" /> Home
@@ -107,7 +107,7 @@ export default function RegisterComplaint() {
 
       <div className="max-w-2xl mx-auto px-4 py-8 sm:py-12">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-100 text-orange-800 text-xs font-bold mb-4">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-800 text-xs font-bold mb-4">
             <AlertCircle className="w-3.5 h-3.5" /> Customer Support
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Register a Complaint</h1>
@@ -164,7 +164,7 @@ export default function RegisterComplaint() {
           </button>
 
           <p className="text-xs text-center text-gray-400">
-            By submitting, you confirm the contact details are registered with SolarJi.
+            By submitting, you confirm the contact details are registered with Kalpana Solar.
           </p>
         </form>
 

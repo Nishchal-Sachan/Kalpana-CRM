@@ -1,4 +1,4 @@
 PassengerNodejs /usr/bin/node
 PassengerStartupFile src/server.js
 PassengerAppType node
-PassengerAppRoot /home/USERNAME/solarji-backend
+PassengerAppRoot /home/USERNAME/kalpana-solar-backend

@@ -45,7 +45,7 @@ app.use('/api/orders', require('./routes/orders'));
 app.use('/api/dashboard', require('./routes/dashboard'));
 app.use('/api/attendance', require('./routes/attendance'));
 
-app.get('/api/health', (req, res) => res.json({ status: 'ok', app: 'SolarJi API' }));
+app.get('/api/health', (req, res) => res.json({ status: 'ok', app: 'Kalpana Solar API' }));
 
 const { sendError } = require('./utils/sendError');
 
@@ -54,4 +54,4 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`SolarJi API running on port ${PORT}`));
+app.listen(PORT, () => console.log(`Kalpana Solar API running on port ${PORT}`));

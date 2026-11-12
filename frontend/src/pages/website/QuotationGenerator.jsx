@@ -4,12 +4,12 @@ import {
   ArrowLeft, ArrowRight, Printer, Building2, Zap,
   Battery, Sun, RotateCcw, Home as HomeIcon,
 } from 'lucide-react';
-import logo from '../../assets/solarji logo.jpeg';
+import logo from '../../assets/kalpana-logo.png';
 import api from '../../api/axios';
 import toast from 'react-hot-toast';
 
 /* ── Constants ─────────────────────────────────────────── */
-const ORANGE   = '#f7941d';
+const BLUE = '#4758da';
 const BLACK    = '#111111';
 const WHITE    = '#ffffff';
 const RATE     = { residential: 60000, commercial: 40000 };  // per kW, GST incl.
@@ -215,7 +215,7 @@ export default function QuotationGenerator() {
   );
   const TD = ({ children, right, bold, orange, small }) => (
     <td style={{ padding:'9px 12px', textAlign: right ? 'right' : 'left',
-                 fontWeight: bold ? 800 : 400, color: orange ? ORANGE : BLACK,
+                 fontWeight: bold ? 800 : 400, color: (orange || blue) ? BLUE : BLACK,
                  fontSize: small ? '.78rem' : '.85rem' }}>{children}</td>
   );
 
@@ -254,7 +254,7 @@ export default function QuotationGenerator() {
             </button>
             <div style={{ display:'flex', alignItems:'center', gap:8 }}>
               <img src={logo} alt="" style={{ width:30, height:30, borderRadius:8,
-                                              objectFit:'cover', border:`1.5px solid ${ORANGE}` }}/>
+                                              objectFit:'cover', border:`1.5px solid ${BLUE}` }}/>
               <span style={{ fontWeight:900, color:BLACK, fontSize:'.9rem' }}>Quotation Generator</span>
             </div>
           </div>
@@ -268,13 +268,13 @@ export default function QuotationGenerator() {
                 <div key={s} style={{ display:'flex', alignItems:'center', gap:4 }}>
                   <div style={{ display:'flex', alignItems:'center', gap:5, padding:'5px 11px',
                                 borderRadius:99, transition:'all .2s',
-                                background: active ? ORANGE : done ? 'rgba(247,148,29,.12)' : '#f0f0f0' }}>
+                                background: active ? BLUE : done ? 'rgba(71,88,218,.12)' : '#f0f0f0' }}>
                     <span style={{ fontSize:'.68rem', fontWeight:900,
-                                   color: active ? WHITE : done ? ORANGE : '#bbb' }}>{s}</span>
+                                   color: active ? WHITE : done ? BLUE : '#bbb' }}>{s}</span>
                     <span style={{ fontSize:'.72rem', fontWeight:700,
-                                   color: active ? WHITE : done ? ORANGE : '#bbb' }}>{lbl}</span>
+                                   color: active ? WHITE : done ? BLUE : '#bbb' }}>{lbl}</span>
                   </div>
-                  {i < 2 && <div style={{ width:20, height:1.5, background: step > s ? ORANGE : '#e5e7eb' }}/>}
+                  {i < 2 && <div style={{ width:20, height:1.5, background: step > s ? BLUE : '#e5e7eb' }}/>}
                 </div>
               );
             })}
@@ -291,8 +291,8 @@ export default function QuotationGenerator() {
               </button>
               <button onClick={() => window.print()}
                 style={{ display:'flex', alignItems:'center', gap:6, padding:'8px 16px', borderRadius:10,
-                         border:'none', background:ORANGE, color:WHITE, fontWeight:700, fontSize:'.82rem',
-                         cursor:'pointer', boxShadow:'0 4px 14px rgba(247,148,29,.35)' }}>
+                         border:'none', background:BLUE, color:WHITE, fontWeight:700, fontSize:'.82rem',
+                         cursor:'pointer', boxShadow:'0 4px 14px rgba(71,88,218,.35)' }}>
                 <Printer size={14}/> Print / PDF
               </button>
             </>}
@@ -309,10 +309,10 @@ export default function QuotationGenerator() {
             style={{ maxWidth:520, margin:'0 auto', background:WHITE, borderRadius:24,
                      padding:'2.5rem', boxShadow:'0 4px 32px rgba(0,0,0,.06)', border:'1px solid #f0f0f0' }}>
             <div style={{ textAlign:'center', marginBottom:'2rem' }}>
-              <div style={{ width:52, height:52, borderRadius:14, background:'rgba(247,148,29,.1)',
-                            border:'1.5px solid rgba(247,148,29,.2)', display:'flex',
+              <div style={{ width:52, height:52, borderRadius:14, background:'rgba(71,88,218,.1)',
+                            border:'1.5px solid rgba(71,88,218,.2)', display:'flex',
                             alignItems:'center', justifyContent:'center', margin:'0 auto 1rem' }}>
-                <Sun size={22} style={{ color:ORANGE }}/>
+                <Sun size={22} style={{ color:BLUE }}/>
               </div>
               <h2 style={{ fontSize:'1.35rem', fontWeight:900, color:BLACK }}>Customer Details</h2>
               <p style={{ color:'#9ca3af', fontSize:'.82rem', marginTop:5 }}>Start with your customer's basic information</p>
@@ -348,9 +348,9 @@ export default function QuotationGenerator() {
             <button disabled={!ok1} onClick={() => setStep(2)}
               style={{ marginTop:'1.75rem', width:'100%', display:'flex', alignItems:'center',
                        justifyContent:'center', gap:8, padding:'13px', borderRadius:13, border:'none',
-                       background: ok1 ? ORANGE : '#e5e7eb', color: ok1 ? WHITE : '#9ca3af',
+                       background: ok1 ? BLUE : '#e5e7eb', color: ok1 ? WHITE : '#9ca3af',
                        fontWeight:800, fontSize:'.95rem', cursor: ok1 ? 'pointer' : 'not-allowed',
-                       boxShadow: ok1 ? '0 4px 16px rgba(247,148,29,.3)' : 'none', transition:'all .2s' }}>
+                       boxShadow: ok1 ? '0 4px 16px rgba(71,88,218,.3)' : 'none', transition:'all .2s' }}>
               Next: System Selection <ArrowRight size={17}/>
             </button>
           </div>
@@ -379,12 +379,12 @@ export default function QuotationGenerator() {
                   <button key={id}
                     onClick={() => { setCType(id); setKw(id === 'commercial' ? 5 : 2); }}
                     style={{ padding:'1.25rem', borderRadius:14, cursor:'pointer', textAlign:'left',
-                             transition:'all .15s', border:`2px solid ${cType === id ? ORANGE : '#e5e7eb'}`,
+                             transition:'all .15s', border:`2px solid ${cType === id ? BLUE : '#e5e7eb'}`,
                              background: cType === id ? '#fff8f0' : WHITE }}>
-                    <Icon size={18} style={{ color: cType === id ? ORANGE : '#bbb', marginBottom:10 }}/>
+                    <Icon size={18} style={{ color: cType === id ? BLUE : '#bbb', marginBottom:10 }}/>
                     <p style={{ fontWeight:800, color:BLACK, marginBottom:3, fontSize:'.9rem' }}>{label}</p>
                     <p style={{ fontSize:'.75rem', color:'#9ca3af', marginBottom:5 }}>{sub}</p>
-                    <p style={{ fontSize:'.78rem', fontWeight:700, color:ORANGE }}>{note}</p>
+                    <p style={{ fontSize:'.78rem', fontWeight:700, color:BLUE }}>{note}</p>
                     {id === 'residential' && (
                       <p style={{ fontSize:'.72rem', color:'#16a34a', marginTop:3, fontWeight:600 }}>
                         + PM Surya Ghar Subsidy eligible
@@ -406,9 +406,9 @@ export default function QuotationGenerator() {
                 ].map(({ id, Icon, label, sub }) => (
                   <button key={id} onClick={() => setSType(id)}
                     style={{ padding:'1rem', borderRadius:13, cursor:'pointer', textAlign:'left',
-                             transition:'all .15s', border:`2px solid ${sType === id ? ORANGE : '#e5e7eb'}`,
+                             transition:'all .15s', border:`2px solid ${sType === id ? BLUE : '#e5e7eb'}`,
                              background: sType === id ? '#fff8f0' : WHITE }}>
-                    <Icon size={16} style={{ color: sType === id ? ORANGE : '#bbb', marginBottom:7 }}/>
+                    <Icon size={16} style={{ color: sType === id ? BLUE : '#bbb', marginBottom:7 }}/>
                     <p style={{ fontWeight:800, color:BLACK, fontSize:'.85rem', marginBottom:4 }}>{label}</p>
                     <p style={{ fontSize:'.72rem', color:'#9ca3af', lineHeight:1.5 }}>{sub}</p>
                   </button>
@@ -420,7 +420,7 @@ export default function QuotationGenerator() {
             <div style={{ marginBottom:'1.75rem' }}>
               <Lbl>
                 System Capacity *{' '}
-                <span style={{ color:ORANGE, fontWeight:600, textTransform:'none', fontSize:'.72rem' }}>
+                <span style={{ color:BLUE, fontWeight:600, textTransform:'none', fontSize:'.72rem' }}>
                   (multiples of 500 W)
                 </span>
               </Lbl>
@@ -436,7 +436,7 @@ export default function QuotationGenerator() {
             {/* Batteries */}
             {sType !== 'onGrid' && (
               <div style={{ marginBottom:'1.75rem', padding:'1.25rem', borderRadius:13,
-                            background:'rgba(247,148,29,.05)', border:'1.5px solid rgba(247,148,29,.2)' }}>
+                            background:'rgba(71,88,218,.05)', border:'1.5px solid rgba(71,88,218,.2)' }}>
                 <Lbl>
                   Number of Batteries{' '}
                   <span style={{ color:'#9ca3af', fontWeight:400, textTransform:'none', fontSize:'.72rem' }}>
@@ -445,15 +445,15 @@ export default function QuotationGenerator() {
                 </Lbl>
                 <div style={{ display:'flex', alignItems:'center', gap:12 }}>
                   <button onClick={() => setBats(Math.max(1, bats - 1))}
-                    style={{ width:36, height:36, borderRadius:9, border:`1.5px solid ${ORANGE}`,
-                             background:WHITE, color:ORANGE, fontWeight:900, fontSize:'1.2rem', cursor:'pointer' }}>
+                    style={{ width:36, height:36, borderRadius:9, border:`1.5px solid ${BLUE}`,
+                             background:WHITE, color:BLUE, fontWeight:900, fontSize:'1.2rem', cursor:'pointer' }}>
                     −
                   </button>
                   <span style={{ fontSize:'1.5rem', fontWeight:900, color:BLACK, minWidth:36, textAlign:'center' }}>
                     {bats}
                   </span>
                   <button onClick={() => setBats(bats + 1)}
-                    style={{ width:36, height:36, borderRadius:9, border:'none', background:ORANGE,
+                    style={{ width:36, height:36, borderRadius:9, border:'none', background:BLUE,
                              color:WHITE, fontWeight:900, fontSize:'1.2rem', cursor:'pointer' }}>
                     +
                   </button>
@@ -489,7 +489,7 @@ export default function QuotationGenerator() {
                     <p style={{ fontSize:'.72rem', color:'rgba(255,255,255,.35)', marginBottom:3 }}>
                       Total (GST Incl.)
                     </p>
-                    <p style={{ fontSize:'1.4rem', fontWeight:900, color:ORANGE }}>{fmt(total)}</p>
+                    <p style={{ fontSize:'1.4rem', fontWeight:900, color:BLUE }}>{fmt(total)}</p>
                   </div>
                   {subsidy > 0 && (
                     <div>
@@ -522,9 +522,9 @@ export default function QuotationGenerator() {
               <button disabled={!ok2 || submitting} onClick={handleGenerate}
                 style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:7,
                          padding:'12px', borderRadius:12, border:'none',
-                         background: ok2 && !submitting ? ORANGE : '#e5e7eb', color: ok2 && !submitting ? WHITE : '#9ca3af',
+                         background: ok2 && !submitting ? BLUE : '#e5e7eb', color: ok2 && !submitting ? WHITE : '#9ca3af',
                          fontWeight:800, fontSize:'.95rem', cursor: ok2 && !submitting ? 'pointer' : 'not-allowed',
-                         boxShadow: ok2 && !submitting ? '0 4px 16px rgba(247,148,29,.3)' : 'none', transition:'all .2s' }}>
+                         boxShadow: ok2 && !submitting ? '0 4px 16px rgba(71,88,218,.3)' : 'none', transition:'all .2s' }}>
                 {submitting ? 'Saving Lead...' : 'Generate Quotation'} <ArrowRight size={17}/>
               </button>
             </div>
@@ -557,26 +557,26 @@ export default function QuotationGenerator() {
                 </button>
                 <button onClick={() => window.print()}
                   style={{ display:'flex', alignItems:'center', gap:6, padding:'8px 18px', borderRadius:10,
-                           border:'none', background:ORANGE, color:WHITE, fontWeight:700, fontSize:'.85rem',
-                           cursor:'pointer', boxShadow:'0 4px 14px rgba(247,148,29,.35)' }}>
+                           border:'none', background:BLUE, color:WHITE, fontWeight:700, fontSize:'.85rem',
+                           cursor:'pointer', boxShadow:'0 4px 14px rgba(71,88,218,.35)' }}>
                   <Printer size={14}/> Print / Save PDF
                 </button>
               </div>
             </div>
 
             {/* ═══ PAGE 1 — COVER ══════════════════════════ */}
-            <div className="qs-cover" style={{ background:WHITE, borderRadius:20, border:`3px solid ${ORANGE}`,
+            <div className="qs-cover" style={{ background:WHITE, borderRadius:20, border:`3px solid ${BLUE}`,
                           padding:'2.5rem 2.5rem', marginBottom:'1.5rem', textAlign:'center',
                           pageBreakAfter:'always' }}>
               <div style={{ display:'flex', alignItems:'center', justifyContent:'center',
                             gap:14, marginBottom:'1.75rem' }}>
-                <img src={logo} alt="SolarJi"
+                <img src={logo} alt="Kalpana Solar"
                   style={{ width:80, height:80, borderRadius:18, objectFit:'cover',
-                           border:`3px solid ${ORANGE}`, boxShadow:'0 8px 24px rgba(247,148,29,.3)' }}/>
+                           border:`3px solid ${BLUE}`, boxShadow:'0 8px 24px rgba(71,88,218,.3)' }}/>
                 <div style={{ textAlign:'left' }}>
                   <p style={{ fontSize:'2.25rem', fontWeight:900, color:BLACK,
-                              letterSpacing:'-.04em', lineHeight:1 }}>SolarJi</p>
-                  <p style={{ fontSize:'.78rem', color:ORANGE, fontWeight:800, letterSpacing:'.05em' }}>
+                              letterSpacing:'-.04em', lineHeight:1 }}>Kalpana Solar</p>
+                  <p style={{ fontSize:'.78rem', color:BLUE, fontWeight:800, letterSpacing:'.05em' }}>
                     SOLAR ENERGY SOLUTIONS
                   </p>
                 </div>
@@ -586,10 +586,10 @@ export default function QuotationGenerator() {
                 Shop No. 5, Solar Market, Naubasta Hamirpur Road, Kanpur Nagar — 208021
               </p>
               <p style={{ fontSize:'.8rem', color:'#9ca3af', marginBottom:'2rem' }}>
-                +91 98765 43210 · +91 87654 32109 · info@solarji.com
+                +91 8736992133 · kalpanasolartradersinfo@gmail.com
               </p>
 
-              <div style={{ background:ORANGE, color:WHITE, borderRadius:16,
+              <div style={{ background:BLUE, color:WHITE, borderRadius:16,
                             padding:'2rem', margin:'0 auto 2rem', maxWidth:360 }}>
                 <p style={{ fontSize:'.7rem', fontWeight:800, letterSpacing:'.2em',
                             textTransform:'uppercase', opacity:.8, marginBottom:10 }}>
@@ -616,7 +616,7 @@ export default function QuotationGenerator() {
                             justifyContent:'center', borderTop:'1px solid #f0f0f0', paddingTop:'1.25rem' }}>
                 <span style={{ fontSize:'.8rem', color:'#6b7280' }}>Date: <strong>{qDate}</strong></span>
                 <span style={{ fontSize:'.8rem', color:'#6b7280' }}>
-                  Quote No: <strong style={{ color:ORANGE }}>{qNo}</strong>
+                  Quote No: <strong style={{ color:BLUE }}>{qNo}</strong>
                 </span>
               </div>
             </div>
@@ -635,13 +635,13 @@ export default function QuotationGenerator() {
                   <p style={{ fontSize:'.85rem', color:'#6b7280' }}>{cPhone}</p>
                 </div>
                 <div style={{ textAlign:'right' }}>
-                  <p style={{ fontWeight:800, color:ORANGE }}>Quote No: {qNo}</p>
+                  <p style={{ fontWeight:800, color:BLUE }}>Quote No: {qNo}</p>
                   <p style={{ fontSize:'.85rem', color:'#6b7280' }}>Date: {qDate}</p>
                 </div>
               </div>
 
-              <div style={{ padding:'10px 14px', background:'rgba(247,148,29,.08)', borderRadius:9,
-                            border:'1px solid rgba(247,148,29,.2)', marginBottom:'1.25rem' }}>
+              <div style={{ padding:'10px 14px', background:'rgba(71,88,218,.08)', borderRadius:9,
+                            border:'1px solid rgba(71,88,218,.2)', marginBottom:'1.25rem' }}>
                 <p style={{ fontWeight:800, color:BLACK, fontSize:'.88rem' }}>
                   SUBJECT: {kw} KW PROPOSAL FOR ROOF TOP {sLabel.toUpperCase()} SOLAR POWER PLANT — {tLabel}
                 </p>
@@ -698,14 +698,14 @@ export default function QuotationGenerator() {
                       <td style={{ padding:'10px 12px', textAlign:'right', fontWeight:700,
                                    fontSize:'.85rem', color:BLACK }}>Total</td>
                       <td style={{ padding:'10px 12px', textAlign:'right', fontWeight:900,
-                                   color:ORANGE, fontSize:'1rem' }}>{fmt(total)}</td>
+                                   color:BLUE, fontSize:'1rem' }}>{fmt(total)}</td>
                     </tr>
                   </tfoot>
                 </table>
               </div>
 
               {/* amount in words */}
-              <div style={{ padding:'9px 13px', background:'rgba(247,148,29,.05)', borderRadius:8,
+              <div style={{ padding:'9px 13px', background:'rgba(71,88,218,.05)', borderRadius:8,
                             marginBottom:'1.5rem', fontSize:'.8rem' }}>
                 <strong>Amount in Words:</strong>{' '}
                 <span style={{ color:'#374151' }}>{numWords(total)}</span>
@@ -775,9 +775,9 @@ export default function QuotationGenerator() {
             <div className="qs pb" style={{ background:WHITE, borderRadius:20, border:'1px solid #e5e7eb',
                           padding:'2rem', marginBottom:'1.5rem', pageBreakBefore:'always' }}>
               <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom:'1.5rem' }}>
-                <div style={{ width:42, height:42, borderRadius:11, background:'rgba(247,148,29,.1)',
+                <div style={{ width:42, height:42, borderRadius:11, background:'rgba(71,88,218,.1)',
                               display:'flex', alignItems:'center', justifyContent:'center' }}>
-                  <Zap size={18} style={{ color:ORANGE }}/>
+                  <Zap size={18} style={{ color:BLUE }}/>
                 </div>
                 <div>
                   <h3 style={{ fontWeight:900, color:BLACK, fontSize:'1rem', marginBottom:2 }}>
@@ -818,7 +818,7 @@ export default function QuotationGenerator() {
               </div>
 
               <p style={{ fontSize:'.75rem', color:'#9ca3af', marginTop:'1rem', padding:'8px 12px',
-                          background:'rgba(247,148,29,.04)', borderRadius:7 }}>
+                          background:'rgba(71,88,218,.04)', borderRadius:7 }}>
                 Note: Goods are sent in extra quantities to avoid shortfall on site.
                 Surplus material will be collected back after work completion.
               </p>
@@ -846,7 +846,7 @@ export default function QuotationGenerator() {
                       style={{ display:'flex', justifyContent:'space-between', padding:'7px 0',
                                borderBottom:'1px solid #f0f0f0', fontSize:'.83rem' }}>
                       <span style={{ color:'#374151' }}>{item}</span>
-                      <span style={{ fontWeight:700, color:ORANGE }}>{val}</span>
+                      <span style={{ fontWeight:700, color:BLUE }}>{val}</span>
                     </div>
                   ))}
                 </div>
@@ -857,11 +857,11 @@ export default function QuotationGenerator() {
                     Payment Schedule
                   </p>
                   {/* Non-loan */}
-                  <p style={{ fontSize:'.75rem', fontWeight:800, color:ORANGE, textTransform:'uppercase',
+                  <p style={{ fontSize:'.75rem', fontWeight:800, color:BLUE, textTransform:'uppercase',
                                letterSpacing:'.06em', marginBottom:6 }}>Without Bank Loan</p>
                   <div style={{ display:'flex', gap:12, padding:'9px 0', borderBottom:'1px solid #f0f0f0',
                                 fontSize:'.83rem', alignItems:'flex-start', marginBottom:'1rem' }}>
-                    <span style={{ fontWeight:900, color:ORANGE, minWidth:46, fontSize:'1rem', lineHeight:1 }}>100%</span>
+                    <span style={{ fontWeight:900, color:BLUE, minWidth:46, fontSize:'1rem', lineHeight:1 }}>100%</span>
                     <span style={{ color:'#374151', lineHeight:1.55 }}>Full payment before commencement of work</span>
                   </div>
                   {/* Loan */}
@@ -869,7 +869,7 @@ export default function QuotationGenerator() {
                                letterSpacing:'.06em', marginBottom:6 }}>With Bank Loan</p>
                   <div style={{ display:'flex', gap:12, padding:'9px 0', borderBottom:'1px solid #f0f0f0',
                                 fontSize:'.83rem', alignItems:'flex-start' }}>
-                    <span style={{ fontWeight:900, color:ORANGE, minWidth:46, fontSize:'.95rem', lineHeight:1 }}>₹5,000</span>
+                    <span style={{ fontWeight:900, color:BLUE, minWidth:46, fontSize:'.95rem', lineHeight:1 }}>₹5,000</span>
                     <span style={{ color:'#374151', lineHeight:1.55 }}>Advance token amount; balance via bank loan disbursement</span>
                   </div>
                   <p style={{ fontSize:'.73rem', color:'#9ca3af', marginTop:8 }}>
@@ -912,7 +912,7 @@ export default function QuotationGenerator() {
                 <div className="qs" style={{ background:WHITE, borderRadius:20, border:'1px solid #e5e7eb', padding:'1.5rem' }}>
                   <p style={{ fontWeight:900, color:BLACK, fontSize:'.9rem', marginBottom:'1rem' }}>Bank Details</p>
                   {[
-                    ['Beneficiary Name', 'Rising Solar Energy'],
+                    ['Beneficiary Name', 'Kalpana Solar'],
                     ['Bank Name',        'Bank of India'],
                     ['Account No.',      '733020110000286'],
                     ['IFSC Code',        'BKID0007330'],
@@ -930,7 +930,7 @@ export default function QuotationGenerator() {
                 <div className="qs" style={{ background:WHITE, borderRadius:20, border:'1px solid #e5e7eb',
                               padding:'1.5rem', display:'flex', flexDirection:'column', justifyContent:'space-between' }}>
                   <div>
-                    <p style={{ fontWeight:900, color:BLACK, fontSize:'.9rem', marginBottom:'1rem' }}>For SolarJi</p>
+                    <p style={{ fontWeight:900, color:BLACK, fontSize:'.9rem', marginBottom:'1rem' }}>For Kalpana Solar</p>
                     <div style={{ height:56, borderBottom:'1.5px dashed #d1d5db', marginBottom:'.75rem' }}/>
                     <p style={{ fontSize:'.75rem', color:'#9ca3af' }}>Authorised Signatory</p>
                   </div>
@@ -938,9 +938,9 @@ export default function QuotationGenerator() {
                                 marginTop:'1rem', paddingTop:'1rem', borderTop:'1px solid #f0f0f0' }}>
                     <img src={logo} alt=""
                       style={{ width:34, height:34, borderRadius:9, objectFit:'cover',
-                               border:`2px solid ${ORANGE}` }}/>
+                               border:`2px solid ${BLUE}` }}/>
                     <div>
-                      <p style={{ fontWeight:900, color:BLACK, fontSize:'.85rem' }}>SolarJi</p>
+                      <p style={{ fontWeight:900, color:BLACK, fontSize:'.85rem' }}>Kalpana Solar</p>
                       <p style={{ fontSize:'.7rem', color:'#9ca3af' }}>Solar Energy Solutions, Kanpur</p>
                     </div>
                   </div>
@@ -949,12 +949,12 @@ export default function QuotationGenerator() {
 
               {/* Footer — inside page 4 so it never spills to a new page */}
               <div style={{ textAlign:'center', padding:'.75rem 1rem 0',
-                            borderTop:`2px solid rgba(247,148,29,.2)`, marginTop:'.75rem' }}>
-                <p style={{ fontWeight:900, color:ORANGE, fontSize:'.88rem', marginBottom:3 }}>
-                  Thanks &amp; Regards — SolarJi
+                            borderTop:`2px solid rgba(71,88,218,.2)`, marginTop:'.75rem' }}>
+                <p style={{ fontWeight:900, color:BLUE, fontSize:'.88rem', marginBottom:3 }}>
+                  Thanks &amp; Regards — Kalpana Solar
                 </p>
                 <p style={{ fontSize:'.75rem', color:'#9ca3af' }}>
-                  +91 98765 43210 · info@solarji.com · Kanpur, Uttar Pradesh &nbsp;|&nbsp; देश चलेगा सूरज से ☀️
+                  +91 8736992133 · kalpanasolartradersinfo@gmail.com · Kanpur, Uttar Pradesh &nbsp;|&nbsp; देश चलेगा सूरज से ☀️
                 </p>
               </div>
             </div>

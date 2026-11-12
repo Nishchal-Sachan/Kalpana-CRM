@@ -33,13 +33,13 @@
     padding: .6rem 1.1rem;
   }
 
-  /* primary = orange */
+  /* primary = blue */
   .btn-primary {
     @apply btn text-white;
-    background: #f7941d;
-    box-shadow: 0 2px 8px rgba(247,148,29,.35);
+    background: #4758da;
+    box-shadow: 0 2px 8px rgba(71,88,218,.35);
   }
-  .btn-primary:hover  { background: #e07800; }
+  .btn-primary:hover  { background: #3645b8; }
 
   /* secondary = white bordered */
   .btn-secondary {
@@ -79,8 +79,8 @@
   }
   .input:focus {
     @apply outline-none;
-    border-color: #f7941d;
-    box-shadow: 0 0 0 3px rgba(247,148,29,.18), inset 0 1px 2px rgba(0,0,0,.04);
+    border-color: #4758da;
+    box-shadow: 0 0 0 3px rgba(71,88,218,.18), inset 0 1px 2px rgba(0,0,0,.04);
   }
 
   .label {
@@ -127,7 +127,7 @@
 
 /* gradient text */
 .text-brand-gradient {
-  background: linear-gradient(135deg, #f7941d 0%, #e07800 100%);
+  background: linear-gradient(135deg, #4758da 0%, #3645b8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

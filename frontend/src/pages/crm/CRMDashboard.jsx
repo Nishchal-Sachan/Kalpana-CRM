@@ -9,7 +9,7 @@ import { useDataCache } from '../../context/DataCacheContext';
 import toast from 'react-hot-toast';
 import { showApiError } from '../../utils/apiError';
 
-const ORANGE = '#f7941d';
+const BLUE = '#4758da';
 const STAGES = ['Lead','Calling','Visit','Filing','Loan Filing','Loan Process','Loan Release','Installation','Kesco Filing','Kesco Process','Meter Install','Subsidy Apply','Subsidy Release','Commission'];
 
 const STAGE_STYLE = {
@@ -19,7 +19,7 @@ const STAGE_STYLE = {
   'Loan Release':    { bg:'#ecfdf5', color:'#047857' }, 'Installation':    { bg:'#f0fdf4', color:'#166534' },
   'Kesco Filing':    { bg:'#f0fdfa', color:'#0f766e' }, 'Kesco Process':    { bg:'#ecfeff', color:'#0e7490' },
   'Meter Install':   { bg:'#eef2ff', color:'#4338ca' }, 'Subsidy Apply':    { bg:'#f0fdfa', color:'#0d9488' },
-  'Subsidy Release': { bg:'#ecfeff', color:'#0891b2' }, 'Commission':       { bg:'rgba(247,148,29,.12)',  color:ORANGE },
+  'Subsidy Release': { bg:'#ecfeff', color:'#0891b2' }, 'Commission':       { bg:'rgba(71,88,218,.12)',  color:BLUE },
 };
 
 function StatCard({ label, value, icon:Icon, color, sub }) {
@@ -64,7 +64,7 @@ export default function CRMDashboard() {
 
   const statCards = [
     { label:'Total Leads',  value:stats.total ?? 0, icon:Target,      color:'#6366f1' },
-    { label:'Commissioned', value:stats.commissioned ?? 0, icon:CheckCircle, color:ORANGE },
+    { label:'Commissioned', value:stats.commissioned ?? 0, icon:CheckCircle, color:BLUE },
     { label:'In Progress',  value:stats.inProgress ?? 0, icon:Activity, color:'#10b981' },
     { label:'New Today',    value:stats.newToday ?? 0, icon:Clock, color:'#f43f5e' },
   ];
@@ -105,7 +105,7 @@ export default function CRMDashboard() {
         <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'2rem', flexWrap:'wrap', gap:'1rem' }}>
           <div>
             <h1 style={{ fontSize:'1.65rem', fontWeight:900, color:'#111111', letterSpacing:'-.03em', marginBottom:4 }}>CRM Dashboard</h1>
-            <p style={{ color:'#9ca3af', fontSize:'.875rem' }}>Welcome back, <span style={{ color:ORANGE, fontWeight:700 }}>{user?.name}</span> 👋</p>
+            <p style={{ color:'#9ca3af', fontSize:'.875rem' }}>Welcome back, <span style={{ color:BLUE, fontWeight:700 }}>{user?.name}</span> 👋</p>
           </div>
           <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
             <button
@@ -138,14 +138,14 @@ export default function CRMDashboard() {
                 <button key={stage} onClick={() => navigate(`/crm/leads?stage=${stage}`)} style={{
                   display:'flex', flexDirection:'column', alignItems:'center', gap:5,
                   padding:'12px 14px', borderRadius:12, minWidth:88, cursor:'pointer',
-                  background: sc[stage]>0?'rgba(247,148,29,.06)':'#fafafa',
-                  border:`1.5px solid ${sc[stage]>0?'rgba(247,148,29,.25)':'#f0f0f0'}`,
+                  background: sc[stage]>0?'rgba(71,88,218,.06)':'#fafafa',
+                  border:`1.5px solid ${sc[stage]>0?'rgba(71,88,218,.25)':'#f0f0f0'}`,
                   transition:'all .15s',
                 }}
-                  onMouseEnter={e=>{e.currentTarget.style.background='rgba(247,148,29,.1)';e.currentTarget.style.borderColor='rgba(247,148,29,.4)';e.currentTarget.style.transform='translateY(-2px)';}}
-                  onMouseLeave={e=>{e.currentTarget.style.background=sc[stage]>0?'rgba(247,148,29,.06)':'#fafafa';e.currentTarget.style.borderColor=sc[stage]>0?'rgba(247,148,29,.25)':'#f0f0f0';e.currentTarget.style.transform='translateY(0)';}}
+                  onMouseEnter={e=>{e.currentTarget.style.background='rgba(71,88,218,.1)';e.currentTarget.style.borderColor='rgba(71,88,218,.4)';e.currentTarget.style.transform='translateY(-2px)';}}
+                  onMouseLeave={e=>{e.currentTarget.style.background=sc[stage]>0?'rgba(71,88,218,.06)':'#fafafa';e.currentTarget.style.borderColor=sc[stage]>0?'rgba(71,88,218,.25)':'#f0f0f0';e.currentTarget.style.transform='translateY(0)';}}
                 >
-                  <span style={{ fontSize:'1.6rem', fontWeight:900, color:sc[stage]>0?ORANGE:'#d1d5db', letterSpacing:'-.03em' }}>{sc[stage]||0}</span>
+                  <span style={{ fontSize:'1.6rem', fontWeight:900, color:sc[stage]>0?BLUE:'#d1d5db', letterSpacing:'-.03em' }}>{sc[stage]||0}</span>
                   <span style={{ fontSize:'.67rem', color:'#9ca3af', textAlign:'center', lineHeight:1.3, fontWeight:600 }}>{stage}</span>
                 </button>
               ))}
@@ -158,7 +158,7 @@ export default function CRMDashboard() {
           <div className="card" style={{ marginBottom:'1.5rem' }}>
             <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'1.25rem' }}>
               <h2 style={{ fontWeight:800, color:'#111111', fontSize:'1rem', display:'flex', alignItems:'center', gap:7 }}>
-                <Star size={15} style={{ color: ORANGE }}/> Team Leaderboard
+                <Star size={15} style={{ color: BLUE }}/> Team Leaderboard
               </h2>
             <div style={{ display:'flex', alignItems:'center', gap:8 }}>
               <span style={{ fontSize:'.75rem', color:'#9ca3af', fontWeight:500 }}>Points = 5 − days in stage</span>
@@ -179,17 +179,17 @@ export default function CRMDashboard() {
                 return (
                   <div key={u._id} style={{
                     display:'flex', alignItems:'center', gap:12, padding:'10px 14px',
-                    borderRadius:12, background: isMe ? 'rgba(247,148,29,.07)' : '#fafafa',
-                    border:`1.5px solid ${isMe ? 'rgba(247,148,29,.3)' : '#f0f0f0'}`,
+                    borderRadius:12, background: isMe ? 'rgba(71,88,218,.07)' : '#fafafa',
+                    border:`1.5px solid ${isMe ? 'rgba(71,88,218,.3)' : '#f0f0f0'}`,
                   }}>
                     <span style={{ width:26, height:26, borderRadius:'50%', background: medalColor(i) + '22', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:900, fontSize:'.78rem', color: medalColor(i), flexShrink:0 }}>
                       {i + 1}
                     </span>
-                    <div style={{ width:30, height:30, borderRadius:8, background: ORANGE, display:'flex', alignItems:'center', justifyContent:'center', fontWeight:800, color:'#fff', fontSize:'.82rem', flexShrink:0 }}>
+                    <div style={{ width:30, height:30, borderRadius:8, background: BLUE, display:'flex', alignItems:'center', justifyContent:'center', fontWeight:800, color:'#fff', fontSize:'.82rem', flexShrink:0 }}>
                       {u.name?.charAt(0)?.toUpperCase()}
                     </div>
                     <div style={{ flex:1, minWidth:0 }}>
-                      <p style={{ fontWeight:700, color:'#111', fontSize:'.875rem', marginBottom:1 }}>{u.name} {isMe && <span style={{ fontSize:'.65rem', color:ORANGE }}>(you)</span>}</p>
+                      <p style={{ fontWeight:700, color:'#111', fontSize:'.875rem', marginBottom:1 }}>{u.name} {isMe && <span style={{ fontSize:'.65rem', color:BLUE }}>(you)</span>}</p>
                       <p style={{ fontSize:'.72rem', color:'#9ca3af', textTransform:'capitalize' }}>
                         {roleLabel(u.role)}
                       </p>
@@ -215,14 +215,14 @@ export default function CRMDashboard() {
         <div className="card">
           <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'1.25rem' }}>
             <h2 style={{ fontWeight:800, color:'#111111', fontSize:'1rem' }}>Recent Leads</h2>
-            <button onClick={() => navigate('/crm/leads')} style={{ fontSize:'.8rem', fontWeight:700, color:ORANGE, background:'none', border:'none', cursor:'pointer', display:'flex', alignItems:'center', gap:4 }}>
+            <button onClick={() => navigate('/crm/leads')} style={{ fontSize:'.8rem', fontWeight:700, color:BLUE, background:'none', border:'none', cursor:'pointer', display:'flex', alignItems:'center', gap:4 }}>
               View all <ArrowRight size={13}/>
             </button>
           </div>
 
           {loading ? (
             <div style={{ padding:'3rem 0', textAlign:'center', color:'#9ca3af' }}>
-              <div style={{ width:32, height:32, borderRadius:'50%', border:`3px solid #f0f0f0`, borderTopColor:ORANGE, animation:'spin 1s linear infinite', margin:'0 auto 12px' }}/>
+              <div style={{ width:32, height:32, borderRadius:'50%', border:`3px solid #f0f0f0`, borderTopColor:BLUE, animation:'spin 1s linear infinite', margin:'0 auto 12px' }}/>
               Loading…
             </div>
           ) : recent.length === 0 ? (
@@ -245,12 +245,12 @@ export default function CRMDashboard() {
                   {recent.map(lead => (
                     <tr key={lead._id} onClick={()=>navigate(`/crm/leads/${lead._id}`)}
                       style={{ borderBottom:'1px solid #f9fafb', cursor:'pointer', transition:'background .1s' }}
-                      onMouseEnter={e=>e.currentTarget.style.background='#fff8f0'}
+                      onMouseEnter={e=>e.currentTarget.style.background='#eff2fe'}
                       onMouseLeave={e=>e.currentTarget.style.background='transparent'}
                     >
                       <td style={{ padding:'13px 16px' }}>
                         <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-                          <div style={{ width:33, height:33, borderRadius:'50%', background:ORANGE, display:'flex', alignItems:'center', justifyContent:'center', fontSize:'.8rem', fontWeight:900, color:'#fff', flexShrink:0 }}>
+                          <div style={{ width:33, height:33, borderRadius:'50%', background:BLUE, display:'flex', alignItems:'center', justifyContent:'center', fontSize:'.8rem', fontWeight:900, color:'#fff', flexShrink:0 }}>
                             {lead.name?.charAt(0)?.toUpperCase()}
                           </div>
                           <span style={{ fontWeight:700, color:'#111111', fontSize:'.875rem' }}>{lead.name}</span>

@@ -5,9 +5,9 @@ import api from '../../api/axios';
 import Layout from '../../components/Layout';
 import toast from 'react-hot-toast';
 import { showApiError } from '../../utils/apiError';
-import logo from '../../assets/solarji logo.jpeg';
+import logo from '../../assets/kalpana-logo.png';
 
-const ACCENT_COLOR = '#f7941d'; // Brand orange color
+const ACCENT_COLOR = '#4758da'; // Brand blue color
 const DARK_GRAY = '#1E1E1E';
 
 // Default templates for the three categories
@@ -449,7 +449,7 @@ export default function AdminQuotations() {
                 onClick={handlePrintQuotation}
                 className="btn-primary"
                 style={{
-                  background: '#f7941d',
+                  background: '#4758da',
                   color: '#ffffff',
                   display: 'flex',
                   alignItems: 'center',
@@ -459,12 +459,12 @@ export default function AdminQuotations() {
                   borderRadius: '12px',
                   fontWeight: 'bold',
                   border: 'none',
-                  boxShadow: '0 4px 12px rgba(247, 148, 29, 0.3)',
+                  boxShadow: '0 4px 12px rgba(71, 88, 218, 0.3)',
                   cursor: 'pointer',
                   transition: 'all 0.15s'
                 }}
-                onMouseEnter={e => e.currentTarget.style.background = '#e07800'}
-                onMouseLeave={e => e.currentTarget.style.background = '#f7941d'}
+                onMouseEnter={e => e.currentTarget.style.background = '#3645b8'}
+                onMouseLeave={e => e.currentTarget.style.background = '#4758da'}
               >
                 <Printer size={16} /> Print / Save PDF
               </button>
@@ -519,7 +519,7 @@ export default function AdminQuotations() {
                         transition: 'all 0.15s',
                         border: 'none',
                         cursor: 'pointer',
-                        background: active ? '#f7941d' : 'transparent',
+                        background: active ? '#4758da' : 'transparent',
                         color: active ? '#ffffff' : '#4b5563',
                         boxShadow: active ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'
                       }}
@@ -754,17 +754,17 @@ export default function AdminQuotations() {
                   gap: '6px',
                   padding: '10px 20px',
                   borderRadius: '12px',
-                  background: '#f7941d', // Brand orange
+                  background: '#4758da', // Brand blue
                   color: '#ffffff',
                   fontSize: '0.85rem',
                   fontWeight: 'bold',
                   border: 'none',
                   cursor: 'pointer',
-                  boxShadow: '0 4px 12px rgba(247, 148, 29, 0.25)',
+                  boxShadow: '0 4px 12px rgba(71, 88, 218, 0.25)',
                   transition: 'all 0.15s'
                 }}
-                onMouseEnter={e => e.currentTarget.style.background = '#e07800'}
-                onMouseLeave={e => e.currentTarget.style.background = '#f7941d'}
+                onMouseEnter={e => e.currentTarget.style.background = '#3645b8'}
+                onMouseLeave={e => e.currentTarget.style.background = '#4758da'}
               >
                 <Plus size={16} /> Add First Component
               </button>
@@ -785,7 +785,7 @@ export default function AdminQuotations() {
                   type="button"
                   onClick={() => setViewMode('builder')}
                   className="btn-primary"
-                  style={{ background: '#f7941d', color: '#fff', padding: '10px 20px', borderRadius: '12px', fontWeight: 'bold', border: 'none', cursor: 'pointer' }}
+                  style={{ background: '#4758da', color: '#fff', padding: '10px 20px', borderRadius: '12px', fontWeight: 'bold', border: 'none', cursor: 'pointer' }}
                 >
                   Create Your First Quotation
                 </button>
@@ -872,8 +872,8 @@ export default function AdminQuotations() {
             {/* Top red header banner */}
             <div className="print-header-bg text-white px-4 py-2 flex items-center justify-between" style={{ backgroundColor: ACCENT_COLOR, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', fontSize: '10px', fontWeight: 'bold', whiteSpace: 'nowrap' }}>
-                <span>📞 {customerPhone || '9451908101'}</span>
-                <span>✉️ risingsolarenergyup@gmail.com</span>
+                <span>📞 {customerPhone || '8736992133'}</span>
+                <span>✉️ kalpanasolartradersinfo@gmail.com</span>
               </div>
               <div style={{ fontSize: '10px', fontWeight: 'bold', textAlign: 'right', lineHeight: '1.3', maxWidth: '60%' }}>
                 OFFICE ADD: 33 - W Block Keshav Nagar,<br />Hamirpur Road Kanpur - 14 (Near Madhulok Chauraha)
@@ -885,12 +885,12 @@ export default function AdminQuotations() {
               <div className="flex items-center gap-3">
                 <img
                   src={logo}
-                  alt="Solarji"
+                  alt="Kalpana Solar"
                   className="w-14 h-14 rounded-lg object-contain bg-white p-1 border border-white/10"
-                  onError={(e) => { e.target.src = 'https://placehold.co/56x56?text=RSE'; }}
+                  onError={(e) => { e.target.src = '/kalpana-logo.png'; }}
                 />
                 <div>
-                  <h2 className="text-lg md:text-xl font-black tracking-tight leading-none">RISING SOLAR ENERGY</h2>
+                  <h2 className="text-lg md:text-xl font-black tracking-tight leading-none">KALPANA SOLAR</h2>
                   <p className="text-[9px] text-gray-300 mt-1 uppercase font-bold tracking-wider">GSTIN: <span className="text-yellow-400">09CWZPS4610R1Z8</span> · State: 09-Uttar Pradesh</p>
                 </div>
               </div>
@@ -1058,7 +1058,7 @@ export default function AdminQuotations() {
                 <div className="space-y-1 text-gray-600">
                   <div className="flex" style={{ display: 'flex', gap: '8px' }}>
                     <span style={{ width: '85px', minWidth: '85px', fontWeight: '500', color: '#6b7280' }}>Beneficiary:</span>
-                    <span style={{ fontWeight: 'bold', color: '#1f2937' }}>Rising Solar Energy</span>
+                    <span style={{ fontWeight: 'bold', color: '#1f2937' }}>Kalpana Solar</span>
                   </div>
                   <div className="flex" style={{ display: 'flex', gap: '8px' }}>
                     <span style={{ width: '85px', minWidth: '85px', fontWeight: '500', color: '#6b7280' }}>Bank Name:</span>
@@ -1089,7 +1089,7 @@ export default function AdminQuotations() {
             {/* Right Section: Signature block */}
             <div className="text-right flex flex-col justify-end items-end h-full pb-2">
               <div className="w-36 border-b border-gray-300 mb-2"></div>
-              <p className="font-bold text-gray-800 text-[11px]">For Rising Solar Energy</p>
+              <p className="font-bold text-gray-800 text-[11px]">For Kalpana Solar</p>
               <p className="text-[9px] text-gray-400 mt-0.5">Authorized Signatory</p>
             </div>
           </div>

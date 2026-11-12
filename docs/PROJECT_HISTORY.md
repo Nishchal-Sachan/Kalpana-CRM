@@ -1,6 +1,6 @@
-# SolarJi — Project History & Optimization Story
+# Kalpana Solar — Project History & Optimization Story
 
-This document records **everything that was built, changed, and optimized** during the development and performance improvement phases of SolarJi. It serves as a changelog, decision log, and onboarding guide for understanding *why* the system works the way it does today.
+This document records **everything that was built, changed, and optimized** during the development and performance improvement phases of Kalpana Solar. It serves as a changelog, decision log, and onboarding guide for understanding *why* the system works the way it does today.
 
 ---
 
@@ -24,7 +24,7 @@ This document records **everything that was built, changed, and optimized** duri
 
 ## 1. Project Origin & Goals
 
-SolarJi was built as a **specialized CRM + inventory platform** for solar installation businesses in India. Core requirements:
+Kalpana Solar was built as a **specialized CRM + inventory platform** for solar installation businesses in India. Core requirements:
 
 - Track leads through an **11-stage solar-specific pipeline** (site visit → KESCO filing → meter install → commission)
 - **Gamify sales** with a points system rewarding fast stage progression
@@ -485,7 +485,7 @@ frontend/src/
 
 ## Summary
 
-SolarJi evolved from a functional but monolithic data-loading app into a **paginated, cached, JWT-optimized** production system. The biggest wins came from:
+Kalpana Solar evolved from a functional but monolithic data-loading app into a **paginated, cached, JWT-optimized** production system. The biggest wins came from:
 
 1. **JWT claims** — no DB on every request  
 2. **Server + client dashboard cache** — fast repeat visits  

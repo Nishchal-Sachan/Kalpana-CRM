@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Menu } from 'lucide-react';
 import Sidebar from './Sidebar';
 
@@ -38,7 +38,7 @@ export default function Layout({ children, module }) {
           <Menu size={22} strokeWidth={2.25} />
         </button>
         <span className="font-extrabold text-[0.95rem] text-white tracking-tight truncate capitalize">
-          SolarJi · {module}
+          Kalpana Solar · {module}
         </span>
         <span className="w-10 shrink-0" aria-hidden />
       </header>

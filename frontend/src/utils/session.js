@@ -1,27 +1,35 @@
-const TOKEN_KEY = 'solarji_token';
+const TOKEN_KEY = 'kalpanasolar_token';
+const LEGACY_TOKEN_KEY = 'solarji_token';
 
 /** Read JWT from sessionStorage (tab session — cleared when tab closes). */
 export function getToken() {
-  return sessionStorage.getItem(TOKEN_KEY);
+  return sessionStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(LEGACY_TOKEN_KEY);
 }
 
 export function setToken(token) {
-  if (token) sessionStorage.setItem(TOKEN_KEY, token);
-  else sessionStorage.removeItem(TOKEN_KEY);
+  if (token) {
+    sessionStorage.setItem(TOKEN_KEY, token);
+  } else {
+    sessionStorage.removeItem(TOKEN_KEY);
+    sessionStorage.removeItem(LEGACY_TOKEN_KEY);
+  }
 }
 
 export function clearToken() {
   sessionStorage.removeItem(TOKEN_KEY);
+  sessionStorage.removeItem(LEGACY_TOKEN_KEY);
 }
 
 /** One-time migration from older localStorage auth keys. */
 export function migrateLegacyAuthStorage() {
-  const legacyToken = localStorage.getItem(TOKEN_KEY);
+  const legacyToken = localStorage.getItem(TOKEN_KEY) || localStorage.getItem(LEGACY_TOKEN_KEY);
   if (legacyToken && !getToken()) {
     setToken(legacyToken);
   }
   localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(LEGACY_TOKEN_KEY);
   localStorage.removeItem('solarji_user');
+  localStorage.removeItem('kalpanasolar_user');
 }
 
 /** Decode JWT payload client-side for instant UI (signature verified by server on API calls). */

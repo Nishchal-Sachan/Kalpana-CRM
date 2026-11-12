@@ -8,7 +8,7 @@ import { showApiError } from '../../utils/apiError';
 import { useAuth } from '../../context/AuthContext';
 import { useDataCache } from '../../context/DataCacheContext';
 
-const ORANGE = '#f7941d';
+const BLUE = '#4758da';
 const PAGE_SIZE = 20;
 
 function buildPrintHtml(items, now, isAdmin) {
@@ -32,7 +32,7 @@ function buildPrintHtml(items, now, isAdmin) {
   return `
     <div class="header">
       <div>
-        <div class="brand">SolarJi</div>
+        <div class="brand">Kalpana Solar</div>
         <div style="font-size: 11px; color: #666; margin-top: 2px">Stock Inventory Report</div>
       </div>
       <div style="text-align: right">
@@ -167,12 +167,12 @@ export default function StockItems() {
         <!DOCTYPE html>
         <html>
           <head>
-            <title>Stock Report — SolarJi</title>
+            <title>Stock Report — Kalpana Solar</title>
             <style>
               * { margin: 0; padding: 0; box-sizing: border-box; }
               body { font-family: Arial, sans-serif; font-size: 12px; color: #111; padding: 24px; }
-              .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; border-bottom: 2px solid ${ORANGE}; padding-bottom: 12px; }
-              .brand { font-size: 22px; font-weight: 900; color: ${ORANGE}; }
+              .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; border-bottom: 2px solid ${BLUE}; padding-bottom: 12px; }
+              .brand { font-size: 22px; font-weight: 900; color: ${BLUE}; }
               table { width: 100%; border-collapse: collapse; }
               thead tr { background: #111; color: #fff; }
               th { padding: 8px 10px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; }
@@ -290,7 +290,7 @@ export default function StockItems() {
                           )}
                           <td className="py-3 px-3 text-gray-700 font-medium">₹{item.sellPrice?.toLocaleString('en-IN')}</td>
                           <td className="py-3 px-3">
-                            <span className={`font-semibold ${isLow ? 'text-orange-600' : 'text-gray-700'}`}>
+                            <span className={`font-semibold ${isLow ? 'text-blue-600' : 'text-gray-700'}`}>
                               {item.quantity} {item.unit}
                               {isLow && <span className="ml-1 text-xs">⚠</span>}
                             </span>
@@ -392,7 +392,7 @@ export default function StockItems() {
                         />
                       </label>
                     </div>
-                    {uploadingImage && <p className="text-xs text-orange-600 mt-1">Uploading image... Please wait.</p>}
+                    {uploadingImage && <p className="text-xs text-blue-600 mt-1">Uploading image... Please wait.</p>}
                   </div>
                 </div>
                 <div className="flex gap-3 pt-2">

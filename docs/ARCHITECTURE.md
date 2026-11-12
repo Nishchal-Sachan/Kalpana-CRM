@@ -1,6 +1,6 @@
-# SolarJi — System Architecture (Detailed)
+# Kalpana Solar — System Architecture (Detailed)
 
-This document describes the full technical architecture of SolarJi: how components connect, how data flows, how security works, and how performance optimizations are implemented.
+This document describes the full technical architecture of Kalpana Solar: how components connect, how data flows, how security works, and how performance optimizations are implemented.
 
 ---
 
@@ -28,7 +28,7 @@ This document describes the full technical architecture of SolarJi: how componen
 
 ## 1. System Overview
 
-**SolarJi** is a full-stack solar business management platform. It combines:
+**Kalpana Solar** is a full-stack solar business management platform. It combines:
 
 - **CRM** — 11-stage lead pipeline with notes, images, assignment, and gamification
 - **Stock** — Voucher-based inventory (purchase/sale) with automatic quantity updates
@@ -59,7 +59,7 @@ The system is a **layered monolith**: one Express API server, one React SPA, one
                                     ▼
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                    BACKEND (Node.js + Express)                               │
-│  Render: https://solarji.onrender.com  (recommended region: Singapore)      │
+│  Render: https://kalpanasolar.onrender.com (or configured VPS / Cloud host) │
 │  ┌─────────────┐  ┌──────────────┐  ┌─────────────┐  ┌─────────────────┐ │
 │  │ compression │→ │ CORS + JSON  │→ │ protect     │→ │ Route handlers  │ │
 │  │ middleware  │  │ no-store /api│  │ adminOnly   │  │ (auth, leads,   │ │
@@ -109,7 +109,7 @@ The system is a **layered monolith**: one Express API server, one React SPA, one
 ## 4. Repository Structure
 
 ```
-solarji/
+Kalpana-CRM/
 ├── README.md                    # Project overview & quick start
 ├── env.example                  # Consolidated env reference
 ├── docs/
@@ -305,7 +305,7 @@ User enters email + password
     → server: signUserToken(user) with claims:
          { id, name, email, role, phone, points, handlesComplaints }
     → response: { token, user }
-    → frontend: sessionStorage.setItem('solarji_token', token)
+    → frontend: sessionStorage.setItem('kalpanasolar_token', token)
     → AuthContext: decode JWT → instant user state (no /me call)
 ```
 

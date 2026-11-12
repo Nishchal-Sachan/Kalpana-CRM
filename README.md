@@ -1,12 +1,12 @@
-# SolarJi
+# Kalpana Solar
 
 **Enterprise operations platform for solar installation businesses.**
 
-SolarJi unifies CRM, inventory control, team management, and sales analytics into a single web application. It is designed for teams that manage long, compliance-heavy project pipelines—site surveys, loan filing, KESCO processes, meter installation—and need inventory tied to those projects without maintaining separate spreadsheets.
+Kalpana Solar unifies CRM, inventory control, team management, and sales analytics into a single web application. It is designed for teams that manage long, compliance-heavy project pipelines—site surveys, loan filing, KESCO processes, meter installation—and need inventory tied to those projects without maintaining separate spreadsheets.
 
 | | |
 |---|---|
-| **Production API** | `https://solarji.onrender.com/api` |
+| **Production API** | `https://api.kalpanasolar.com/api` (or configured Render / VPS host) |
 | **Architecture** | Layered monolith — React SPA + Express REST API + MongoDB |
 | **Auth model** | Stateless JWT with embedded claims; tab-scoped session storage |
 | **Deep docs** | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) · [`docs/PROJECT_HISTORY.md`](docs/PROJECT_HISTORY.md) |
@@ -37,7 +37,7 @@ SolarJi unifies CRM, inventory control, team management, and sales analytics int
 
 ## Executive Summary
 
-SolarJi addresses four operational problems common in solar businesses:
+Kalpana Solar addresses four operational problems common in solar businesses:
 
 1. **Pipeline visibility** — Leads move through eleven industry-specific stages. Every transition is logged with actor, timestamp, and optional notes.
 2. **Inventory integrity** — Stock changes only through formal purchase (ADD) or sales (SELL) vouchers. Quantities are updated atomically; voucher deletion reverses the transaction.
@@ -57,7 +57,7 @@ The system supports four roles—**Admin**, **Stock Manager**, **Manager**, and 
 
 ## Roles & Access Control
 
-SolarJi uses **role-based access control (RBAC)** on the backend (middleware + query filters) and frontend (routes + conditional UI).
+Kalpana Solar uses **role-based access control (RBAC)** on the backend (middleware + query filters) and frontend (routes + conditional UI).
 
 ### Role Summary
 
@@ -155,7 +155,7 @@ Complaints are submitted via the **public** form at `/complaint` (no login). New
 
 ### High-Level Topology
 
-SolarJi follows a **classic three-tier, stateless API architecture**. The backend holds no session state; identity travels in signed JWTs. Dashboard statistics use a short-lived in-process cache to reduce database load without introducing external dependencies (Redis).
+Kalpana Solar follows a **classic three-tier, stateless API architecture**. The backend holds no session state; identity travels in signed JWTs. Dashboard statistics use a short-lived in-process cache to reduce database load without introducing external dependencies (Redis).
 
 ```mermaid
 flowchart TB
@@ -369,7 +369,7 @@ sequenceDiagram
     A->>A: bcrypt.compare(hash, storedHash)
     A->>A: signUserToken({ id, name, email, role, phone, points, handlesComplaints })
     A-->>F: { token, user }
-    F->>F: sessionStorage.setItem('solarji_token')
+    F->>F: sessionStorage.setItem('kalpanasolar_token')
     F->>F: decode JWT → AuthContext (instant, no /me)
 ```
 
@@ -422,7 +422,7 @@ POST /stock/vouchers
 
 ## Caching & Performance
 
-SolarJi uses a **deliberately layered cache strategy**—no background prefetch; caches activate on user navigation and invalidate on writes.
+Kalpana Solar uses a **deliberately layered cache strategy**—no background prefetch; caches activate on user navigation and invalidate on writes.
 
 | Layer | Scope | TTL | Invalidation |
 |-------|-------|-----|--------------|
@@ -549,7 +549,7 @@ Complete API reference (42 endpoints): [`docs/ARCHITECTURE.md §10`](docs/ARCHIT
 ## Repository Layout
 
 ```
-solarji/
+Kalpana-CRM/
 ├── README.md                         ← you are here
 ├── env.example                       ← full env reference (backend + frontend)
 ├── docs/
@@ -621,7 +621,7 @@ solarji/
 
 ```bash
 git clone <repository-url>
-cd solarji
+cd Kalpana-CRM
 
 # Install dependencies
 cd backend  && npm install
@@ -643,7 +643,7 @@ See also the consolidated reference at [`env.example`](env.example).
 
 ```env
 PORT=5000
-MONGO_URI=mongodb+srv://<user>:<password>@<cluster>.mongodb.net/solarji
+MONGO_URI=mongodb+srv://<user>:<password>@<cluster>.mongodb.net/kalpanasolar
 JWT_SECRET=<minimum-32-character-random-string>
 CLIENT_URL=http://localhost:5173,https://your-frontend-domain.com
 
@@ -823,5 +823,5 @@ To change Render region: **Settings → Region → Singapore → Manual Deploy**
 ---
 
 <p align="center">
-  <sub>SolarJi · Built for solar operations teams · May 2026</sub>
+  <sub>Kalpana Solar · Built for solar operations teams · May 2026</sub>
 </p>

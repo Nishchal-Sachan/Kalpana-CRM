@@ -11,7 +11,7 @@ import {
   formatBillDate,
 } from '../constants/voucherBill';
 
-const ORANGE = '#f7941d';
+const BLUE = '#4758da';
 
 function recalcRow(row) {
   const qty = parseFloat(row.quantity) || 0;
@@ -41,8 +41,8 @@ function StepPill({ label, step, current, done }) {
     <div
       className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-colors"
       style={{
-        background: active ? ORANGE : done ? 'rgba(247,148,29,.12)' : '#f0f0f0',
-        color: active ? '#fff' : done ? ORANGE : '#9ca3af',
+        background: active ? BLUE : done ? 'rgba(71,88,218,.12)' : '#f0f0f0',
+        color: active ? '#fff' : done ? BLUE : '#9ca3af',
       }}
     >
       <span>{step}</span>
@@ -194,7 +194,7 @@ export default function VoucherBillSheetModal({
           </div>
           <div className="flex items-center gap-2">
             <StepPill label="Fill" step={1} current={mode === 'edit' ? 1 : 2} done={mode === 'preview'} />
-            <div className="w-5 h-0.5 rounded" style={{ background: mode === 'preview' ? ORANGE : '#e5e7eb' }} />
+            <div className="w-5 h-0.5 rounded" style={{ background: mode === 'preview' ? BLUE : '#e5e7eb' }} />
             <StepPill label="Preview" step={2} current={mode === 'preview' ? 2 : 1} done={false} />
           </div>
         </div>

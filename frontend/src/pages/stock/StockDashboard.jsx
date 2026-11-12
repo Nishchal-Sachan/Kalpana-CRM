@@ -7,7 +7,7 @@ import { showApiError } from '../../utils/apiError';
 import { useDataCache } from '../../context/DataCacheContext';
 import { useAuth } from '../../context/AuthContext';
 
-const ORANGE = '#f7941d';
+const BLUE = '#4758da';
 
 function StatCard({ label, value, color, icon:Icon, sub }) {
   return (
@@ -57,7 +57,7 @@ export default function StockDashboard() {
 
   const statCards = [
     { label:'Total Items',     value:stats.totalItems,   icon:Package,       color:'#6366f1' },
-    ...(isAdmin ? [{ label:'Inventory Value', value:`₹${(stats.totalValue / 1000).toFixed(0)}K`, icon:TrendingUp, color:ORANGE, sub:'at purchase cost' }] : []),
+    ...(isAdmin ? [{ label:'Inventory Value', value:`₹${(stats.totalValue / 1000).toFixed(0)}K`, icon:TrendingUp, color:BLUE, sub:'at purchase cost' }] : []),
     { label:'Low Stock',       value:stats.lowStockCount, icon:AlertTriangle, color:'#f43f5e' },
     { label:'Total Vouchers',  value:stats.totalVouchers, icon:FileText,      color:'#10b981' },
   ];
@@ -96,15 +96,15 @@ export default function StockDashboard() {
 
         {/* Low stock */}
         {lowStock.length>0 && (
-          <div style={{ marginBottom:'1.5rem', padding:'1rem 1.25rem', borderRadius:16, background:'#fff8f0', border:`1.5px solid rgba(247,148,29,.3)`, display:'flex', alignItems:'flex-start', gap:12 }}>
-            <AlertTriangle size={18} style={{ color:ORANGE, flexShrink:0, marginTop:2 }}/>
+          <div style={{ marginBottom:'1.5rem', padding:'1rem 1.25rem', borderRadius:16, background:'#eff2fe', border:`1.5px solid rgba(71,88,218,.3)`, display:'flex', alignItems:'flex-start', gap:12 }}>
+            <AlertTriangle size={18} style={{ color:BLUE, flexShrink:0, marginTop:2 }}/>
             <div>
-              <p style={{ fontWeight:800, color:'#92400e', fontSize:'.875rem', marginBottom:8 }}>
+              <p style={{ fontWeight:800, color:'#1e3a8a', fontSize:'.875rem', marginBottom:8 }}>
                 Low Stock Alert — {lowStock.length} item{lowStock.length>1?'s':''} need restocking
               </p>
               <div style={{ display:'flex', flexWrap:'wrap', gap:6 }}>
                 {lowStock.map(i=>(
-                  <span key={i._id} style={{ padding:'3px 10px', borderRadius:99, fontSize:'.75rem', fontWeight:700, background:'rgba(247,148,29,.12)', border:'1px solid rgba(247,148,29,.3)', color:'#92400e' }}>
+                  <span key={i._id} style={{ padding:'3px 10px', borderRadius:99, fontSize:'.75rem', fontWeight:700, background:'rgba(71,88,218,.12)', border:'1px solid rgba(71,88,218,.3)', color:'#1e3a8a' }}>
                     {i.name} ({i.quantity} {i.unit})
                   </span>
                 ))}
@@ -119,7 +119,7 @@ export default function StockDashboard() {
           <div className="card">
             <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'1.25rem' }}>
               <h2 style={{ fontWeight:800, color:'#111111', fontSize:'1rem' }}>Stock Items</h2>
-              <button onClick={()=>navigate('/stock/items')} style={{ fontSize:'.8rem', fontWeight:700, color:ORANGE, background:'none', border:'none', cursor:'pointer', display:'flex', alignItems:'center', gap:4 }}>
+              <button onClick={()=>navigate('/stock/items')} style={{ fontSize:'.8rem', fontWeight:700, color:BLUE, background:'none', border:'none', cursor:'pointer', display:'flex', alignItems:'center', gap:4 }}>
                 View all <ArrowRight size={13}/>
               </button>
             </div>
@@ -138,7 +138,7 @@ export default function StockDashboard() {
                   <p style={{ fontSize:'.75rem', color:'#9ca3af', marginTop:2 }}>{item.category}</p>
                 </div>
                 <div style={{ textAlign:'right' }}>
-                  <p style={{ fontWeight:700, fontSize:'.875rem', color: item.quantity<=item.minQuantity&&item.minQuantity>0?ORANGE:'#374151' }}>
+                  <p style={{ fontWeight:700, fontSize:'.875rem', color: item.quantity<=item.minQuantity&&item.minQuantity>0?BLUE:'#374151' }}>
                     {item.quantity} {item.unit}
                   </p>
                   <p style={{ fontSize:'.72rem', color:'#9ca3af' }}>₹{item.sellPrice}/unit</p>
@@ -151,7 +151,7 @@ export default function StockDashboard() {
           <div className="card">
             <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'1.25rem' }}>
               <h2 style={{ fontWeight:800, color:'#111111', fontSize:'1rem' }}>Recent Vouchers</h2>
-              <button onClick={()=>navigate('/stock/vouchers')} style={{ fontSize:'.8rem', fontWeight:700, color:ORANGE, background:'none', border:'none', cursor:'pointer', display:'flex', alignItems:'center', gap:4 }}>
+              <button onClick={()=>navigate('/stock/vouchers')} style={{ fontSize:'.8rem', fontWeight:700, color:BLUE, background:'none', border:'none', cursor:'pointer', display:'flex', alignItems:'center', gap:4 }}>
                 View all <ArrowRight size={13}/>
               </button>
             </div>

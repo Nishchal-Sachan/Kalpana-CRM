@@ -2,9 +2,9 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Sun, Zap, Shield, Award, Phone, Mail, MapPin,
          ArrowRight, BarChart3, Package, CheckCircle, Star, Layers, Menu, X } from 'lucide-react';
-import logo from '../../assets/solarji logo.jpeg';
+import logo from '../../assets/kalpana-logo.png';
 
-const ORANGE = '#f7941d';
+const BLUE = '#4758da';
 const BLACK  = '#111111';
 const WHITE  = '#ffffff';
 
@@ -69,8 +69,8 @@ export default function Home() {
         <nav style={{ maxWidth:1200, margin:'0 auto', padding:'0 clamp(0.75rem, 4vw, 1.5rem)' }}>
           <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:10, minHeight:64 }}>
             <a href="/" style={{ display:'flex', alignItems:'center', gap:10, textDecoration:'none', flexShrink:0 }} onClick={scrollLock}>
-              <img src={logo} alt="SolarJi" style={{ width:36, height:36, borderRadius:10, objectFit:'cover', border:`2px solid ${ORANGE}` }}/>
-              <span style={{ fontWeight:900, fontSize:'clamp(0.95rem, 4vw, 1.05rem)', color:BLACK, letterSpacing:'-.02em' }}>SolarJi</span>
+              <img src={logo} alt="Kalpana Solar" style={{ width:36, height:36, borderRadius:10, objectFit:'cover', border:`2px solid ${BLUE}` }}/>
+              <span style={{ fontWeight:900, fontSize:'clamp(0.95rem, 4vw, 1.05rem)', color:BLACK, letterSpacing:'-.02em' }}>Kalpana Solar</span>
             </a>
 
             {/* Desktop links */}
@@ -78,13 +78,13 @@ export default function Home() {
               {['Services','Products','Gallery','Why Us','Contact'].map(l=>(
                 <a key={l} href={`#${l.toLowerCase().replace(' ','-')}`}
                   style={{ fontSize:'.875rem', fontWeight:600, color:'#6b7280', textDecoration:'none', transition:'color .15s' }}
-                  onMouseEnter={e=>e.target.style.color=ORANGE}
+                  onMouseEnter={e=>e.target.style.color=BLUE}
                   onMouseLeave={e=>e.target.style.color='#6b7280'}
                 >{l}</a>
               ))}
               <a href="/shop"
                 style={{ fontSize:'.875rem', fontWeight:600, color:'#6b7280', textDecoration:'none', transition:'color .15s' }}
-                onMouseEnter={e=>e.target.style.color=ORANGE}
+                onMouseEnter={e=>e.target.style.color=BLUE}
                 onMouseLeave={e=>e.target.style.color='#6b7280'}
                 onClick={(e) => { e.preventDefault(); navigate('/shop'); }}
               >Shop / Products</a>
@@ -92,7 +92,7 @@ export default function Home() {
                 type="button"
                 onClick={() => navigate('/complaint')}
                 style={{ fontSize:'.875rem', fontWeight:600, color:'#6b7280', background:'none', border:'none', cursor:'pointer', padding:0, transition:'color .15s' }}
-                onMouseEnter={e=>e.currentTarget.style.color=ORANGE}
+                onMouseEnter={e=>e.currentTarget.style.color=BLUE}
                 onMouseLeave={e=>e.currentTarget.style.color='#6b7280'}
               >Register Complaint</button>
             </div>
@@ -125,18 +125,18 @@ export default function Home() {
                   <a
                     key={l}
                     href={`#${l.toLowerCase().replace(' ','-')}`}
-                    className="py-2.5 px-2 rounded-xl font-semibold text-gray-700 active:bg-orange-50"
+                    className="py-2.5 px-2 rounded-xl font-semibold text-gray-700 active:bg-blue-50"
                     onClick={scrollLock}
                   >{l}</a>
                 ))}
                 <a
                   href="/shop"
-                  className="py-2.5 px-2 rounded-xl font-semibold text-gray-700 active:bg-orange-50 text-left w-full block"
+                  className="py-2.5 px-2 rounded-xl font-semibold text-gray-700 active:bg-blue-50 text-left w-full block"
                   onClick={(e) => { e.preventDefault(); navigate('/shop'); scrollLock(); }}
                 >Shop / Products</a>
                 <button
                   type="button"
-                  className="py-2.5 px-2 rounded-xl font-semibold text-gray-700 active:bg-orange-50 text-left w-full"
+                  className="py-2.5 px-2 rounded-xl font-semibold text-gray-700 active:bg-blue-50 text-left w-full"
                   onClick={() => { navigate('/complaint'); scrollLock(); }}
                 >Register Complaint</button>
               </div>
@@ -156,29 +156,29 @@ export default function Home() {
         <img src={PHOTOS.hero} alt="Solar farm"
           style={{ position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover', objectPosition:'center' }}
         />
-        {/* dark + orange gradient overlay */}
-        <div style={{ position:'absolute', inset:0, background:'linear-gradient(135deg, rgba(17,17,17,.88) 0%, rgba(17,17,17,.7) 50%, rgba(247,148,29,.25) 100%)' }}/>
-        {/* orange glow top-right */}
-        <div style={{ position:'absolute', top:'-5%', right:'-5%', width:500, height:500, borderRadius:'50%', background:'radial-gradient(circle, rgba(247,148,29,.22) 0%, transparent 65%)', pointerEvents:'none' }} className="anim-glow"/>
+        {/* dark + blue gradient overlay */}
+        <div style={{ position:'absolute', inset:0, background:'linear-gradient(135deg, rgba(17,17,17,.88) 0%, rgba(17,17,17,.7) 50%, rgba(71,88,218,.25) 100%)' }}/>
+        {/* blue glow top-right */}
+        <div style={{ position:'absolute', top:'-5%', right:'-5%', width:500, height:500, borderRadius:'50%', background:'radial-gradient(circle, rgba(71,88,218,.22) 0%, transparent 65%)', pointerEvents:'none' }} className="anim-glow"/>
 
         <div style={{ maxWidth:1200, margin:'0 auto', padding:'clamp(3rem, 10vw, 6rem) clamp(1rem, 4vw, 1.5rem)', width:'100%', position:'relative' }}>
           <div className="anim-fade-up" style={{ maxWidth:680 }}>
-            <div style={{ display:'inline-flex', alignItems:'center', gap:8, padding:'6px 16px', borderRadius:99, background:'rgba(247,148,29,.15)', border:'1px solid rgba(247,148,29,.35)', color:ORANGE, fontSize:'.78rem', fontWeight:700, marginBottom:'1.75rem' }}>
-              <span style={{ width:7, height:7, borderRadius:'50%', background:ORANGE, display:'inline-block' }} className="anim-glow"/>
+            <div style={{ display:'inline-flex', alignItems:'center', gap:8, padding:'6px 16px', borderRadius:99, background:'rgba(71,88,218,.15)', border:'1px solid rgba(71,88,218,.35)', color:BLUE, fontSize:'.78rem', fontWeight:700, marginBottom:'1.75rem' }}>
+              <span style={{ width:7, height:7, borderRadius:'50%', background:BLUE, display:'inline-block' }} className="anim-glow"/>
               Kanpur's #1 Solar Company — देश चलेगा सूरज से
             </div>
             <h1 style={{ fontSize:'clamp(2.8rem,6vw,5.25rem)', fontWeight:900, color:WHITE, letterSpacing:'-.04em', lineHeight:1.04, marginBottom:'1.5rem' }}>
               Power Your Future<br/>
-              <span style={{ color:ORANGE }}>With Solar Energy</span>
+              <span style={{ color:BLUE }}>With Solar Energy</span>
             </h1>
             <p className="anim-fade-up-1" style={{ fontSize:'1.1rem', color:'rgba(255,255,255,.55)', lineHeight:1.8, maxWidth:520, marginBottom:'2.5rem' }}>
               End-to-end solar solutions — design, supply, installation, Kesco net metering
               &amp; lifetime support. One trusted partner, zero hassle.
             </p>
             <div className="anim-fade-up-2" style={{ display:'flex', flexWrap:'wrap', gap:12 }}>
-              <button onClick={()=>navigate('/quotation')} style={{ display:'flex', alignItems:'center', gap:8, padding:'15px 30px', borderRadius:14, border:'none', background:ORANGE, color:WHITE, fontSize:'1rem', fontWeight:800, cursor:'pointer', boxShadow:'0 8px 28px rgba(247,148,29,.5)', transition:'all .15s' }}
-                onMouseEnter={e=>{e.currentTarget.style.background='#e07800';e.currentTarget.style.transform='translateY(-2px)';}}
-                onMouseLeave={e=>{e.currentTarget.style.background=ORANGE;e.currentTarget.style.transform='translateY(0)';}}
+              <button onClick={()=>navigate('/quotation')} style={{ display:'flex', alignItems:'center', gap:8, padding:'15px 30px', borderRadius:14, border:'none', background:BLUE, color:WHITE, fontSize:'1rem', fontWeight:800, cursor:'pointer', boxShadow:'0 8px 28px rgba(71,88,218,.5)', transition:'all .15s' }}
+                onMouseEnter={e=>{e.currentTarget.style.background='#3645b8';e.currentTarget.style.transform='translateY(-2px)';}}
+                onMouseLeave={e=>{e.currentTarget.style.background=BLUE;e.currentTarget.style.transform='translateY(0)';}}
               >Get Free Quotation <ArrowRight size={18}/></button>
               <a href="#contact" style={{ display:'flex', alignItems:'center', gap:8, padding:'15px 30px', borderRadius:14, border:'1.5px solid rgba(255,255,255,.2)', background:'transparent', color:'rgba(255,255,255,.8)', fontSize:'1rem', fontWeight:700, cursor:'pointer', textDecoration:'none', transition:'all .15s' }}
                 onMouseEnter={e=>{e.currentTarget.style.borderColor='rgba(255,255,255,.45)';e.currentTarget.style.color=WHITE;}}
@@ -188,7 +188,7 @@ export default function Home() {
             <div className="anim-fade-up-3" style={{ display:'flex', flexWrap:'wrap', gap:'1.5rem', marginTop:'3rem', paddingTop:'2rem', borderTop:'1px solid rgba(255,255,255,.1)' }}>
               {[{icon:Star,label:'5-Star Rated'},{icon:CheckCircle,label:'Govt Approved'},{icon:Shield,label:'Fully Insured'},{icon:Zap,label:'Tier-1 Products'}].map(({icon:Icon,label})=>(
                 <div key={label} style={{ display:'flex', alignItems:'center', gap:7, fontSize:'.85rem', color:'rgba(255,255,255,.45)', fontWeight:500 }}>
-                  <Icon size={15} style={{ color:ORANGE }}/> {label}
+                  <Icon size={15} style={{ color:BLUE }}/> {label}
                 </div>
               ))}
             </div>
@@ -197,7 +197,7 @@ export default function Home() {
       </section>
 
       {/* ══ STATS ══ */}
-      <section style={{ background:ORANGE }}>
+      <section style={{ background:BLUE }}>
         <div style={{ maxWidth:1200, margin:'0 auto', padding:'3rem 1.5rem', display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(150px,1fr))', gap:'1.5rem', textAlign:'center' }}>
           {STATS.map(({value,label})=>(
             <div key={label}>
@@ -212,14 +212,14 @@ export default function Home() {
       <section id="services" style={{ background:'#f5f6f8', padding:'6rem 0' }}>
         <div style={{ maxWidth:1200, margin:'0 auto', padding:'0 1.5rem' }}>
           <div style={{ textAlign:'center', marginBottom:'3.5rem' }}>
-            <span style={{ display:'inline-block', padding:'5px 14px', borderRadius:99, background:'rgba(247,148,29,.1)', border:`1px solid rgba(247,148,29,.25)`, color:ORANGE, fontSize:'.72rem', fontWeight:800, textTransform:'uppercase', letterSpacing:'.1em', marginBottom:'1rem' }}>What We Do</span>
+            <span style={{ display:'inline-block', padding:'5px 14px', borderRadius:99, background:'rgba(71,88,218,.1)', border:`1px solid rgba(71,88,218,.25)`, color:BLUE, fontSize:'.72rem', fontWeight:800, textTransform:'uppercase', letterSpacing:'.1em', marginBottom:'1rem' }}>What We Do</span>
             <h2 style={{ fontSize:'clamp(1.8rem,3.5vw,2.75rem)', fontWeight:900, color:BLACK, letterSpacing:'-.03em', marginBottom:'.75rem' }}>Our Services</h2>
             <p style={{ color:'#9ca3af', maxWidth:480, margin:'0 auto' }}>Complete solar solutions — from consultation to commissioning and lifetime support.</p>
           </div>
           <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))', gap:'1.5rem' }}>
             {SERVICES.map(({icon:Icon, title, desc, photo})=>(
               <div key={title} style={{ background:WHITE, borderRadius:20, overflow:'hidden', border:'1.5px solid #f0f0f0', transition:'all .25s', cursor:'default' }}
-                onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-6px)';e.currentTarget.style.boxShadow=`0 20px 50px rgba(247,148,29,.15)`;e.currentTarget.style.borderColor=ORANGE;}}
+                onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-6px)';e.currentTarget.style.boxShadow=`0 20px 50px rgba(71,88,218,.15)`;e.currentTarget.style.borderColor=BLUE;}}
                 onMouseLeave={e=>{e.currentTarget.style.transform='translateY(0)';e.currentTarget.style.boxShadow='none';e.currentTarget.style.borderColor='#f0f0f0';}}
               >
                 {/* photo */}
@@ -229,7 +229,7 @@ export default function Home() {
                     onMouseLeave={e=>e.target.style.transform='scale(1)'}
                   />
                   <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom, transparent 40%, rgba(0,0,0,.5) 100%)' }}/>
-                  <div style={{ position:'absolute', bottom:12, left:14, width:36, height:36, borderRadius:10, background:ORANGE, display:'flex', alignItems:'center', justifyContent:'center' }}>
+                  <div style={{ position:'absolute', bottom:12, left:14, width:36, height:36, borderRadius:10, background:BLUE, display:'flex', alignItems:'center', justifyContent:'center' }}>
                     <Icon size={18} style={{ color:WHITE }}/>
                   </div>
                 </div>
@@ -248,7 +248,7 @@ export default function Home() {
       <section id="gallery" style={{ background:WHITE, padding:'5rem 0' }}>
         <div style={{ maxWidth:1200, margin:'0 auto', padding:'0 1.5rem' }}>
           <div style={{ textAlign:'center', marginBottom:'3rem' }}>
-            <span style={{ display:'inline-block', padding:'5px 14px', borderRadius:99, background:'rgba(247,148,29,.1)', border:`1px solid rgba(247,148,29,.25)`, color:ORANGE, fontSize:'.72rem', fontWeight:800, textTransform:'uppercase', letterSpacing:'.1em', marginBottom:'1rem' }}>Our Work</span>
+            <span style={{ display:'inline-block', padding:'5px 14px', borderRadius:99, background:'rgba(71,88,218,.1)', border:`1px solid rgba(71,88,218,.25)`, color:BLUE, fontSize:'.72rem', fontWeight:800, textTransform:'uppercase', letterSpacing:'.1em', marginBottom:'1rem' }}>Our Work</span>
             <h2 style={{ fontSize:'clamp(1.8rem,3.5vw,2.75rem)', fontWeight:900, color:BLACK, letterSpacing:'-.03em', marginBottom:'.75rem' }}>Installations Gallery</h2>
             <p style={{ color:'#9ca3af' }}>Real solar projects delivered across Kanpur and Uttar Pradesh.</p>
           </div>
@@ -262,7 +262,7 @@ export default function Home() {
                 />
                 <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom, transparent 50%, rgba(0,0,0,.65) 100%)' }}/>
                 <div style={{ position:'absolute', bottom:14, left:16 }}>
-                  <span style={{ display:'inline-block', padding:'4px 10px', borderRadius:99, background:'rgba(247,148,29,.9)', color:WHITE, fontSize:'.72rem', fontWeight:800 }}>{label}</span>
+                  <span style={{ display:'inline-block', padding:'4px 10px', borderRadius:99, background:'rgba(71,88,218,.9)', color:WHITE, fontSize:'.72rem', fontWeight:800 }}>{label}</span>
                 </div>
               </div>
             ))}
@@ -274,7 +274,7 @@ export default function Home() {
               />
               <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom, transparent 40%, rgba(0,0,0,.65) 100%)' }}/>
               <div style={{ position:'absolute', bottom:18, left:20 }}>
-                <span style={{ display:'inline-block', padding:'4px 12px', borderRadius:99, background:'rgba(247,148,29,.9)', color:WHITE, fontSize:'.72rem', fontWeight:800 }}>Kanpur Installations</span>
+                <span style={{ display:'inline-block', padding:'4px 12px', borderRadius:99, background:'rgba(71,88,218,.9)', color:WHITE, fontSize:'.72rem', fontWeight:800 }}>Kanpur Installations</span>
               </div>
             </div>
           </div>
@@ -285,22 +285,22 @@ export default function Home() {
       <section id="products" style={{ background:'#f5f6f8', padding:'6rem 0' }}>
         <div style={{ maxWidth:1200, margin:'0 auto', padding:'0 1.5rem' }}>
           <div style={{ textAlign:'center', marginBottom:'3.5rem' }}>
-            <span style={{ display:'inline-block', padding:'5px 14px', borderRadius:99, background:'rgba(247,148,29,.1)', border:`1px solid rgba(247,148,29,.25)`, color:ORANGE, fontSize:'.72rem', fontWeight:800, textTransform:'uppercase', letterSpacing:'.1em', marginBottom:'1rem' }}>Equipment</span>
+            <span style={{ display:'inline-block', padding:'5px 14px', borderRadius:99, background:'rgba(71,88,218,.1)', border:`1px solid rgba(71,88,218,.25)`, color:BLUE, fontSize:'.72rem', fontWeight:800, textTransform:'uppercase', letterSpacing:'.1em', marginBottom:'1rem' }}>Equipment</span>
             <h2 style={{ fontSize:'clamp(1.8rem,3.5vw,2.75rem)', fontWeight:900, color:BLACK, letterSpacing:'-.03em', marginBottom:'.75rem' }}>Premium Products</h2>
             <p style={{ color:'#9ca3af' }}>Tier-1 solar equipment from globally trusted manufacturers.</p>
           </div>
           <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(min(100%,240px),1fr))', gap:'1rem' }}>
             {PRODUCTS.map(({name,brands,desc})=>(
               <div key={name} style={{ display:'flex', gap:14, padding:'1.25rem 1.5rem', borderRadius:16, border:'1.5px solid #e5e7eb', background:WHITE, transition:'all .15s' }}
-                onMouseEnter={e=>{e.currentTarget.style.borderColor=ORANGE;e.currentTarget.style.background='#fff8f0';}}
+                onMouseEnter={e=>{e.currentTarget.style.borderColor=BLUE;e.currentTarget.style.background='#eff2fe';}}
                 onMouseLeave={e=>{e.currentTarget.style.borderColor='#e5e7eb';e.currentTarget.style.background=WHITE;}}
               >
-                <div style={{ width:40, height:40, borderRadius:10, background:'rgba(247,148,29,.1)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, marginTop:2 }}>
-                  <Layers size={17} style={{ color:ORANGE }}/>
+                <div style={{ width:40, height:40, borderRadius:10, background:'rgba(71,88,218,.1)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, marginTop:2 }}>
+                  <Layers size={17} style={{ color:BLUE }}/>
                 </div>
                 <div>
                   <p style={{ fontWeight:800, color:BLACK, marginBottom:3 }}>{name}</p>
-                  <p style={{ fontSize:'.75rem', color:ORANGE, fontWeight:700, marginBottom:4 }}>{brands}</p>
+                  <p style={{ fontSize:'.75rem', color:BLUE, fontWeight:700, marginBottom:4 }}>{brands}</p>
                   <p style={{ fontSize:'.825rem', color:'#9ca3af' }}>{desc}</p>
                 </div>
               </div>
@@ -322,7 +322,7 @@ export default function Home() {
               <img src={PHOTOS.engineer} alt="Engineer" style={{ width:'100%', height:'100%', objectFit:'cover' }}/>
             </div>
             {/* stat pill */}
-            <div style={{ position:'absolute', top:24, left:24, padding:'10px 18px', borderRadius:14, background:ORANGE, boxShadow:'0 8px 24px rgba(247,148,29,.4)' }}>
+            <div style={{ position:'absolute', top:24, left:24, padding:'10px 18px', borderRadius:14, background:BLUE, boxShadow:'0 8px 24px rgba(71,88,218,.4)' }}>
               <p style={{ fontWeight:900, fontSize:'1.5rem', color:WHITE, letterSpacing:'-.03em', lineHeight:1 }}>500+</p>
               <p style={{ fontSize:'.72rem', color:'rgba(255,255,255,.8)', fontWeight:600, marginTop:2 }}>Projects Done</p>
             </div>
@@ -330,7 +330,7 @@ export default function Home() {
 
           {/* Right: text */}
           <div style={{ paddingBottom:32 }}>
-            <span style={{ display:'inline-block', padding:'5px 14px', borderRadius:99, background:'rgba(247,148,29,.1)', border:`1px solid rgba(247,148,29,.25)`, color:ORANGE, fontSize:'.72rem', fontWeight:800, textTransform:'uppercase', letterSpacing:'.1em', marginBottom:'1.25rem' }}>Why SolarJi</span>
+            <span style={{ display:'inline-block', padding:'5px 14px', borderRadius:99, background:'rgba(71,88,218,.1)', border:`1px solid rgba(71,88,218,.25)`, color:BLUE, fontSize:'.72rem', fontWeight:800, textTransform:'uppercase', letterSpacing:'.1em', marginBottom:'1.25rem' }}>Why Kalpana Solar</span>
             <h2 style={{ fontSize:'clamp(1.8rem,3.5vw,2.75rem)', fontWeight:900, color:BLACK, letterSpacing:'-.03em', marginBottom:'1rem' }}>
               Kanpur's Most<br/>Trusted Solar Brand
             </h2>
@@ -341,16 +341,16 @@ export default function Home() {
             <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'10px', marginBottom:'2.5rem' }}>
               {WHY.map(item=>(
                 <div key={item} style={{ display:'flex', alignItems:'center', gap:9 }}>
-                  <div style={{ width:22, height:22, borderRadius:'50%', background:'rgba(247,148,29,.12)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
-                    <CheckCircle size={12} style={{ color:ORANGE }}/>
+                  <div style={{ width:22, height:22, borderRadius:'50%', background:'rgba(71,88,218,.12)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                    <CheckCircle size={12} style={{ color:BLUE }}/>
                   </div>
                   <span style={{ fontSize:'.85rem', color:'#374151', fontWeight:600 }}>{item}</span>
                 </div>
               ))}
             </div>
-            <button onClick={()=>navigate('/quotation')} style={{ display:'flex', alignItems:'center', gap:8, padding:'14px 28px', borderRadius:14, border:'none', background:ORANGE, color:WHITE, fontSize:'1rem', fontWeight:800, cursor:'pointer', boxShadow:'0 6px 20px rgba(247,148,29,.4)', transition:'all .15s' }}
-              onMouseEnter={e=>{e.currentTarget.style.background='#e07800';e.currentTarget.style.transform='translateY(-2px)';}}
-              onMouseLeave={e=>{e.currentTarget.style.background=ORANGE;e.currentTarget.style.transform='translateY(0)';}}
+            <button onClick={()=>navigate('/quotation')} style={{ display:'flex', alignItems:'center', gap:8, padding:'14px 28px', borderRadius:14, border:'none', background:BLUE, color:WHITE, fontSize:'1rem', fontWeight:800, cursor:'pointer', boxShadow:'0 6px 20px rgba(71,88,218,.4)', transition:'all .15s' }}
+              onMouseEnter={e=>{e.currentTarget.style.background='#3645b8';e.currentTarget.style.transform='translateY(-2px)';}}
+              onMouseLeave={e=>{e.currentTarget.style.background=BLUE;e.currentTarget.style.transform='translateY(0)';}}
             >Get Free Estimate <ArrowRight size={18}/></button>
           </div>
         </div>
@@ -361,7 +361,7 @@ export default function Home() {
         <img src={PHOTOS.panels} alt="Solar panels"
           style={{ width:'100%', height:400, objectFit:'cover', display:'block' }}
         />
-        <div style={{ position:'absolute', inset:0, background:'linear-gradient(135deg, rgba(17,17,17,.82) 0%, rgba(247,148,29,.5) 100%)' }}/>
+        <div style={{ position:'absolute', inset:0, background:'linear-gradient(135deg, rgba(17,17,17,.82) 0%, rgba(71,88,218,.5) 100%)' }}/>
         <div style={{ position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center', flexDirection:'column', textAlign:'center', padding:'2rem' }}>
           <Zap size={42} style={{ color:WHITE, opacity:.85, marginBottom:'1.25rem' }}/>
           <h2 style={{ fontSize:'clamp(1.8rem,3.5vw,2.75rem)', fontWeight:900, color:WHITE, letterSpacing:'-.03em', marginBottom:'1rem' }}>
@@ -370,9 +370,9 @@ export default function Home() {
           <p style={{ color:'rgba(255,255,255,.75)', fontSize:'1.05rem', lineHeight:1.75, marginBottom:'2rem', maxWidth:500 }}>
             Enter your electricity bill and instantly see your solar system size, cost, savings &amp; payback period.
           </p>
-          <button onClick={()=>navigate('/quotation')} style={{ display:'inline-flex', alignItems:'center', gap:10, padding:'15px 36px', borderRadius:14, border:'none', background:ORANGE, color:WHITE, fontSize:'1rem', fontWeight:800, cursor:'pointer', boxShadow:'0 8px 28px rgba(247,148,29,.55)', transition:'all .15s' }}
-            onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-2px)';e.currentTarget.style.background='#e07800';}}
-            onMouseLeave={e=>{e.currentTarget.style.transform='translateY(0)';e.currentTarget.style.background=ORANGE;}}
+          <button onClick={()=>navigate('/quotation')} style={{ display:'inline-flex', alignItems:'center', gap:10, padding:'15px 36px', borderRadius:14, border:'none', background:BLUE, color:WHITE, fontSize:'1rem', fontWeight:800, cursor:'pointer', boxShadow:'0 8px 28px rgba(71,88,218,.55)', transition:'all .15s' }}
+            onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-2px)';e.currentTarget.style.background='#3645b8';}}
+            onMouseLeave={e=>{e.currentTarget.style.transform='translateY(0)';e.currentTarget.style.background=BLUE;}}
           >Generate Quotation Now <ArrowRight size={20}/></button>
         </div>
       </section>
@@ -381,21 +381,21 @@ export default function Home() {
       <section id="contact" style={{ background:BLACK, padding:'6rem 0' }}>
         <div style={{ maxWidth:1200, margin:'0 auto', padding:'0 1.5rem' }}>
           <div style={{ textAlign:'center', marginBottom:'3.5rem' }}>
-            <span style={{ display:'inline-block', padding:'5px 14px', borderRadius:99, background:'rgba(247,148,29,.1)', border:`1px solid rgba(247,148,29,.3)`, color:ORANGE, fontSize:'.72rem', fontWeight:800, textTransform:'uppercase', letterSpacing:'.1em', marginBottom:'1rem' }}>Get In Touch</span>
+            <span style={{ display:'inline-block', padding:'5px 14px', borderRadius:99, background:'rgba(71,88,218,.1)', border:`1px solid rgba(71,88,218,.3)`, color:BLUE, fontSize:'.72rem', fontWeight:800, textTransform:'uppercase', letterSpacing:'.1em', marginBottom:'1rem' }}>Get In Touch</span>
             <h2 style={{ fontSize:'clamp(1.8rem,3.5vw,2.75rem)', fontWeight:900, color:WHITE, letterSpacing:'-.03em' }}>Contact Us</h2>
           </div>
           <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(240px,1fr))', gap:'1.25rem' }}>
             {[
-              { icon:Phone,  title:'Call Us',  lines:['+91 94519 08101'] },
-              { icon:Mail,   title:'Email Us', lines:['info@solarji.co.in'] },
+              { icon:Phone,  title:'Call Us',  lines:['+91 87369 92133'] },
+              { icon:Mail,   title:'Email Us', lines:['kalpanasolartradersinfo@gmail.com'] },
               { icon:MapPin, title:'Visit Us', lines:['Shop No. 5, Solar Market','Kanpur, Uttar Pradesh'] },
             ].map(({icon:Icon,title,lines})=>(
               <div key={title} style={{ textAlign:'center', padding:'2.25rem 1.75rem', borderRadius:20, border:'1px solid rgba(255,255,255,.07)', background:'rgba(255,255,255,.03)', transition:'all .2s' }}
-                onMouseEnter={e=>{e.currentTarget.style.borderColor='rgba(247,148,29,.35)';e.currentTarget.style.background='rgba(247,148,29,.05)';e.currentTarget.style.transform='translateY(-4px)';}}
+                onMouseEnter={e=>{e.currentTarget.style.borderColor='rgba(71,88,218,.35)';e.currentTarget.style.background='rgba(71,88,218,.05)';e.currentTarget.style.transform='translateY(-4px)';}}
                 onMouseLeave={e=>{e.currentTarget.style.borderColor='rgba(255,255,255,.07)';e.currentTarget.style.background='rgba(255,255,255,.03)';e.currentTarget.style.transform='translateY(0)';}}
               >
-                <div style={{ width:54, height:54, borderRadius:14, background:'rgba(247,148,29,.12)', border:`1px solid rgba(247,148,29,.25)`, display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 1.25rem' }}>
-                  <Icon size={22} style={{ color:ORANGE }}/>
+                <div style={{ width:54, height:54, borderRadius:14, background:'rgba(71,88,218,.12)', border:`1px solid rgba(71,88,218,.25)`, display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 1.25rem' }}>
+                  <Icon size={22} style={{ color:BLUE }}/>
                 </div>
                 <h3 style={{ fontWeight:800, color:WHITE, marginBottom:'.75rem' }}>{title}</h3>
                 {lines.map(l=><p key={l} style={{ color:'rgba(255,255,255,.4)', fontSize:'.875rem', lineHeight:1.8 }}>{l}</p>)}
@@ -409,11 +409,11 @@ export default function Home() {
       <footer style={{ background:'#0a0a0a', borderTop:'1px solid rgba(255,255,255,.06)', padding:'1.75rem 0' }}>
         <div style={{ maxWidth:1200, margin:'0 auto', padding:'0 1.5rem', display:'flex', flexWrap:'wrap', alignItems:'center', justifyContent:'space-between', gap:'1rem' }}>
           <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-            <img src={logo} alt="SolarJi" style={{ width:30, height:30, borderRadius:8, objectFit:'cover', border:`1.5px solid ${ORANGE}` }}/>
-            <span style={{ fontWeight:900, color:'rgba(255,255,255,.4)', fontSize:'.875rem' }}>SolarJi</span>
+            <img src={logo} alt="Kalpana Solar" style={{ width:30, height:30, borderRadius:8, objectFit:'cover', border:`1.5px solid ${BLUE}` }}/>
+            <span style={{ fontWeight:900, color:'rgba(255,255,255,.4)', fontSize:'.875rem' }}>Kalpana Solar</span>
           </div>
           <p style={{ fontSize:'.78rem', color:'rgba(255,255,255,.2)' }}>
-            © {new Date().getFullYear()} SolarJi — Powered by Green Energy ☀️
+            © {new Date().getFullYear()} Kalpana Solar — Powered by Green Energy ☀️
           </p>
           <div style={{ display:'flex', gap:'1.5rem' }}>
             {['Services','Products','Gallery','Contact'].map(l=>(

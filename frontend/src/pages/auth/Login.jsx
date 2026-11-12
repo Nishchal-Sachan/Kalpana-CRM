@@ -1,12 +1,12 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import toast from 'react-hot-toast';
 import { showApiError } from '../../utils/apiError';
 import { Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
-import logo from '../../assets/solarji logo.jpeg';
+import logo from '../../assets/kalpana-logo.png';
 
-const ORANGE = '#f7941d';
+const BLUE = '#4758da';
 
 export default function Login() {
   const [form, setForm] = useState({ email:'', password:'' });
@@ -39,11 +39,11 @@ export default function Login() {
       <div className="hidden lg:flex flex-col justify-between p-14"
         style={{ width:'48%', background:'#111111', position:'relative', overflow:'hidden' }}>
 
-        {/* subtle orange glow */}
+        {/* subtle blue glow */}
         <div className="anim-glow" style={{
           position:'absolute', top:'-20%', right:'-20%',
           width:500, height:500, borderRadius:'50%',
-          background:'radial-gradient(circle, rgba(247,148,29,.18) 0%, transparent 65%)',
+          background:'radial-gradient(circle, rgba(71,88,218,.18) 0%, transparent 65%)',
           pointerEvents:'none',
         }} />
         {/* dot texture */}
@@ -55,13 +55,13 @@ export default function Login() {
 
         {/* brand mark */}
         <div style={{ position:'relative', display:'flex', alignItems:'center', gap:12 }}>
-          <img src={logo} alt="SolarJi" style={{
+          <img src={logo} alt="Kalpana Solar" style={{
             width:44, height:44, borderRadius:12, objectFit:'cover',
-            border:`2px solid ${ORANGE}`, boxShadow:`0 0 16px rgba(247,148,29,.45)`,
+            border:`2px solid ${BLUE}`, boxShadow:`0 0 16px rgba(71,88,218,.45)`,
           }} />
           <div>
-            <p style={{ fontWeight:900, fontSize:'1.15rem', color:'#fff', letterSpacing:'-.02em' }}>SolarJi</p>
-            <p style={{ fontSize:'.72rem', color:ORANGE, fontWeight:700 }}>देश चलेगा सूरज से</p>
+            <p style={{ fontWeight:900, fontSize:'1.15rem', color:'#fff', letterSpacing:'-.02em' }}>Kalpana Solar</p>
+            <p style={{ fontSize:'.72rem', color:BLUE, fontWeight:700 }}>देश चलेगा सूरज से</p>
           </div>
         </div>
 
@@ -69,7 +69,7 @@ export default function Login() {
         <div style={{ position:'relative' }}>
           <div style={{
             display:'inline-block', padding:'6px 14px', borderRadius:99, marginBottom:'1.5rem',
-            background:'rgba(247,148,29,.12)', border:'1px solid rgba(247,148,29,.25)', color:ORANGE,
+            background:'rgba(71,88,218,.12)', border:'1px solid rgba(71,88,218,.25)', color:BLUE,
             fontSize:'.75rem', fontWeight:700, letterSpacing:'.06em', textTransform:'uppercase',
           }}>Solar Energy CRM & ERP</div>
 
@@ -90,14 +90,14 @@ export default function Login() {
             {['CRM & Leads','Stock Management','Quotation Generator','Team Management'].map(f => (
               <span key={f} style={{
                 padding:'5px 12px', borderRadius:99, fontSize:'.76rem', fontWeight:600,
-                background:'rgba(247,148,29,.1)', border:'1px solid rgba(247,148,29,.2)', color:ORANGE,
+                background:'rgba(71,88,218,.1)', border:'1px solid rgba(71,88,218,.2)', color:BLUE,
               }}>{f}</span>
             ))}
           </div>
         </div>
 
         <p style={{ position:'relative', fontSize:'.78rem', color:'rgba(255,255,255,.2)' }}>
-          © {new Date().getFullYear()} SolarJi — Kanpur, Uttar Pradesh
+          © {new Date().getFullYear()} Kalpana Solar — Kanpur, Uttar Pradesh
         </p>
       </div>
 
@@ -112,15 +112,15 @@ export default function Login() {
 
           {/* mobile logo */}
           <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:'2.5rem' }} className="lg:hidden">
-            <img src={logo} alt="SolarJi" style={{ width:36, height:36, borderRadius:9, objectFit:'cover', border:`2px solid ${ORANGE}` }} />
-            <span style={{ fontWeight:900, fontSize:'1.05rem', color:'#111' }}>SolarJi</span>
+            <img src={logo} alt="Kalpana Solar" style={{ width:36, height:36, borderRadius:9, objectFit:'cover', border:`2px solid ${BLUE}` }} />
+            <span style={{ fontWeight:900, fontSize:'1.05rem', color:'#111' }}>Kalpana Solar</span>
           </div>
 
           <h2 style={{ fontSize:'1.9rem', fontWeight:900, color:'#111111', letterSpacing:'-.03em', marginBottom:'.4rem' }}>
             Sign in
           </h2>
           <p style={{ color:'#9ca3af', fontSize:'.9rem', marginBottom:'2rem' }}>
-            Access your SolarJi dashboard
+            Access your Kalpana Solar dashboard
           </p>
 
           <form onSubmit={handleSubmit} style={{ display:'flex', flexDirection:'column', gap:'1.15rem' }}>
@@ -142,7 +142,7 @@ export default function Login() {
                     border:'1.5px solid #e5e7eb', borderRadius:12, fontSize:'.9rem',
                     color:'#111', outline:'none', background:'#fff', transition:'border-color .15s, box-shadow .15s',
                   }}
-                  onFocus={e => { e.target.style.borderColor=ORANGE; e.target.style.boxShadow=`0 0 0 3px rgba(247,148,29,.15)`; }}
+                  onFocus={e => { e.target.style.borderColor=BLUE; e.target.style.boxShadow=`0 0 0 3px rgba(71,88,218,.15)`; }}
                   onBlur={e =>  { e.target.style.borderColor='#e5e7eb'; e.target.style.boxShadow='none'; }}
                 />
               </div>
@@ -165,7 +165,7 @@ export default function Login() {
                     border:'1.5px solid #e5e7eb', borderRadius:12, fontSize:'.9rem',
                     color:'#111', outline:'none', background:'#fff', transition:'border-color .15s, box-shadow .15s',
                   }}
-                  onFocus={e => { e.target.style.borderColor=ORANGE; e.target.style.boxShadow=`0 0 0 3px rgba(247,148,29,.15)`; }}
+                  onFocus={e => { e.target.style.borderColor=BLUE; e.target.style.boxShadow=`0 0 0 3px rgba(71,88,218,.15)`; }}
                   onBlur={e =>  { e.target.style.borderColor='#e5e7eb'; e.target.style.boxShadow='none'; }}
                 />
                 <button type="button" onClick={() => setShowPass(!showPass)} style={{
@@ -181,13 +181,13 @@ export default function Login() {
             <button type="submit" disabled={loading} style={{
               width:'100%', display:'flex', alignItems:'center', justifyContent:'center', gap:8,
               padding:14, borderRadius:12, border:'none', cursor: loading ? 'not-allowed':'pointer',
-              background: loading ? 'rgba(247,148,29,.5)' : ORANGE,
-              boxShadow: loading ? 'none' : '0 4px 16px rgba(247,148,29,.4)',
+              background: loading ? 'rgba(71,88,218,.5)' : BLUE,
+              boxShadow: loading ? 'none' : '0 4px 16px rgba(71,88,218,.4)',
               fontSize:'.95rem', fontWeight:800, color:'#fff',
               transition:'all .15s', marginTop:4,
             }}
-              onMouseEnter={e => { if(!loading) e.currentTarget.style.background='#e07800'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = loading ? 'rgba(247,148,29,.5)':ORANGE; }}
+              onMouseEnter={e => { if(!loading) e.currentTarget.style.background='#3645b8'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = loading ? 'rgba(71,88,218,.5)':BLUE; }}
             >
               {loading ? (
                 <><svg style={{ width:18,height:18 }} className="anim-spin" viewBox="0 0 24 24" fill="none">
@@ -201,7 +201,7 @@ export default function Login() {
           {/* hint */}
           <div style={{
             marginTop:'1.75rem', padding:'1rem 1.25rem', borderRadius:12,
-            background:'#fff8f0', border:`1px solid rgba(247,148,29,.25)`,
+            background:'#eff2fe', border:`1px solid rgba(71,88,218,.25)`,
           }}>
           </div>
         </div>

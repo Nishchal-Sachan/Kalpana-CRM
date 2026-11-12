@@ -6,9 +6,9 @@ import {
 } from 'lucide-react';
 import api from '../../api/axios';
 import toast from 'react-hot-toast';
-import logo from '../../assets/solarji logo.jpeg';
+import logo from '../../assets/kalpana-logo.png';
 
-const ORANGE = '#f7941d';
+const BLUE = '#4758da';
 const BLACK  = '#111111';
 const WHITE  = '#ffffff';
 
@@ -170,9 +170,9 @@ export default function Shop() {
               <ArrowLeft size={13}/> Home
             </button>
             <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-              <img src={logo} alt="" style={{ width:30, height:30, borderRadius:8,
-                                              objectFit:'cover', border:`1.5px solid ${ORANGE}` }}/>
-              <span style={{ fontWeight:900, color:BLACK, fontSize:'1rem' }}>SolarJi Store</span>
+              <img src={logo} alt="Kalpana Solar" style={{ width:30, height:30, borderRadius:8,
+                                              objectFit:'cover', border:`1.5px solid ${BLUE}` }}/>
+              <span style={{ fontWeight:900, color:BLACK, fontSize:'1rem' }}>Kalpana Solar Store</span>
             </div>
           </div>
 
@@ -183,7 +183,7 @@ export default function Shop() {
             <ShoppingCart size={15} />
             Cart
             {cartCount > 0 && (
-              <span style={{ position:'absolute', top:-6, right:-6, background:ORANGE, color:WHITE,
+              <span style={{ position:'absolute', top:-6, right:-6, background:BLUE, color:WHITE,
                              borderRadius:99, minWidth:18, height:18, display:'flex', alignItems:'center',
                              justifyContent:'center', fontSize:'.65rem', fontWeight:900, padding:'0 4px' }}>
                 {cartCount}
@@ -236,7 +236,7 @@ export default function Shop() {
                   cursor:'pointer',
                   border:'none',
                   transition:'all .15s',
-                  background: selectedCategory === cat ? ORANGE : '#e5e7eb',
+                  background: selectedCategory === cat ? BLUE : '#e5e7eb',
                   color: selectedCategory === cat ? WHITE : '#4b5563'
                 }}
               >
@@ -249,7 +249,7 @@ export default function Shop() {
         {/* Loading Spinner */}
         {loading && (
           <div style={{ display:'flex', justifyContent:'center', padding:'4rem 0' }}>
-            <div style={{ border:'3px solid #f3f3f3', borderTop:`3px solid ${ORANGE}`, borderRadius:'50%', width:40, height:40, animation:'spin 1s linear infinite' }} />
+            <div style={{ border:'3px solid #f3f3f3', borderTop:`3px solid ${BLUE}`, borderRadius:'50%', width:40, height:40, animation:'spin 1s linear infinite' }} />
           </div>
         )}
 
@@ -349,7 +349,7 @@ export default function Shop() {
                     </h3>
                     
                     <div style={{ display:'flex', alignItems:'baseline', gap:4, marginTop:'auto', marginBottom:'1.25rem' }}>
-                      <span style={{ fontSize:'1.25rem', fontWeight:900, color:ORANGE }}>
+                      <span style={{ fontSize:'1.25rem', fontWeight:900, color:BLUE }}>
                         ₹{prod.sellPrice.toLocaleString('en-IN')}
                       </span>
                       <span style={{ fontSize:'.75rem', color:'#9ca3af' }}>/ {prod.unit}</span>
@@ -387,7 +387,7 @@ export default function Shop() {
                           cursor: isOutOfStock ? 'not-allowed' : 'pointer',
                           transition:'background .15s'
                         }}
-                        onMouseEnter={e => { if(!isOutOfStock) e.currentTarget.style.background = ORANGE; }}
+                        onMouseEnter={e => { if(!isOutOfStock) e.currentTarget.style.background = BLUE; }}
                         onMouseLeave={e => { if(!isOutOfStock) e.currentTarget.style.background = BLACK; }}
                       >
                         Add to Cart
@@ -431,7 +431,7 @@ export default function Shop() {
             <div style={{ padding:'1.25rem 1.5rem', borderBottom:'1px solid #e5e7eb',
                           display:'flex', alignItems:'center', justifyContent:'space-between' }}>
               <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-                <ShoppingCart size={18} style={{ color:ORANGE }} />
+                <ShoppingCart size={18} style={{ color:BLUE }} />
                 <h2 style={{ fontWeight:900, color:BLACK, fontSize:'1.1rem' }}>Shopping Cart ({cartCount})</h2>
               </div>
               <button onClick={() => setIsCartOpen(false)}
@@ -503,7 +503,7 @@ export default function Shop() {
               <div style={{ padding:'1.5rem', borderTop:'1px solid #e5e7eb', background:'#fafafa' }}>
                 <div style={{ display:'flex', justifyContent:'space-between', marginBottom:'1.25rem' }}>
                   <span style={{ color:'#4b5563', fontSize:'.88rem', fontWeight:700 }}>Grand Total:</span>
-                  <span style={{ color:ORANGE, fontSize:'1.3rem', fontWeight:900 }}>
+                  <span style={{ color:BLUE, fontSize:'1.3rem', fontWeight:900 }}>
                     ₹{cartTotal.toLocaleString('en-IN')}
                   </span>
                 </div>
@@ -514,7 +514,7 @@ export default function Shop() {
                     padding:'12px',
                     borderRadius:12,
                     border:'none',
-                    background:ORANGE,
+                    background:BLUE,
                     color:WHITE,
                     fontWeight:800,
                     fontSize:'.9rem',
@@ -523,7 +523,7 @@ export default function Shop() {
                     alignItems:'center',
                     justifyContent:'center',
                     gap:8,
-                    boxShadow:'0 4px 16px rgba(247,148,29,.3)'
+                    boxShadow:'0 4px 16px rgba(71,88,218,.3)'
                   }}
                 >
                   Proceed to Checkout <ChevronRight size={16} />
@@ -569,11 +569,11 @@ export default function Shop() {
                   Inquiry Placed Successfully!
                 </h3>
                 <p style={{ color:'#6b7280', fontSize:'.85rem', marginTop:8, lineHeight:1.6 }}>
-                  Thank you for placing your order request with SolarJi! We have logged your request in our database. 
+                  Thank you for placing your order request with Kalpana Solar! We have logged your request in our database. 
                   A sales coordinator will call you on <strong>{cPhone}</strong> within 24 hours to schedule payment confirmation and shipment.
                 </p>
                 <div style={{ background:'#f9fafb', border:'1px solid #e5e7eb', borderRadius:12, padding:'10px 14px', margin:'1.25rem 0', fontSize:'.78rem', color:'#4b5563' }}>
-                  Reference Inquiry ID: <strong style={{ color:ORANGE }}>{createdLeadId}</strong>
+                  Reference Inquiry ID: <strong style={{ color:BLUE }}>{createdLeadId}</strong>
                 </div>
                 <button onClick={() => { setIsCheckoutOpen(false); setCheckoutSuccess(false); setCreatedLeadId(null); setCName(''); setCPhone(''); setCAddr(''); setCNotes(''); }}
                   style={{ padding:'10px 24px', borderRadius:10, border:'none', background:BLACK, color:WHITE, fontWeight:800, fontSize:'.85rem', cursor:'pointer' }}
@@ -600,11 +600,11 @@ export default function Shop() {
                   gap:10,
                   padding:'1rem',
                   borderRadius:14,
-                  background:'rgba(247,148,29,.05)',
-                  border:`1.5px solid rgba(247,148,29,.2)`,
+                  background:'rgba(71,88,218,.05)',
+                  border:`1.5px solid rgba(71,88,218,.2)`,
                   marginBottom:'1.5rem'
                 }}>
-                  <ShieldCheck size={20} style={{ color:ORANGE, flexShrink:0, marginTop:1 }} />
+                  <ShieldCheck size={20} style={{ color:BLUE, flexShrink:0, marginTop:1 }} />
                   <div>
                     <p style={{ fontSize:'.8rem', fontWeight:800, color:BLACK }}>No Online Payment Required</p>
                     <p style={{ fontSize:'.72rem', color:'#6b7280', marginTop:2, lineHeight:1.4 }}>
@@ -679,7 +679,7 @@ export default function Shop() {
                       height:46,
                       borderRadius:12,
                       border:'none',
-                      background: isFormValid && !submitting ? ORANGE : '#e5e7eb',
+                      background: isFormValid && !submitting ? BLUE : '#e5e7eb',
                       color: isFormValid && !submitting ? WHITE : '#9ca3af',
                       fontWeight:800,
                       fontSize:'.9rem',
@@ -687,7 +687,7 @@ export default function Shop() {
                       display:'flex',
                       alignItems:'center',
                       justifyContent:'center',
-                      boxShadow: isFormValid && !submitting ? '0 4px 16px rgba(247,148,29,.3)' : 'none'
+                      boxShadow: isFormValid && !submitting ? '0 4px 16px rgba(71,88,218,.3)' : 'none'
                     }}
                   >
                     {submitting ? 'Submitting Request...' : `Place Offline Order • ₹${cartTotal.toLocaleString('en-IN')}`}

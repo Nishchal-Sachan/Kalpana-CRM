@@ -7,11 +7,11 @@ import toast from 'react-hot-toast';
 import { showApiError } from '../../utils/apiError';
 import { useDataCache } from '../../context/DataCacheContext';
 
-const ORANGE = '#f7941d';
+const BLUE = '#4758da';
 
 const OVERVIEW = [
   { key:'users',    label:'Users',       icon:Users,    color:'#6366f1', path:'/crm/users'     },
-  { key:'leads',    label:'Leads',       icon:Target,   color:ORANGE,    path:'/crm/leads'     },
+  { key:'leads',    label:'Leads',       icon:Target,   color:BLUE,    path:'/crm/leads'     },
   { key:'items',    label:'Stock Items', icon:Package,  color:'#10b981', path:'/stock/items'   },
   { key:'vouchers', label:'Vouchers',    icon:FileText, color:'#f43f5e', path:'/stock/vouchers'},
 ];
@@ -20,7 +20,7 @@ const QUICK = [
   { label:'Manage Users',        desc:'Create & manage CRM team',  icon:Users,   color:'#6366f1', path:'/crm/users'  },
   { label:'Service Complaints',  desc:'View & assign complaints',  icon:AlertCircle, color:'#ea580c', path:'/crm/complaints' },
   { label:'Stock Inventory',     desc:'Add & edit stock items',    icon:Layers,  color:'#10b981', path:'/stock/items'},
-  { label:'Quotation Generator', desc:'Generate solar estimates',  icon:Sun,     color:ORANGE,    path:'/quotation'  },
+  { label:'Quotation Generator', desc:'Generate solar estimates',  icon:Sun,     color:BLUE,    path:'/quotation'  },
 ];
 
 export default function AdminDashboard() {
@@ -116,8 +116,8 @@ export default function AdminDashboard() {
       <div style={{ padding:'clamp(1rem, 4vw, 2rem) clamp(1rem, 4vw, 2rem) clamp(2rem, 5vw, 3rem)', maxWidth:1200 }}>
         <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'2rem', flexWrap:'wrap', gap:'1rem' }}>
           <div style={{ display:'flex', alignItems:'center', gap:12 }}>
-            <div style={{ width:42, height:42, borderRadius:12, background:'rgba(247,148,29,.1)', border:`1.5px solid rgba(247,148,29,.25)`, display:'flex', alignItems:'center', justifyContent:'center' }}>
-              <Settings size={18} style={{ color:ORANGE }}/>
+            <div style={{ width:42, height:42, borderRadius:12, background:'rgba(71,88,218,.1)', border:`1.5px solid rgba(71,88,218,.25)`, display:'flex', alignItems:'center', justifyContent:'center' }}>
+              <Settings size={18} style={{ color:BLUE }}/>
             </div>
             <div>
               <h1 style={{ fontSize:'1.65rem', fontWeight:900, color:'#111111', letterSpacing:'-.03em', lineHeight:1 }}>Admin Panel</h1>

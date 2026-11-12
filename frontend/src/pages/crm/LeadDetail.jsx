@@ -43,7 +43,7 @@ const stageColors = {
   'Commission': 'bg-emerald-100 text-emerald-800 border-emerald-300',
 };
 
-const ORANGE = '#f7941d';
+const BLUE = '#4758da';
 
 function daysSince(dateStr) {
   if (!dateStr) return 0;
@@ -61,7 +61,7 @@ function stageDuration(history, idx) {
 
 function pointsColor(p) {
   if (p >= 4)  return '#10b981';
-  if (p >= 2)  return ORANGE;
+  if (p >= 2)  return BLUE;
   if (p >= 0)  return '#f59e0b';
   return '#f43f5e';
 }
@@ -373,7 +373,7 @@ export default function LeadDetail() {
                           </button>
                         )}
 
-                        <label className="btn-secondary py-1 px-2 text-xs cursor-pointer flex items-center gap-1 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200">
+                        <label className="btn-secondary py-1 px-2 text-xs cursor-pointer flex items-center gap-1 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200">
                           <Upload className="w-3.5 h-3.5 text-gray-600" />
                           <span>{isUploading ? 'Uploading...' : hasDoc ? 'Update' : 'Upload'}</span>
                           <input
@@ -512,10 +512,10 @@ export default function LeadDetail() {
                   const isCurrent = i === arr.length - 1;
                   const pts = 5 - dur;
                   return (
-                    <div key={i} className="relative pl-4 border-l-2" style={{ borderColor: isCurrent ? ORANGE : '#e5e7eb' }}>
+                    <div key={i} className="relative pl-4 border-l-2" style={{ borderColor: isCurrent ? BLUE : '#e5e7eb' }}>
                       <div className="flex items-center gap-2 flex-wrap mb-1">
                         <div className={`badge ${stageColors[h.stage] || 'bg-gray-100 text-gray-600'}`}>{h.stage}</div>
-                        {isCurrent && <span style={{ fontSize:'.68rem', fontWeight:700, color:ORANGE, background:'rgba(247,148,29,.1)', padding:'1px 7px', borderRadius:99 }}>CURRENT</span>}
+                        {isCurrent && <span style={{ fontSize:'.68rem', fontWeight:700, color:BLUE, background:'rgba(71,88,218,.1)', padding:'1px 7px', borderRadius:99 }}>CURRENT</span>}
                         {!isCurrent && (
                           <span style={{ fontSize:'.68rem', fontWeight:700, color: pts > 0 ? '#10b981' : pts === 0 ? '#f59e0b' : '#f43f5e', background: pts > 0 ? 'rgba(16,185,129,.08)' : pts === 0 ? 'rgba(245,158,11,.08)' : 'rgba(244,63,94,.08)', padding:'1px 7px', borderRadius:99 }}>
                             {pts > 0 ? `+${pts} pts` : pts === 0 ? '0 pts' : `${pts} pts`} · {dur}d

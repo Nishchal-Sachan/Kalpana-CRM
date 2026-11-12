@@ -4,7 +4,7 @@ import {
   LayoutDashboard, Users, Target, Package, ShoppingCart, FileText,
   LogOut, Settings, PlusCircle, BarChart3, Home, Layers, ChevronRight, X, AlertCircle, Clock,
 } from 'lucide-react';
-import logo from '../assets/solarji logo.jpeg';
+import logo from '../assets/kalpana-logo.png';
 import { roleLabel } from '../utils/roles';
 
 const CRM_LINKS = [
@@ -25,7 +25,7 @@ const STOCK_LINKS = [
   { to:'/stock/vouchers',     label:'Voucher History', icon:FileText },
 ];
 
-const ORANGE = '#f7941d';
+const BLUE = '#4758da';
 const BG     = '#111111';
 const BORDER = 'rgba(255,255,255,0.08)';
 
@@ -42,9 +42,9 @@ function SLink({ to, label, icon:Icon, end, onNavigate }) {
         <div style={{
           display:'flex', alignItems:'center', gap:10, padding:'9px 10px',
           borderRadius:11, transition:'all .13s', cursor:'pointer',
-          background: isActive ? 'rgba(247,148,29,.15)' : 'transparent',
-          border:`1px solid ${isActive ? 'rgba(247,148,29,.35)' : 'transparent'}`,
-          color: isActive ? ORANGE : 'rgba(255,255,255,.5)',
+          background: isActive ? 'rgba(71,88,218,.15)' : 'transparent',
+          border:`1px solid ${isActive ? 'rgba(71,88,218,.35)' : 'transparent'}`,
+          color: isActive ? BLUE : 'rgba(255,255,255,.5)',
           fontSize:'.85rem', fontWeight: isActive ? 700 : 500,
           marginBottom:2,
         }}>
@@ -101,13 +101,13 @@ export default function Sidebar({ module, onNavigate, onCloseMobile }) {
       {/* ── Brand ── */}
       <div style={{ padding:'18px 14px 14px', borderBottom:`1px solid ${BORDER}`, paddingRight: onCloseMobile ? 52 : 14 }}>
         <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-          <img src={logo} alt="SolarJi" style={{
+          <img src={logo} alt="Kalpana Solar" style={{
             width:40, height:40, borderRadius:10, objectFit:'cover',
-            border:`2px solid ${ORANGE}`, boxShadow:`0 0 12px rgba(247,148,29,.35)`,
+            border:`2px solid ${BLUE}`, boxShadow:`0 0 12px rgba(71,88,218,.35)`,
           }} />
           <div>
-            <p style={{ fontWeight:900, fontSize:'1rem', color:'#fff', letterSpacing:'-.02em', lineHeight:1.1 }}>SolarJi</p>
-            <p style={{ fontSize:'.68rem', color:ORANGE, fontWeight:700, textTransform:'capitalize' }}>{module} Portal</p>
+            <p style={{ fontWeight:900, fontSize:'1rem', color:'#fff', letterSpacing:'-.02em', lineHeight:1.1 }}>Kalpana Solar</p>
+            <p style={{ fontSize:'.68rem', color:BLUE, fontWeight:700, textTransform:'capitalize' }}>{module} Portal</p>
           </div>
         </div>
       </div>
@@ -149,10 +149,10 @@ export default function Sidebar({ module, onNavigate, onCloseMobile }) {
       <div style={{ padding:'10px 8px 12px', borderTop:`1px solid ${BORDER}` }}>
         <div style={{ display:'flex', alignItems:'center', gap:10, padding:'8px 10px', marginBottom:4 }}>
           <div style={{
-            width:34, height:34, borderRadius:10, background:ORANGE,
+            width:34, height:34, borderRadius:10, background:BLUE,
             display:'flex', alignItems:'center', justifyContent:'center',
             fontSize:'.9rem', fontWeight:900, color:'#fff', flexShrink:0,
-            boxShadow:`0 4px 10px rgba(247,148,29,.4)`,
+            boxShadow:`0 4px 10px rgba(71,88,218,.4)`,
           }}>
             {user?.name?.charAt(0)?.toUpperCase()}
           </div>

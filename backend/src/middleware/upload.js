@@ -36,7 +36,7 @@ const upload = multer({
 });
 
 // Compresses with sharp (resize-to-fit + WebP), then streams to Cloudinary.
-async function compressAndUpload(file, { folder = 'solarji/leads' } = {}) {
+async function compressAndUpload(file, { folder = 'kalpanasolar/leads' } = {}) {
   const compressed = await sharp(file.buffer, { failOn: 'none' })
     .rotate() // honor EXIF orientation
     .resize({

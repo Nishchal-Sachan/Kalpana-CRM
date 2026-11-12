@@ -1,7 +1,7 @@
 {
-  "name": "solarji-backend",
+  "name": "kalpana-solar-backend",
   "version": "1.0.0",
-  "description": "SolarJi Backend API",
+  "description": "Kalpana Solar Backend API",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",

@@ -201,7 +201,7 @@ export default function Users() {
                           </span>
                         </td>
                         <td className="py-3 px-3">
-                          <span className={`badge ${u.handlesComplaints ? 'bg-orange-100 text-orange-800' : 'bg-gray-100 text-gray-500'}`}>
+                          <span className={`badge ${u.handlesComplaints ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-500'}`}>
                             {u.handlesComplaints ? 'Enabled' : '—'}
                           </span>
                         </td>
@@ -265,7 +265,7 @@ export default function Users() {
                 </div>
                 <div>
                   <label className="label">Email *</label>
-                  <input className="input" type="email" required value={form.email} onChange={e => f('email', e.target.value)} placeholder="john@solarji.com" />
+                  <input className="input" type="email" required value={form.email} onChange={e => f('email', e.target.value)} placeholder="john@kalpanasolar.com" />
                 </div>
                 <div>
                   <label className="label">{editing ? 'New Password (leave blank to keep)' : 'Password *'}</label>

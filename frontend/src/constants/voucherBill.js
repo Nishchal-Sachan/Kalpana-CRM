@@ -2,12 +2,12 @@
 export const BILL_PAD_ROWS = 40;
 
 export const COMPANY = {
-  name: 'SolarJi',
+  name: 'Kalpana Solar',
   tagline: 'Solar Installation & Energy Solutions',
   addressLines: ['Shop No. 5, Solar Market', 'Kanpur, Uttar Pradesh'],
   address: 'Shop No. 5, Solar Market, Kanpur, Uttar Pradesh',
-  phones: ['+91 98765 43210', '+91 87654 32109'],
-  email: 'info@solarji.com',
+  phones: ['+91 8736992133'],
+  email: 'kalpanasolartradersinfo@gmail.com',
 };
 
 export function emptyVoucherRow() {

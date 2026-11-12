@@ -1,7 +1,7 @@
-import logo from '../assets/solarji logo.jpeg';
+import logo from '../assets/kalpana-logo.png';
 import { COMPANY, buildBillLines, formatBillDate, formatMoney } from '../constants/voucherBill';
 
-const ORANGE = '#f7941d';
+const BLUE = '#4758da';
 const BLACK = '#111111';
 
 const billStyles = `
@@ -17,7 +17,7 @@ const billStyles = `
     box-sizing: border-box;
   }
   .voucher-bill.styled {
-    border: 3px solid ${ORANGE};
+    border: 3px solid ${BLUE};
     border-radius: 16px;
     box-shadow: 0 8px 32px rgba(0,0,0,.08);
     padding: 12mm 14mm 10mm;
@@ -34,20 +34,20 @@ const billStyles = `
     padding-bottom: 10px;
     margin-bottom: 12px;
   }
-  .voucher-bill.styled .voucher-bill-header { border-bottom-color: ${ORANGE}; }
+  .voucher-bill.styled .voucher-bill-header { border-bottom-color: ${BLUE}; }
   .voucher-bill-brand { display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1; }
   .voucher-bill-brand img {
     width: 56px; height: 56px; border-radius: 14px; object-fit: cover;
-    border: 2px solid ${ORANGE}; flex-shrink: 0;
+    border: 2px solid ${BLUE}; flex-shrink: 0;
   }
   .voucher-bill-company h1 { font-size: 1.5rem; font-weight: 900; margin: 0; letter-spacing: -0.03em; color: ${BLACK}; line-height: 1.1; }
-  .voucher-bill-company .tagline { font-size: 0.68rem; font-weight: 800; color: ${ORANGE}; letter-spacing: 0.06em; text-transform: uppercase; margin-top: 2px; }
+  .voucher-bill-company .tagline { font-size: 0.68rem; font-weight: 800; color: ${BLUE}; letter-spacing: 0.06em; text-transform: uppercase; margin-top: 2px; }
   .voucher-bill-company p { margin: 2px 0; font-size: 10px; color: #555; }
   .voucher-bill-meta { text-align: right; font-size: 11px; flex-shrink: 0; }
   .voucher-bill-meta .title { font-size: 14px; font-weight: 800; text-transform: uppercase; margin-bottom: 4px; color: ${BLACK}; }
   .voucher-bill-meta .draft-badge {
-    display: inline-block; font-size: 9px; font-weight: 800; color: ${ORANGE};
-    border: 1.5px solid ${ORANGE}; border-radius: 99px; padding: 2px 8px; margin-bottom: 4px;
+    display: inline-block; font-size: 9px; font-weight: 800; color: ${BLUE};
+    border: 1.5px solid ${BLUE}; border-radius: 99px; padding: 2px 8px; margin-bottom: 4px;
   }
   .voucher-bill-party {
     display: grid;
@@ -64,7 +64,7 @@ const billStyles = `
     padding: 4px 5px;
     vertical-align: middle;
   }
-  .voucher-bill.styled .voucher-bill-table th { background: rgba(247,148,29,.12); }
+  .voucher-bill.styled .voucher-bill-table th { background: rgba(71,88,218,.12); }
   .voucher-bill-table th { background: #f3f4f6; font-weight: 700; text-align: center; }
   .voucher-bill-table .col-sno { width: 6%; text-align: center; }
   .voucher-bill-table .col-item { width: 38%; text-align: left; word-break: break-word; }
@@ -98,7 +98,7 @@ const billStyles = `
     padding: 8px 14px;
     min-width: 180px;
   }
-  .voucher-bill.styled .voucher-bill-total { border-color: ${ORANGE}; color: ${BLACK}; }
+  .voucher-bill.styled .voucher-bill-total { border-color: ${BLUE}; color: ${BLACK}; }
   @media print {
     @page { size: A4 portrait; margin: 6mm; }
     html, body { margin: 0 !important; padding: 0 !important; background: #fff !important; }
@@ -189,7 +189,7 @@ export default function VoucherBillDocument({ voucher, className = '', styled = 
         <div className="voucher-bill-header">
           <div className="voucher-bill-brand">
             {styled && (
-              <img src={logo} alt="SolarJi" />
+              <img src={logo} alt="Kalpana Solar" />
             )}
             <div className="voucher-bill-company">
               <h1>{COMPANY.name}</h1>

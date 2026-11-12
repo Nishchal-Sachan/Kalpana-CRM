@@ -159,7 +159,7 @@ export default function NewLead() {
             </div>
           </div>
 
-          <div className="text-xs font-semibold px-3 py-1.5 rounded-full bg-orange-50 text-orange-600 border border-orange-200">
+          <div className="text-xs font-semibold px-3 py-1.5 rounded-full bg-blue-50 text-blue-600 border border-blue-200">
             Step {currentStep} of 2
           </div>
         </div>
@@ -169,7 +169,7 @@ export default function NewLead() {
           <div className="flex items-center justify-between relative">
             <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-gray-200 -z-0 rounded" />
             <div
-              className="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-orange-500 transition-all duration-300 -z-0 rounded"
+              className="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-brand-500 transition-all duration-300 -z-0 rounded"
               style={{ width: currentStep === 1 ? '50%' : '100%' }}
             />
 
@@ -179,7 +179,7 @@ export default function NewLead() {
               onClick={() => setCurrentStep(1)}
               className={`relative z-10 flex items-center gap-2.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
                 currentStep === 1
-                  ? 'bg-orange-500 text-white shadow-md'
+                  ? 'bg-brand-500 text-white shadow-md'
                   : 'bg-emerald-500 text-white'
               }`}
             >
@@ -200,7 +200,7 @@ export default function NewLead() {
               }}
               className={`relative z-10 flex items-center gap-2.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
                 currentStep === 2
-                  ? 'bg-orange-500 text-white shadow-md'
+                  ? 'bg-brand-500 text-white shadow-md'
                   : 'bg-gray-100 text-gray-600 border border-gray-300'
               }`}
             >
@@ -215,7 +215,7 @@ export default function NewLead() {
           <form onSubmit={handleNextStep} className="space-y-5">
             <div className="card">
               <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-orange-500" />
+                <span className="w-2 h-2 rounded-full bg-brand-500" />
                 Customer Contact & Identity Details
               </h3>
               <div className="grid md:grid-cols-2 gap-4">
@@ -292,7 +292,7 @@ export default function NewLead() {
 
             <div className="card">
               <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-orange-500" />
+                <span className="w-2 h-2 rounded-full bg-brand-500" />
                 Project Details & Requirements
               </h3>
               <div className="grid md:grid-cols-2 gap-4">
@@ -333,7 +333,7 @@ export default function NewLead() {
             {canViewAllLeads && (
               <div className="card">
                 <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-orange-500" />
+                  <span className="w-2 h-2 rounded-full bg-brand-500" />
                   Lead Assignment
                 </h3>
                 <div>
@@ -377,9 +377,9 @@ export default function NewLead() {
         {currentStep === 2 && (
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Step 2 Contact & Identity Verification Box */}
-            <div className="card bg-orange-50/50 border-orange-200">
+            <div className="card bg-blue-50/40 border-blue-200">
               <h3 className="font-semibold text-gray-900 text-sm mb-3 flex items-center gap-2">
-                <CreditCard className="w-4 h-4 text-orange-600" />
+                <CreditCard className="w-4 h-4 text-blue-600" />
                 Customer Identity & Contact Verification
               </h3>
               <div className="grid md:grid-cols-2 gap-3 text-xs">
@@ -451,7 +451,7 @@ export default function NewLead() {
                       className={`border rounded-xl p-4 transition-all relative ${
                         hasFile
                           ? 'border-emerald-500 bg-emerald-50/40 shadow-sm'
-                          : 'border-gray-200 hover:border-orange-300 hover:bg-orange-50/20'
+                          : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50/20'
                       }`}
                     >
                       <div className="flex items-start justify-between gap-3 mb-2">
@@ -499,9 +499,9 @@ export default function NewLead() {
                           </span>
                         </div>
                       ) : (
-                        <label className="mt-3 flex items-center justify-center gap-2 border-2 border-dashed border-gray-300 hover:border-orange-400 rounded-lg p-3 cursor-pointer bg-white transition-colors group">
-                          <Upload className="w-4 h-4 text-gray-400 group-hover:text-orange-500" />
-                          <span className="text-xs font-medium text-gray-600 group-hover:text-orange-600">
+                        <label className="mt-3 flex items-center justify-center gap-2 border-2 border-dashed border-gray-300 hover:border-blue-400 rounded-lg p-3 cursor-pointer bg-white transition-colors group">
+                          <Upload className="w-4 h-4 text-gray-400 group-hover:text-blue-500" />
+                          <span className="text-xs font-medium text-gray-600 group-hover:text-blue-600">
                             Choose File / Image
                           </span>
                           <input

@@ -30,7 +30,7 @@ async function processDocUploads(files, leadId) {
     if (files[key] && files[key][0]) {
       const file = files[key][0];
       if (isCloudinaryConfigured()) {
-        const uploaded = await compressAndUpload(file, { folder: `solarji/leads/${leadId}/documents` });
+        const uploaded = await compressAndUpload(file, { folder: `kalpanasolar/leads/${leadId}/documents` });
         resultDocs[key] = {
           url: uploaded.url,
           publicId: uploaded.publicId,
@@ -393,7 +393,7 @@ router.post('/:id/notes', protect, upload.array('images', 6), async (req, res) =
     }
 
     if (req.files && req.files.length > 0) {
-      uploaded = await uploadMany(req.files, { folder: `solarji/leads/${lead._id}` });
+      uploaded = await uploadMany(req.files, { folder: `kalpanasolar/leads/${lead._id}` });
     }
 
     lead.notes.push({
