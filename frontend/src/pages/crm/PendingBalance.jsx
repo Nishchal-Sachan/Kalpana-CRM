@@ -136,7 +136,7 @@ export default function PendingBalance() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2.5">
-              <div className="p-2 rounded-xl bg-amber-100 text-amber-700">
+              <div className="p-2 rounded-xl bg-brand-100 text-brand-600">
                 <Receipt className="w-5 h-5" />
               </div>
               <h1 className="text-xl font-bold text-gray-900">Pending Balance Customers</h1>
@@ -163,7 +163,7 @@ export default function PendingBalance() {
               disabled={loading}
               className="btn-secondary gap-2"
             >
-              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-orange-500' : ''}`} />
+              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-brand-500' : ''}`} />
               <span>Refresh</span>
             </button>
           </div>
@@ -179,20 +179,20 @@ export default function PendingBalance() {
             <p className="text-xs text-amber-700 font-semibold mt-1">Outstanding to be collected</p>
           </div>
 
-          <div className="card p-4 bg-gradient-to-br from-orange-50/70 to-white border-orange-100">
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Pending Accounts</p>
+          <div className="card p-4 bg-gradient-to-br from-brand-50/70 to-white border-brand-100">
+            <p className="text-xs font-bold text-brand-600 uppercase tracking-wider">Pending Accounts</p>
             <p className="text-2xl font-black text-gray-900 mt-1">
               {stats.totalPendingCustomers}
             </p>
-            <p className="text-xs text-orange-600 font-semibold mt-1">Customers with balance &gt; 0</p>
+            <p className="text-xs text-brand-600 font-semibold mt-1">Customers with balance &gt; 0</p>
           </div>
 
-          <div className="card p-4 bg-gradient-to-br from-blue-50/70 to-white border-blue-100">
-            <p className="text-xs font-bold text-blue-500 uppercase tracking-wider">Total Plant Value</p>
-            <p className="text-2xl font-black text-blue-900 mt-1">
+          <div className="card p-4 bg-gradient-to-br from-brand-50/70 to-white border-brand-100">
+            <p className="text-xs font-bold text-brand-500 uppercase tracking-wider">Total Plant Value</p>
+            <p className="text-2xl font-black text-brand-900 mt-1">
               ₹{Number(stats.totalPlantCost || 0).toLocaleString('en-IN')}
             </p>
-            <p className="text-xs text-blue-600 font-semibold mt-1">Portfolio value</p>
+            <p className="text-xs text-brand-600 font-semibold mt-1">Portfolio value</p>
           </div>
 
           <div className="card p-4 bg-gradient-to-br from-emerald-50/70 to-white border-emerald-100">
@@ -219,7 +219,7 @@ export default function PendingBalance() {
                 onClick={() => setTabType(t.id)}
                 className={`py-2 px-3.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
                   tabType === t.id
-                    ? 'bg-amber-500 text-white shadow-sm'
+                    ? 'bg-brand-500 text-white shadow-sm'
                     : 'bg-gray-50 text-gray-600 hover:bg-gray-100 border border-gray-200'
                 }`}
               >
@@ -257,7 +257,7 @@ export default function PendingBalance() {
         <div className="card p-0 overflow-hidden shadow-sm">
           {loading ? (
             <div className="flex items-center justify-center h-64 text-gray-400">
-              <RefreshCw className="w-6 h-6 animate-spin text-orange-500 mr-2" />
+              <RefreshCw className="w-6 h-6 animate-spin text-brand-500 mr-2" />
               <span>Loading pending balance customer accounts...</span>
             </div>
           ) : leads.length === 0 ? (
@@ -295,7 +295,7 @@ export default function PendingBalance() {
                     const percentPaid = plantCost > 0 ? Math.min(100, Math.round((totalPaid / plantCost) * 100)) : 0;
 
                     return (
-                      <tr key={l._id} className="hover:bg-amber-50/20 transition-colors group">
+                      <tr key={l._id} className="hover:bg-brand-50/25 transition-colors group">
                         {/* Index */}
                         <td className="py-3.5 px-4 font-mono font-medium text-gray-400 whitespace-nowrap">
                           {rowNumber}
@@ -304,11 +304,11 @@ export default function PendingBalance() {
                         {/* Customer Info */}
                         <td className="py-3.5 px-4">
                           <div className="flex items-center gap-2.5">
-                            <div className="w-8 h-8 rounded-full bg-amber-100 text-amber-800 font-bold flex items-center justify-center text-xs flex-shrink-0">
+                            <div className="w-8 h-8 rounded-full bg-brand-100 text-brand-700 font-bold flex items-center justify-center text-xs flex-shrink-0">
                               {l.name?.charAt(0)?.toUpperCase()}
                             </div>
                             <div>
-                              <p className="font-bold text-gray-900 group-hover:text-amber-700 transition-colors">
+                              <p className="font-bold text-gray-900 group-hover:text-brand-600 transition-colors">
                                 {l.name}
                               </p>
                               <div className="flex items-center gap-2 text-xs text-gray-500 mt-0.5">
@@ -317,7 +317,7 @@ export default function PendingBalance() {
                               </div>
                               {(l.panel || l.inverter || l.structure || l.otherMaterials) && (
                                 <div className="text-[10px] text-gray-600 mt-1 flex flex-wrap gap-1">
-                                  {l.panel && <span className="bg-orange-50 text-orange-800 px-1.5 py-0.5 rounded border border-orange-100" title={`Panel: ${l.panel}`}>☀️ {l.panel}</span>}
+                                  {l.panel && <span className="bg-brand-50 text-brand-800 px-1.5 py-0.5 rounded border border-brand-100" title={`Panel: ${l.panel}`}>☀️ {l.panel}</span>}
                                   {l.inverter && <span className="bg-blue-50 text-blue-800 px-1.5 py-0.5 rounded border border-blue-100" title={`Inverter: ${l.inverter}`}>⚡ {l.inverter}</span>}
                                   {l.structure && <span className="bg-gray-100 text-gray-700 px-1.5 py-0.5 rounded border border-gray-200" title={`Structure: ${l.structure}`}>🏗️ {l.structure}</span>}
                                   {l.otherMaterials && <span className="bg-purple-50 text-purple-700 px-1.5 py-0.5 rounded border border-purple-100" title={`Materials: ${l.otherMaterials}`}>📦 {l.otherMaterials}</span>}
@@ -339,12 +339,12 @@ export default function PendingBalance() {
                         <td className="py-3.5 px-4 whitespace-nowrap">
                           {fp ? (
                             <div>
-                              <p className="font-bold text-blue-800">
+                              <p className="font-bold text-brand-800">
                                 ₹{Number(fp.amount).toLocaleString('en-IN')}
                               </p>
                               <div className="flex items-center gap-1.5 mt-0.5">
                                 <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
-                                  fp.method === 'account' ? 'bg-blue-100 text-blue-700' : 'bg-emerald-100 text-emerald-700'
+                                  fp.method === 'account' ? 'bg-brand-100 text-brand-700' : 'bg-emerald-100 text-emerald-700'
                                 }`}>
                                   {fp.method === 'account' ? 'ACCOUNT' : 'CASH'}
                                 </span>
@@ -402,7 +402,7 @@ export default function PendingBalance() {
                             <button
                               type="button"
                               onClick={() => setReceiptLead(l)}
-                              className="btn-secondary py-1.5 px-2.5 text-xs inline-flex items-center gap-1 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                              className="btn-secondary py-1.5 px-2.5 text-xs inline-flex items-center gap-1 hover:bg-brand-50 hover:text-brand-600 hover:border-brand-200"
                               title="Print or Download customer statement & receipt"
                             >
                               <Printer className="w-3.5 h-3.5" />
@@ -411,7 +411,7 @@ export default function PendingBalance() {
                             <button
                               type="button"
                               onClick={() => navigate(`/crm/leads/${l._id}`)}
-                              className="btn-secondary py-1.5 px-2.5 text-xs inline-flex items-center gap-1 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                              className="btn-secondary py-1.5 px-2.5 text-xs inline-flex items-center gap-1 hover:bg-brand-50 hover:text-brand-600 hover:border-brand-200"
                             >
                               <Eye className="w-3.5 h-3.5" />
                               <span>View</span>
@@ -508,7 +508,7 @@ export default function PendingBalance() {
                       onClick={() => setPayMethod('account')}
                       className={`p-2.5 rounded-xl border flex items-center justify-center gap-2 font-bold text-xs transition-all ${
                         payMethod === 'account'
-                          ? 'bg-blue-600 text-white border-blue-700 shadow-sm'
+                          ? 'bg-brand-600 text-white border-brand-700 shadow-sm'
                           : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
                       }`}
                     >

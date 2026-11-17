@@ -135,7 +135,7 @@ export default function FirstPaid() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2.5">
-              <div className="p-2 rounded-xl bg-orange-100 text-orange-600">
+              <div className="p-2 rounded-xl bg-brand-100 text-brand-600">
                 <CreditCard className="w-5 h-5" />
               </div>
               <h1 className="text-xl font-bold text-gray-900">First Paid Customers</h1>
@@ -162,7 +162,7 @@ export default function FirstPaid() {
               disabled={loading}
               className="btn-secondary gap-2"
             >
-              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-orange-500' : ''}`} />
+              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-brand-500' : ''}`} />
               <span>Refresh</span>
             </button>
           </div>
@@ -170,20 +170,20 @@ export default function FirstPaid() {
 
         {/* Stats KPI Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="card p-4 bg-gradient-to-br from-orange-50/70 to-white border-orange-100">
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">First-Paid Customers</p>
+          <div className="card p-4 bg-gradient-to-br from-brand-50/70 to-white border-brand-100">
+            <p className="text-xs font-bold text-brand-600 uppercase tracking-wider">First-Paid Customers</p>
             <p className="text-2xl font-black text-gray-900 mt-1">
               {stats.totalCustomers}
             </p>
-            <p className="text-xs text-orange-600 font-semibold mt-1">Customers with payments</p>
+            <p className="text-xs text-brand-600 font-semibold mt-1">Customers with payments</p>
           </div>
 
-          <div className="card p-4 bg-gradient-to-br from-blue-50/70 to-white border-blue-100">
-            <p className="text-xs font-bold text-blue-500 uppercase tracking-wider">Total Collected</p>
-            <p className="text-2xl font-black text-blue-900 mt-1">
+          <div className="card p-4 bg-gradient-to-br from-brand-50/70 to-white border-brand-100">
+            <p className="text-xs font-bold text-brand-500 uppercase tracking-wider">Total Collected</p>
+            <p className="text-2xl font-black text-brand-900 mt-1">
               ₹{Number(stats.totalPaid || 0).toLocaleString('en-IN')}
             </p>
-            <p className="text-xs text-blue-600 font-semibold mt-1">Cumulative collected sum</p>
+            <p className="text-xs text-brand-600 font-semibold mt-1">Cumulative collected sum</p>
           </div>
 
           <div className="card p-4 bg-gradient-to-br from-emerald-50/70 to-white border-emerald-100">
@@ -243,7 +243,7 @@ export default function FirstPaid() {
         <div className="card p-0 overflow-hidden shadow-sm">
           {loading ? (
             <div className="flex items-center justify-center h-64 text-gray-400">
-              <RefreshCw className="w-6 h-6 animate-spin text-orange-500 mr-2" />
+              <RefreshCw className="w-6 h-6 animate-spin text-brand-500 mr-2" />
               <span>Loading first-paid customer records...</span>
             </div>
           ) : leads.length === 0 ? (
@@ -281,7 +281,7 @@ export default function FirstPaid() {
                     const percentPaid = plantCost > 0 ? Math.min(100, Math.round((totalPaid / plantCost) * 100)) : (totalPaid > 0 ? 100 : 0);
 
                     return (
-                      <tr key={l._id} className="hover:bg-orange-50/20 transition-colors group">
+                      <tr key={l._id} className="hover:bg-brand-50/25 transition-colors group">
                         {/* Rank / Order */}
                         <td className="py-3.5 px-4 font-mono font-bold text-gray-500 whitespace-nowrap">
                           <span className={`inline-flex items-center justify-center w-7 h-7 rounded-lg text-xs font-black ${
@@ -297,11 +297,11 @@ export default function FirstPaid() {
                         {/* Customer Info */}
                         <td className="py-3.5 px-4">
                           <div className="flex items-center gap-2.5">
-                            <div className="w-8 h-8 rounded-full bg-orange-100 text-orange-700 font-bold flex items-center justify-center text-xs flex-shrink-0">
+                            <div className="w-8 h-8 rounded-full bg-brand-100 text-brand-700 font-bold flex items-center justify-center text-xs flex-shrink-0">
                               {l.name?.charAt(0)?.toUpperCase()}
                             </div>
                             <div>
-                              <p className="font-bold text-gray-900 group-hover:text-orange-600 transition-colors">
+                              <p className="font-bold text-gray-900 group-hover:text-brand-600 transition-colors">
                                 {l.name}
                               </p>
                               <div className="flex items-center gap-2 text-xs text-gray-500 mt-0.5">
@@ -310,7 +310,7 @@ export default function FirstPaid() {
                               </div>
                               {(l.panel || l.inverter || l.structure || l.otherMaterials) && (
                                 <div className="text-[10px] text-gray-600 mt-1 flex flex-wrap gap-1">
-                                  {l.panel && <span className="bg-orange-50 text-orange-800 px-1.5 py-0.5 rounded border border-orange-100" title={`Panel: ${l.panel}`}>☀️ {l.panel}</span>}
+                                  {l.panel && <span className="bg-brand-50 text-brand-800 px-1.5 py-0.5 rounded border border-brand-100" title={`Panel: ${l.panel}`}>☀️ {l.panel}</span>}
                                   {l.inverter && <span className="bg-blue-50 text-blue-800 px-1.5 py-0.5 rounded border border-blue-100" title={`Inverter: ${l.inverter}`}>⚡ {l.inverter}</span>}
                                   {l.structure && <span className="bg-gray-100 text-gray-700 px-1.5 py-0.5 rounded border border-gray-200" title={`Structure: ${l.structure}`}>🏗️ {l.structure}</span>}
                                   {l.otherMaterials && <span className="bg-purple-50 text-purple-700 px-1.5 py-0.5 rounded border border-purple-100" title={`Materials: ${l.otherMaterials}`}>📦 {l.otherMaterials}</span>}
@@ -324,12 +324,12 @@ export default function FirstPaid() {
                         <td className="py-3.5 px-4 whitespace-nowrap">
                           {fp ? (
                             <div>
-                              <p className="font-extrabold text-blue-900">
+                              <p className="font-extrabold text-brand-900">
                                 ₹{Number(fp.amount).toLocaleString('en-IN')}
                               </p>
                               <div className="flex items-center gap-1.5 mt-0.5">
                                 <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
-                                  fp.method === 'account' ? 'bg-blue-100 text-blue-700' : 'bg-emerald-100 text-emerald-700'
+                                  fp.method === 'account' ? 'bg-brand-100 text-brand-700' : 'bg-emerald-100 text-emerald-700'
                                 }`}>
                                   {fp.method === 'account' ? 'ACCOUNT' : 'CASH'}
                                 </span>
@@ -398,7 +398,7 @@ export default function FirstPaid() {
                             <button
                               type="button"
                               onClick={() => setReceiptLead(l)}
-                              className="btn-secondary py-1.5 px-2.5 text-xs inline-flex items-center gap-1 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                              className="btn-secondary py-1.5 px-2.5 text-xs inline-flex items-center gap-1 hover:bg-brand-50 hover:text-brand-600 hover:border-brand-200"
                               title="Print or Download customer payment receipt"
                             >
                               <Printer className="w-3.5 h-3.5" />
@@ -407,7 +407,7 @@ export default function FirstPaid() {
                             <button
                               type="button"
                               onClick={() => navigate(`/crm/leads/${l._id}`)}
-                              className="btn-secondary py-1.5 px-2.5 text-xs inline-flex items-center gap-1 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                              className="btn-secondary py-1.5 px-2.5 text-xs inline-flex items-center gap-1 hover:bg-brand-50 hover:text-brand-600 hover:border-brand-200"
                             >
                               <Eye className="w-3.5 h-3.5" />
                               <span>View</span>
@@ -494,7 +494,7 @@ export default function FirstPaid() {
                       onClick={() => setPayMethod('account')}
                       className={`p-2.5 rounded-xl border flex items-center justify-center gap-2 font-bold text-xs transition-all ${
                         payMethod === 'account'
-                          ? 'bg-blue-600 text-white border-blue-700 shadow-sm'
+                          ? 'bg-brand-600 text-white border-brand-700 shadow-sm'
                           : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
                       }`}
                     >

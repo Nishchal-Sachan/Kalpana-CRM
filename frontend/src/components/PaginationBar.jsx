@@ -37,7 +37,7 @@ export default function PaginationBar({ pagination, page, onPageChange, loading,
             onClick={() => onPageChange(p)}
             className={`min-w-[2.25rem] h-9 px-2 rounded-lg text-sm font-semibold transition-colors ${
               p === page
-                ? 'bg-solar-500 text-white'
+                ? 'bg-brand-500 text-white'
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             }`}
           >
