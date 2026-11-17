@@ -5,7 +5,7 @@ import {
   RefreshCw, Star, Clock, Calendar, ImagePlus, X, Trash2,
   FileText, CreditCard, Building, Receipt, Camera, Upload, ExternalLink, Eye,
   IndianRupee, Plus, CheckCircle2, Wallet, Banknote, AlertCircle, Printer,
-  Sun, Zap, Layers, Package
+  Sun, Zap, Layers, Package, PenTool, Award, FileCheck, Files, FileSpreadsheet
 } from 'lucide-react';
 import api from '../../api/axios';
 import Layout from '../../components/Layout';
@@ -26,6 +26,15 @@ const DOCUMENT_SLOTS = [
   { id: 'houseTax', label: 'House Tax / Property Paper', icon: FileText },
   { id: 'electricityBill', label: 'Electricity Bill', icon: Receipt },
   { id: 'rooftopPhoto', label: 'Rooftop Photo', icon: Camera },
+  { id: 'signature', label: 'Signature', icon: PenTool },
+  { id: 'systemGeoTagPhoto', label: 'System Geo Tag Photo', icon: MapPin },
+  { id: 'inverterGeoTagPhoto', label: 'Inverter Geo Tag Photo', icon: Zap },
+  { id: 'dcrCertificate', label: 'DCR Certificate', icon: Award },
+  { id: 'modelAgreement', label: 'Model Agreement', icon: FileCheck },
+  { id: 'quotation', label: 'Quotation', icon: FileText },
+  { id: 'paymentReceipt', label: 'Payment Receipt', icon: Receipt },
+  { id: 'taxInvoice', label: 'Tax Invoice', icon: FileSpreadsheet },
+  { id: 'miscellaneousPaper', label: 'Miscellaneous Paper', icon: Files },
 ];
 
 const STAGES = [
@@ -860,10 +869,10 @@ export default function LeadDetail() {
             <div className="card">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold text-gray-700 flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-solar-500" /> Customer Documents
+                  <FileText className="w-4 h-4 text-brand-500" /> Customer Documents
                 </h3>
                 <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2.5 py-1 rounded-full">
-                  {Object.keys(lead.documents || {}).filter(k => lead.documents[k]?.url).length} / 6 Uploaded
+                  {Object.keys(lead.documents || {}).filter(k => lead.documents[k]?.url).length} / {DOCUMENT_SLOTS.length} Uploaded
                 </span>
               </div>
 
@@ -897,7 +906,14 @@ export default function LeadDetail() {
                         {hasDoc && (
                           <button
                             type="button"
-                            onClick={() => setLightbox(doc.url)}
+                            onClick={() => {
+                              const isPdf = /\.pdf($|\?)/i.test(doc.url) || /\.pdf/i.test(doc.originalName || '');
+                              if (isPdf) {
+                                window.open(doc.url, '_blank');
+                              } else {
+                                setLightbox(doc.url);
+                              }
+                            }}
                             className="btn-secondary py-1 px-2 text-xs flex items-center gap-1"
                             title="View document"
                           >

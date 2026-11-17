@@ -19,13 +19,26 @@ const docFields = [
   { name: 'houseTax', maxCount: 1 },
   { name: 'electricityBill', maxCount: 1 },
   { name: 'rooftopPhoto', maxCount: 1 },
+  { name: 'signature', maxCount: 1 },
+  { name: 'systemGeoTagPhoto', maxCount: 1 },
+  { name: 'inverterGeoTagPhoto', maxCount: 1 },
+  { name: 'dcrCertificate', maxCount: 1 },
+  { name: 'modelAgreement', maxCount: 1 },
+  { name: 'quotation', maxCount: 1 },
+  { name: 'paymentReceipt', maxCount: 1 },
+  { name: 'taxInvoice', maxCount: 1 },
+  { name: 'miscellaneousPaper', maxCount: 1 },
 ];
 
 async function processDocUploads(files, leadId) {
   const resultDocs = {};
   if (!files) return resultDocs;
 
-  const docKeys = ['aadhaar', 'pan', 'passbook', 'houseTax', 'electricityBill', 'rooftopPhoto'];
+  const docKeys = [
+    'aadhaar', 'pan', 'passbook', 'houseTax', 'electricityBill', 'rooftopPhoto',
+    'signature', 'systemGeoTagPhoto', 'inverterGeoTagPhoto', 'dcrCertificate',
+    'modelAgreement', 'quotation', 'paymentReceipt', 'taxInvoice', 'miscellaneousPaper'
+  ];
 
   for (const key of docKeys) {
     if (files[key] && files[key][0]) {

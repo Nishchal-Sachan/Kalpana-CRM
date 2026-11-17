@@ -4,7 +4,7 @@ import {
   ArrowLeft, ArrowRight, UserPlus, Upload, CheckCircle2,
   FileText, CreditCard, Building, Receipt, Camera, X, Mail, Phone, Hash,
   Package, Sun, Zap, Layers, Plus, Check, Info, Sparkles, ChevronDown, ChevronUp,
-  Edit3, Trash2, IndianRupee, Eye, HelpCircle
+  Edit3, Trash2, IndianRupee, Eye, HelpCircle, PenTool, MapPin, Award, FileCheck, Files, FileSpreadsheet
 } from 'lucide-react';
 import api from '../../api/axios';
 import Layout from '../../components/Layout';
@@ -21,6 +21,15 @@ const DOCUMENT_SLOTS = [
   { id: 'houseTax', label: 'House Tax / Property Paper', icon: FileText, subtitle: 'Tax receipt or ownership doc' },
   { id: 'electricityBill', label: 'Electricity Bill', icon: Receipt, subtitle: 'Latest bill copy' },
   { id: 'rooftopPhoto', label: 'Rooftop Photo', icon: Camera, subtitle: 'Clear photo of solar installation roof' },
+  { id: 'signature', label: 'Signature', icon: PenTool, subtitle: 'Customer signature or agreement sign' },
+  { id: 'systemGeoTagPhoto', label: 'System Geo Tag Photo', icon: MapPin, subtitle: 'Geo-tagged photo of system installation' },
+  { id: 'inverterGeoTagPhoto', label: 'Inverter Geo Tag Photo', icon: Zap, subtitle: 'Geo-tagged photo of inverter with serial' },
+  { id: 'dcrCertificate', label: 'DCR Certificate', icon: Award, subtitle: 'Domestic Content Requirement certificate' },
+  { id: 'modelAgreement', label: 'Model Agreement', icon: FileCheck, subtitle: 'Signed model agreement contract document' },
+  { id: 'quotation', label: 'Quotation', icon: FileText, subtitle: 'Final customer quotation / estimate sheet' },
+  { id: 'paymentReceipt', label: 'Payment Receipt', icon: Receipt, subtitle: 'Customer payment receipt or transfer slip' },
+  { id: 'taxInvoice', label: 'Tax Invoice', icon: FileSpreadsheet, subtitle: 'GST tax invoice document' },
+  { id: 'miscellaneousPaper', label: 'Miscellaneous Paper', icon: Files, subtitle: 'NOC, annexures, or other site papers' },
 ];
 
 const CATEGORIES = [
