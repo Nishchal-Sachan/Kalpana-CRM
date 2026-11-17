@@ -14,8 +14,9 @@ import { showApiError } from '../../utils/apiError';
 
 const STAGES = [
   'Lead', 'Calling', 'Visit', 'Filing', 'Loan Filing', 'Loan Process',
-  'Loan Release', 'Installation', 'Kesco Filing', 'Kesco Process',
-  'Meter Install', 'Subsidy Apply', 'Subsidy Release', 'Commission'
+  'Loan Release', 'Installation', 'Kesco Filing', '30% Applied',
+  'Meter Install', 'Connection', 'Subsidy Apply', '30% Release',
+  'Subsidy Release', 'Documents Sent'
 ];
 
 const stageColors = {
@@ -28,11 +29,21 @@ const stageColors = {
   'Loan Release': 'bg-green-100 text-green-700',
   'Installation': 'bg-green-200 text-green-800',
   'Kesco Filing': 'bg-teal-100 text-teal-700',
-  'Kesco Process': 'bg-cyan-100 text-cyan-700',
+  '30% Applied': 'bg-cyan-100 text-cyan-700',
   'Meter Install': 'bg-indigo-100 text-indigo-700',
+  'Connection': 'bg-violet-100 text-violet-700',
   'Subsidy Apply': 'bg-teal-200 text-teal-800',
+  '30% Release': 'bg-emerald-100 text-emerald-700',
   'Subsidy Release': 'bg-cyan-200 text-cyan-800',
-  'Commission': 'bg-emerald-100 text-emerald-800',
+  'Documents Sent': 'bg-blue-100 text-blue-800',
+  // Backward compatibility aliases
+  'Kesco Process': 'bg-cyan-100 text-cyan-700',
+  '30% APLLIED': 'bg-cyan-100 text-cyan-700',
+  '30% APPLIED': 'bg-cyan-100 text-cyan-700',
+  'Commission': 'bg-blue-100 text-blue-800',
+  'DOCUMENTS SENT': 'bg-blue-100 text-blue-800',
+  'CONNECTION': 'bg-violet-100 text-violet-700',
+  '30% RELEASE': 'bg-emerald-100 text-emerald-700',
 };
 
 const PAGE_SIZE = 20;

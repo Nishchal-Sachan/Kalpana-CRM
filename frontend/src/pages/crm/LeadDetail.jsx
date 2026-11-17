@@ -39,8 +39,9 @@ const DOCUMENT_SLOTS = [
 
 const STAGES = [
   'Lead', 'Calling', 'Visit', 'Filing', 'Loan Filing', 'Loan Process',
-  'Loan Release', 'Installation', 'Kesco Filing', 'Kesco Process',
-  'Meter Install', 'Subsidy Apply', 'Subsidy Release', 'Commission'
+  'Loan Release', 'Installation', 'Kesco Filing', '30% Applied',
+  'Meter Install', 'Connection', 'Subsidy Apply', '30% Release',
+  'Subsidy Release', 'Documents Sent'
 ];
 
 const stageColors = {
@@ -53,11 +54,21 @@ const stageColors = {
   'Loan Release': 'bg-green-100 text-green-700 border-green-300',
   'Installation': 'bg-green-200 text-green-800 border-green-400',
   'Kesco Filing': 'bg-teal-100 text-teal-700 border-teal-300',
-  'Kesco Process': 'bg-cyan-100 text-cyan-700 border-cyan-300',
+  '30% Applied': 'bg-cyan-100 text-cyan-700 border-cyan-300',
   'Meter Install': 'bg-indigo-100 text-indigo-700 border-indigo-300',
+  'Connection': 'bg-violet-100 text-violet-700 border-violet-300',
   'Subsidy Apply': 'bg-teal-200 text-teal-800 border-teal-400',
+  '30% Release': 'bg-emerald-100 text-emerald-700 border-emerald-300',
   'Subsidy Release': 'bg-cyan-200 text-cyan-800 border-cyan-400',
-  'Commission': 'bg-emerald-100 text-emerald-800 border-emerald-300',
+  'Documents Sent': 'bg-blue-100 text-blue-800 border-blue-300',
+  // Backward compatibility aliases
+  'Kesco Process': 'bg-cyan-100 text-cyan-700 border-cyan-300',
+  '30% APLLIED': 'bg-cyan-100 text-cyan-700 border-cyan-300',
+  '30% APPLIED': 'bg-cyan-100 text-cyan-700 border-cyan-300',
+  'Commission': 'bg-blue-100 text-blue-800 border-blue-300',
+  'DOCUMENTS SENT': 'bg-blue-100 text-blue-800 border-blue-300',
+  'CONNECTION': 'bg-violet-100 text-violet-700 border-violet-300',
+  '30% RELEASE': 'bg-emerald-100 text-emerald-700 border-emerald-300',
 };
 
 const BLUE = '#4758da';

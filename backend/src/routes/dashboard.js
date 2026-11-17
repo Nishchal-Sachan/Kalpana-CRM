@@ -50,13 +50,13 @@ async function fetchLeadStats(filter) {
           $group: {
             _id: null,
             total: { $sum: 1 },
-            commissioned: { $sum: { $cond: [{ $eq: ['$stage', 'Commission'] }, 1, 0] } },
+            commissioned: { $sum: { $cond: [{ $in: ['$stage', ['Documents Sent', 'Commission']] }, 1, 0] } },
             inProgress: {
               $sum: {
                 $cond: [{
                   $and: [
                     { $ne: ['$stage', 'Lead'] },
-                    { $ne: ['$stage', 'Commission'] },
+                    { $not: { $in: ['$stage', ['Documents Sent', 'Commission']] } },
                   ],
                 }, 1, 0],
               },

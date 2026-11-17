@@ -451,7 +451,7 @@ Lead ─────── stageHistory[], notes[]
 | `{ stage: 1, updatedAt: -1 }` | Stage filter |
 | `{ createdAt: -1 }` | Recent leads |
 
-**11 pipeline stages:** Lead → Calling → Visit → Filing → Loan Filing → Loan Process → Installation → Kesco Filing → Kesco Process → Meter Install → Commission
+**16 pipeline stages:** Lead → Calling → Visit → Filing → Loan Filing → Loan Process → Loan Release → Installation → Kesco Filing → 30% Applied → Meter Install → Connection → Subsidy Apply → 30% Release → Subsidy Release → Documents Sent
 
 #### StockItem
 

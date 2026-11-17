@@ -3,11 +3,20 @@ const mongoose = require('mongoose');
 const STAGES = [
   'Lead', 'Calling', 'Visit', 'Filing',
   'Loan Filing', 'Loan Process', 'Loan Release', 'Installation',
-  'Kesco Filing', 'Kesco Process', 'Meter Install', 'Subsidy Apply', 'Subsidy Release', 'Commission'
+  'Kesco Filing', '30% Applied', 'Meter Install', 'Connection',
+  'Subsidy Apply', '30% Release', 'Subsidy Release', 'Documents Sent'
+];
+
+// Include canonical stages and backward-compatible aliases for enum validation
+const VALID_STAGES = [
+  ...STAGES,
+  'Kesco Process', '30% APLLIED', '30% APPLIED',
+  'Commission', 'COMISSION', 'DOCUMENTS SENT',
+  'CONNECTION', '30% RELEASE', 'SUBSIDY APPLIED'
 ];
 
 const stageHistorySchema = new mongoose.Schema({
-  stage: { type: String, enum: STAGES },
+  stage: { type: String, enum: VALID_STAGES },
   assignedTo: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   movedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   note: { type: String },
@@ -43,7 +52,7 @@ const leadSchema = new mongoose.Schema({
   plantCost: { type: Number, default: 0, min: 0 },
   payments: [paymentSchema],
 
-  stage: { type: String, enum: STAGES, default: 'Lead' },
+  stage: { type: String, enum: VALID_STAGES, default: 'Lead' },
   assignedTo: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
 
@@ -126,6 +135,22 @@ leadSchema.virtual('remainingBalance').get(function () {
   const cost = Number(this.plantCost) || 0;
   const paid = this.totalPaid || 0;
   return Math.max(0, cost - paid);
+});
+
+leadSchema.pre('save', function (next) {
+  if (this.isModified('stage') && this.stage) {
+    const s = this.stage.trim().toLowerCase();
+    if (s === 'kesko process' || s === 'kesco process' || s === '30% apllied' || s === '30% applied') {
+      this.stage = '30% Applied';
+    } else if (s === 'comission' || s === 'commission' || s === 'documents sent') {
+      this.stage = 'Documents Sent';
+    } else if (s === 'connection') {
+      this.stage = 'Connection';
+    } else if (s === '30% release') {
+      this.stage = '30% Release';
+    }
+  }
+  next();
 });
 
 leadSchema.statics.STAGES = STAGES;

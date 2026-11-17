@@ -10,16 +10,24 @@ import toast from 'react-hot-toast';
 import { showApiError } from '../../utils/apiError';
 
 const BLUE = '#4758da';
-const STAGES = ['Lead','Calling','Visit','Filing','Loan Filing','Loan Process','Loan Release','Installation','Kesco Filing','Kesco Process','Meter Install','Subsidy Apply','Subsidy Release','Commission'];
+const STAGES = [
+  'Lead', 'Calling', 'Visit', 'Filing', 'Loan Filing', 'Loan Process', 'Loan Release', 'Installation',
+  'Kesco Filing', '30% Applied', 'Meter Install', 'Connection', 'Subsidy Apply', '30% Release', 'Subsidy Release', 'Documents Sent'
+];
 
 const STAGE_STYLE = {
   'Lead':            { bg:'#eff6ff', color:'#1d4ed8' }, 'Calling':         { bg:'#f0fdf4', color:'#15803d' },
   'Visit':           { bg:'#fdf4ff', color:'#7e22ce' }, 'Filing':          { bg:'#fefce8', color:'#854d0e' },
   'Loan Filing':     { bg:'#fff7ed', color:'#c2410c' }, 'Loan Process':    { bg:'#fff7ed', color:'#ea580c' },
   'Loan Release':    { bg:'#ecfdf5', color:'#047857' }, 'Installation':    { bg:'#f0fdf4', color:'#166534' },
-  'Kesco Filing':    { bg:'#f0fdfa', color:'#0f766e' }, 'Kesco Process':    { bg:'#ecfeff', color:'#0e7490' },
-  'Meter Install':   { bg:'#eef2ff', color:'#4338ca' }, 'Subsidy Apply':    { bg:'#f0fdfa', color:'#0d9488' },
-  'Subsidy Release': { bg:'#ecfeff', color:'#0891b2' }, 'Commission':       { bg:'rgba(71,88,218,.12)',  color:BLUE },
+  'Kesco Filing':    { bg:'#f0fdfa', color:'#0f766e' }, '30% Applied':     { bg:'#ecfeff', color:'#0e7490' },
+  'Meter Install':   { bg:'#eef2ff', color:'#4338ca' }, 'Connection':       { bg:'#f5f3ff', color:'#6d28d9' },
+  'Subsidy Apply':   { bg:'#f0fdfa', color:'#0d9488' }, '30% Release':     { bg:'#f0fdf4', color:'#15803d' },
+  'Subsidy Release': { bg:'#ecfeff', color:'#0891b2' }, 'Documents Sent':   { bg:'rgba(71,88,218,.12)',  color:BLUE },
+  // Backward compatibility aliases
+  'Kesco Process':   { bg:'#ecfeff', color:'#0e7490' }, 'Commission':      { bg:'rgba(71,88,218,.12)',  color:BLUE },
+  '30% APLLIED':     { bg:'#ecfeff', color:'#0e7490' }, '30% APPLIED':     { bg:'#ecfeff', color:'#0e7490' },
+  'DOCUMENTS SENT':  { bg:'rgba(71,88,218,.12)',  color:BLUE },
 };
 
 function StatCard({ label, value, icon:Icon, color, sub }) {
@@ -63,9 +71,9 @@ export default function CRMDashboard() {
   const loading = isLoading('dashboard:crm') && !dashboardCrm;
 
   const statCards = [
-    { label:'Total Leads',  value:stats.total ?? 0, icon:Target,      color:'#6366f1' },
-    { label:'Commissioned', value:stats.commissioned ?? 0, icon:CheckCircle, color:BLUE },
-    { label:'In Progress',  value:stats.inProgress ?? 0, icon:Activity, color:'#10b981' },
+    { label:'Total Leads',    value:stats.total ?? 0, icon:Target,      color:'#6366f1' },
+    { label:'Documents Sent', value:stats.commissioned ?? 0, icon:CheckCircle, color:BLUE },
+    { label:'In Progress',    value:stats.inProgress ?? 0, icon:Activity, color:'#10b981' },
     { label:'New Today',    value:stats.newToday ?? 0, icon:Clock, color:'#f43f5e' },
   ];
 

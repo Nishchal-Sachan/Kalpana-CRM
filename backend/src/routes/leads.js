@@ -407,13 +407,13 @@ router.get('/stats', protect, async (req, res) => {
             $group: {
               _id: null,
               total: { $sum: 1 },
-              commissioned: { $sum: { $cond: [{ $eq: ['$stage', 'Commission'] }, 1, 0] } },
+              commissioned: { $sum: { $cond: [{ $in: ['$stage', ['Documents Sent', 'Commission']] }, 1, 0] } },
               inProgress: {
                 $sum: {
                   $cond: [{
                     $and: [
                       { $ne: ['$stage', 'Lead'] },
-                      { $ne: ['$stage', 'Commission'] },
+                      { $not: { $in: ['$stage', ['Documents Sent', 'Commission']] } },
                     ],
                   }, 1, 0],
                 },
@@ -659,7 +659,19 @@ router.put('/:id/documents', protect, upload.fields(docFields), async (req, res)
 
 router.put('/:id/stage', protect, async (req, res) => {
   try {
-    const { stage, assignedTo, note } = req.body;
+    let { stage, assignedTo, note } = req.body;
+    if (stage && typeof stage === 'string') {
+      const s = stage.trim().toLowerCase();
+      if (s === 'kesko process' || s === 'kesco process' || s === '30% apllied' || s === '30% applied') {
+        stage = '30% Applied';
+      } else if (s === 'comission' || s === 'commission' || s === 'documents sent') {
+        stage = 'Documents Sent';
+      } else if (s === 'connection') {
+        stage = 'Connection';
+      } else if (s === '30% release') {
+        stage = '30% Release';
+      }
+    }
     const lead = await Lead.findById(req.params.id);
     if (!lead) return res.status(404).json({ message: 'Lead not found' });
 
@@ -702,7 +714,7 @@ router.put('/:id/stage', protect, async (req, res) => {
     await lead.populate(LEAD_LIST_FIELDS);
     dashCache.invalidateCrm();
 
-    if (isStageChange && ['Filing', 'Loan Process', 'Commission'].includes(stage)) {
+    if (isStageChange && ['Filing', 'Loan Process', 'Documents Sent', 'Commission'].includes(stage)) {
       sendLeadStageNotification(lead, stage)
         .then((result) => console.log(`📧 Stage email notification (${stage}) result for ${lead.email}:`, result))
         .catch((err) => console.error(`❌ Stage notification email failed (${stage}):`, err));

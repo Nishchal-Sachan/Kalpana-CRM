@@ -184,10 +184,10 @@ function leadStageEmailHtml({ lead, stage }) {
     headline = 'Solar Financing in Progress';
     mainText = `Dear <strong>${lead.name}</strong>,<br/><br/>Great news! Your solar financing application is now actively being processed with our banking partners. Kalpana Solar is working to ensure smooth verification and quick loan approval for your system.`;
     nextSteps = 'Our finance desk will coordinate directly with the bank to complete sanction and loan release procedures.';
-  } else if (stage === 'Commission') {
-    badgeText = 'System Commissioned & Live';
-    headline = 'Congratulations! Your Solar System is Live';
-    mainText = `Dear <strong>${lead.name}</strong>,<br/><br/>We are delighted to celebrate this milestone with you! Your solar rooftop project has been fully installed, tested, and commissioned. You are now generating clean, sustainable solar power!`;
+  } else if (stage === 'Documents Sent' || stage === 'Commission') {
+    badgeText = 'Documents Sent & Project Completed';
+    headline = 'Congratulations! Final Documents Sent';
+    mainText = `Dear <strong>${lead.name}</strong>,<br/><br/>We are delighted to celebrate this milestone with you! All final project documents and compliance records for your solar rooftop system have been compiled and sent by Kalpana Solar.`;
     nextSteps = 'Welcome to the green energy movement! Our customer care team will remain available for routine monitoring and support.';
   }
 
@@ -274,7 +274,7 @@ async function sendLeadStageNotification(lead, stage) {
     return { sent: false, reason: 'no_lead_email' };
   }
 
-  if (!['Filing', 'Loan Process', 'Commission'].includes(stage)) {
+  if (!['Filing', 'Loan Process', 'Documents Sent', 'Commission'].includes(stage)) {
     return { sent: false, reason: 'stage_not_notified' };
   }
 
@@ -288,6 +288,7 @@ async function sendLeadStageNotification(lead, stage) {
     const subjectMap = {
       'Filing': `Application Filing Submitted — ${lead.name} | Kalpana Solar`,
       'Loan Process': `Solar Loan Financing in Progress — ${lead.name} | Kalpana Solar`,
+      'Documents Sent': `🎉 Documents Sent & Solar Project Completed! — ${lead.name} | Kalpana Solar`,
       'Commission': `🎉 Solar System Commissioned & Live! — ${lead.name} | Kalpana Solar`,
     };
 

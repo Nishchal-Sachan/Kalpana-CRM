@@ -300,8 +300,9 @@ erDiagram
 ### Lead Pipeline Stages
 
 ```
-Lead → Calling → Visit → Filing → Loan Filing → Loan Process
-  → Installation → Kesco Filing → Kesco Process → Meter Install → Commission
+Lead → Calling → Visit → Filing → Loan Filing → Loan Process → Loan Release
+  → Installation → Kesco Filing → 30% Applied → Meter Install → Connection
+  → Subsidy Apply → 30% Release → Subsidy Release → Documents Sent
 ```
 
 Stage transitions append to `stageHistory[]` and may award points to the assigned user.
