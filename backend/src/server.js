@@ -30,22 +30,34 @@ app.use(cors({
   maxAge: 86400,
 }));
 app.use(express.json());
-app.use('/api', (req, res, next) => {
+
+// API Router
+const apiRouter = express.Router();
+
+apiRouter.use((req, res, next) => {
   res.set('Cache-Control', 'no-store');
   next();
 });
 
-app.use('/api/auth', require('./routes/auth'));
-app.use('/api/users', require('./routes/users'));
-app.use('/api/leads', require('./routes/leads'));
-app.use('/api/stock', require('./routes/stock'));
-app.use('/api/quotations', require('./routes/quotations'));
-app.use('/api/complaints', require('./routes/complaints'));
-app.use('/api/orders', require('./routes/orders'));
-app.use('/api/dashboard', require('./routes/dashboard'));
-app.use('/api/attendance', require('./routes/attendance'));
+apiRouter.use('/auth', require('./routes/auth'));
+apiRouter.use('/users', require('./routes/users'));
+apiRouter.use('/leads', require('./routes/leads'));
+apiRouter.use('/stock', require('./routes/stock'));
+apiRouter.use('/quotations', require('./routes/quotations'));
+apiRouter.use('/complaints', require('./routes/complaints'));
+apiRouter.use('/orders', require('./routes/orders'));
+apiRouter.use('/dashboard', require('./routes/dashboard'));
+apiRouter.use('/attendance', require('./routes/attendance'));
+apiRouter.get('/health', (req, res) => res.json({ status: 'ok', app: 'Kalpana Solar API' }));
 
-app.get('/api/health', (req, res) => res.json({ status: 'ok', app: 'Kalpana Solar API' }));
+// Mount under both /api and root / so calls succeed whether VITE_API_URL includes /api or not
+app.use('/api', apiRouter);
+app.use(apiRouter);
+
+// Fallback 404 handler returning JSON instead of raw HTML
+app.use((req, res) => {
+  res.status(404).json({ message: `Route not found: ${req.method} ${req.originalUrl}` });
+});
 
 const { sendError } = require('./utils/sendError');
 

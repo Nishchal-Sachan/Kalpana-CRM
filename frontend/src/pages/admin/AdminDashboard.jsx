@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Settings, Users, Target, Package, FileText, Plus, Trash2, Edit2, X, Sun, Layers, RotateCcw, RefreshCw, AlertCircle } from 'lucide-react';
 import api from '../../api/axios';

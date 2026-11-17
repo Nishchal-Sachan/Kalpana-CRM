@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Package, ShoppingCart, FileText, Plus, TrendingUp, AlertTriangle, ArrowRight, RefreshCw } from 'lucide-react';
+import { Package, ShoppingCart, FileText, Plus, Minus, TrendingUp, AlertTriangle, ArrowRight, RefreshCw } from 'lucide-react';
 import Layout from '../../components/Layout';
 import toast from 'react-hot-toast';
 import { showApiError } from '../../utils/apiError';
 import { useDataCache } from '../../context/DataCacheContext';
 import { useAuth } from '../../context/AuthContext';
+import { formatQty } from '../../constants/voucherBill';
 
 const BLUE = '#4758da';
 
@@ -83,7 +84,10 @@ export default function StockDashboard() {
               <RefreshCw size={15} className={refreshing ? 'animate-spin' : ''} />
             </button>
             {isAdmin && (
-              <button onClick={()=>navigate('/stock/voucher/add')} className="btn-success"><Plus size={15}/> Purchase</button>
+              <>
+                <button onClick={()=>navigate('/stock/voucher/add')} className="btn-success"><Plus size={15}/> Purchase</button>
+                <button onClick={()=>navigate('/stock/voucher/expense')} className="btn-danger"><Minus size={15}/> Expense</button>
+              </>
             )}
             <button onClick={()=>navigate('/stock/voucher/sell')} className="btn-primary"><ShoppingCart size={15}/> Sell</button>
           </div>
@@ -105,7 +109,7 @@ export default function StockDashboard() {
               <div style={{ display:'flex', flexWrap:'wrap', gap:6 }}>
                 {lowStock.map(i=>(
                   <span key={i._id} style={{ padding:'3px 10px', borderRadius:99, fontSize:'.75rem', fontWeight:700, background:'rgba(71,88,218,.12)', border:'1px solid rgba(71,88,218,.3)', color:'#1e3a8a' }}>
-                    {i.name} ({i.quantity} {i.unit})
+                    {i.name} ({formatQty(i.quantity)} {i.unit})
                   </span>
                 ))}
               </div>
@@ -139,7 +143,7 @@ export default function StockDashboard() {
                 </div>
                 <div style={{ textAlign:'right' }}>
                   <p style={{ fontWeight:700, fontSize:'.875rem', color: item.quantity<=item.minQuantity&&item.minQuantity>0?BLUE:'#374151' }}>
-                    {item.quantity} {item.unit}
+                    {formatQty(item.quantity)} {item.unit}
                   </p>
                   <p style={{ fontSize:'.72rem', color:'#9ca3af' }}>₹{item.sellPrice}/unit</p>
                 </div>

@@ -3,24 +3,29 @@ import { useAuth } from '../context/AuthContext';
 import {
   LayoutDashboard, Users, Target, Package, ShoppingCart, FileText,
   LogOut, Settings, PlusCircle, BarChart3, Home, Layers, ChevronRight, X, AlertCircle, Clock,
+  CreditCard, Receipt,
 } from 'lucide-react';
 import logo from '../assets/kalpana-logo.png';
 import { roleLabel } from '../utils/roles';
 
 const CRM_LINKS = [
-  { to:'/crm',           label:'Dashboard',      icon:LayoutDashboard, end:true },
-  { to:'/crm/leads',     label:'All Leads',       icon:Target },
-  { to:'/crm/leads/new', label:'New Lead',         icon:PlusCircle },
-  { to:'/crm/complaints', label:'Complaints',     icon:AlertCircle },
-  { to:'/crm/orders',     label:'Shop Orders',     icon:ShoppingCart },
-  { to:'/crm/attendance', label:'Attendance',     icon:Clock },
+  { to:'/crm',                 label:'Dashboard',        icon:LayoutDashboard, end:true },
+  { to:'/crm/leads',           label:'All Leads',         icon:Target },
+  { to:'/crm/first-paid',      label:'First Paid',        icon:CreditCard },
+  { to:'/crm/pending-balance', label:'Pending Balance',   icon:Receipt },
+  { to:'/crm/leads/new',       label:'New Lead',          icon:PlusCircle },
+  { to:'/crm/complaints',      label:'Complaints',        icon:AlertCircle },
+  { to:'/crm/orders',          label:'Shop Orders',       icon:ShoppingCart },
+  { to:'/crm/attendance',      label:'Attendance',        icon:Clock },
 ];
 const CRM_TEAM   = [{ to:'/crm/team', label:'Team', icon:Users }];
 const CRM_ADMIN  = [{ to:'/crm/users', label:'User Management', icon:Users }];
 const STOCK_LINKS = [
   { to:'/stock',              label:'Dashboard',      icon:BarChart3,   end:true },
   { to:'/stock/items',        label:'Inventory',       icon:Package },
+  { to:'/stock/groups',       label:'Load Groups (BOM)', icon:Layers },
   { to:'/stock/voucher/add',  label:'Purchase Voucher',icon:ShoppingCart },
+  { to:'/stock/voucher/expense', label:'Expense Voucher', icon:FileText },
   { to:'/stock/voucher/sell', label:'Sales Voucher',   icon:FileText },
   { to:'/stock/vouchers',     label:'Voucher History', icon:FileText },
 ];
@@ -77,7 +82,9 @@ export default function Sidebar({ module, onNavigate, onCloseMobile }) {
   const { user, logout, isAdmin, canViewTeam, canAccessStock, canAccessComplaints } = useAuth();
   const navigate = useNavigate();
   const links = (module === 'stock' ? STOCK_LINKS : CRM_LINKS).filter(
-    (l) => l.to !== '/crm/complaints' || canAccessComplaints,
+    (l) => (l.to !== '/crm/complaints' || canAccessComplaints) &&
+           (l.to !== '/stock/voucher/add' || isAdmin) &&
+           (l.to !== '/stock/voucher/expense' || isAdmin)
   );
 
   return (

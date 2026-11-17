@@ -19,12 +19,15 @@ const Complaints = lazy(() => import('./pages/crm/Complaints'))
 const Orders = lazy(() => import('./pages/crm/Orders'))
 const StockDashboard = lazy(() => import('./pages/stock/StockDashboard'))
 const StockItems = lazy(() => import('./pages/stock/StockItems'))
+const LoadGroups = lazy(() => import('./pages/stock/LoadGroups'))
 const VoucherForm = lazy(() => import('./pages/stock/VoucherForm'))
 const VoucherList = lazy(() => import('./pages/stock/VoucherList'))
 const VoucherPreview = lazy(() => import('./pages/stock/VoucherPreview'))
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'))
 const AdminQuotations = lazy(() => import('./pages/admin/AdminQuotations'))
 const Attendance = lazy(() => import('./pages/crm/Attendance'))
+const FirstPaid = lazy(() => import('./pages/crm/FirstPaid'))
+const PendingBalance = lazy(() => import('./pages/crm/PendingBalance'))
 
 function PageLoader() {
   return (
@@ -74,6 +77,8 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/crm" element={<LazyPage><CRMDashboard /></LazyPage>} />
         <Route path="/crm/leads" element={<LazyPage><Leads /></LazyPage>} />
+        <Route path="/crm/first-paid" element={<LazyPage><FirstPaid /></LazyPage>} />
+        <Route path="/crm/pending-balance" element={<LazyPage><PendingBalance /></LazyPage>} />
         <Route path="/crm/leads/new" element={<LazyPage><NewLead /></LazyPage>} />
         <Route path="/crm/leads/:id" element={<LazyPage><LeadDetail /></LazyPage>} />
         <Route path="/crm/users" element={<LazyPage adminOnly><Users /></LazyPage>} />
@@ -83,8 +88,10 @@ export default function App() {
         <Route path="/crm/attendance" element={<LazyPage><Attendance /></LazyPage>} />
         <Route path="/stock" element={<LazyPage stockOnly><StockDashboard /></LazyPage>} />
         <Route path="/stock/items" element={<LazyPage stockOnly><StockItems /></LazyPage>} />
+        <Route path="/stock/groups" element={<LazyPage stockOnly><LoadGroups /></LazyPage>} />
         <Route path="/stock/voucher/add" element={<LazyPage stockOnly><VoucherForm type="ADD" /></LazyPage>} />
         <Route path="/stock/voucher/sell" element={<LazyPage stockOnly><VoucherForm type="SELL" /></LazyPage>} />
+        <Route path="/stock/voucher/expense" element={<LazyPage stockOnly><VoucherForm type="EXPENSE" /></LazyPage>} />
         <Route path="/stock/vouchers" element={<LazyPage stockOnly><VoucherList /></LazyPage>} />
         <Route path="/stock/vouchers/:id/preview" element={<LazyPage stockOnly><VoucherPreview /></LazyPage>} />
         <Route path="/admin" element={<LazyPage adminOnly><AdminDashboard /></LazyPage>} />

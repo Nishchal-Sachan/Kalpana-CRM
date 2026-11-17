@@ -388,7 +388,7 @@ export default function Home() {
             {[
               { icon:Phone,  title:'Call Us',  lines:['+91 87369 92133'] },
               { icon:Mail,   title:'Email Us', lines:['kalpanasolartradersinfo@gmail.com'] },
-              { icon:MapPin, title:'Visit Us', lines:['Shop No. 5, Solar Market','Kanpur, Uttar Pradesh'] },
+              { icon:MapPin, title:'Visit Us', lines:['12 A Rajendra Nagar Naubasta', 'Kanpur 208021'] },
             ].map(({icon:Icon,title,lines})=>(
               <div key={title} style={{ textAlign:'center', padding:'2.25rem 1.75rem', borderRadius:20, border:'1px solid rgba(255,255,255,.07)', background:'rgba(255,255,255,.03)', transition:'all .2s' }}
                 onMouseEnter={e=>{e.currentTarget.style.borderColor='rgba(71,88,218,.35)';e.currentTarget.style.background='rgba(71,88,218,.05)';e.currentTarget.style.transform='translateY(-4px)';}}

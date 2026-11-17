@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Plus, Trash2, Save, ShoppingCart, Package, Calendar, FileSpreadsheet, Eye } from 'lucide-react';
 import api from '../../api/axios';
@@ -9,7 +10,7 @@ import toast from 'react-hot-toast';
 import { showApiError } from '../../utils/apiError';
 import { useDataCache } from '../../context/DataCacheContext';
 import { useAuth } from '../../context/AuthContext';
-import { buildDraftVoucher, emptyVoucherRow } from '../../constants/voucherBill';
+import { buildDraftVoucher, emptyVoucherRow, formatQty } from '../../constants/voucherBill';
 const todayISO = () => new Date().toISOString().split('T')[0];
 
 export default function VoucherForm({ type }) {
@@ -17,6 +18,7 @@ export default function VoucherForm({ type }) {
   const { addStockVoucher } = useDataCache();
   const { user, isAdmin } = useAuth();
   const [stockItems, setStockItems] = useState([]);
+  const [loadGroups, setLoadGroups] = useState([]);
   const [itemsLoading, setItemsLoading] = useState(true);
   const [party, setParty] = useState('');
   const [partyAddress, setPartyAddress] = useState('');
@@ -25,12 +27,35 @@ export default function VoucherForm({ type }) {
   const [saving, setSaving] = useState(false);
   const [showBillSheet, setShowBillSheet] = useState(false);
   const [showFormPreview, setShowFormPreview] = useState(false);
-  const [rows, setRows] = useState([emptyVoucherRow()]);
+  const [rows, setRows] = useState(() => [
+    type === 'EXPENSE'
+      ? { item: undefined, itemName: '', unit: 'job', quantity: 1, price: '', gst: 18, total: 0 }
+      : emptyVoucherRow()
+  ]);
+  const [openDropdownIdx, setOpenDropdownIdx] = useState(null);
+  const [itemSearchText, setItemSearchText] = useState('');
+  const [dropdownCoords, setDropdownCoords] = useState(null);
+
+  useEffect(() => {
+    const handleScrollOrResize = () => {
+      setOpenDropdownIdx(null);
+      setDropdownCoords(null);
+    };
+    if (openDropdownIdx !== null) {
+      window.addEventListener('scroll', handleScrollOrResize, { passive: true });
+      window.addEventListener('resize', handleScrollOrResize);
+    }
+    return () => {
+      window.removeEventListener('scroll', handleScrollOrResize);
+      window.removeEventListener('resize', handleScrollOrResize);
+    };
+  }, [openDropdownIdx]);
 
   const isSell = type === 'SELL';
-  const title = isSell ? 'Sales Voucher' : 'Purchase Voucher';
-  const partyLabel = isSell ? 'Customer Name' : 'Supplier Name';
-  const addressLabel = isSell ? 'Customer Address' : 'Supplier Address';
+  const isExpense = type === 'EXPENSE';
+  const title = isExpense ? 'Expense Voucher' : isSell ? 'Sales Voucher' : 'Purchase Voucher';
+  const partyLabel = isExpense ? 'Paid To' : isSell ? 'Customer Name' : 'Supplier Name';
+  const addressLabel = isExpense ? 'Recipient Address' : isSell ? 'Customer Address' : 'Supplier Address';
 
   useEffect(() => {
     if (type === 'ADD' && !isAdmin) {
@@ -38,12 +63,59 @@ export default function VoucherForm({ type }) {
       navigate('/stock');
       return;
     }
+    if (type === 'EXPENSE' && !isAdmin) {
+      toast.error('Only admins can record expenses');
+      navigate('/stock');
+      return;
+    }
 
-    api.get('/stock/items', { params: { picker: 1, limit: 100 } })
+    if (type === 'EXPENSE') {
+      setStockItems([]);
+      setItemsLoading(false);
+      return;
+    }
+
+    api.get('/stock/items', { params: { picker: 1, limit: 1000 } })
       .then((res) => setStockItems(res.data.items || []))
       .catch((err) => showApiError(err, 'Could not load stock items for voucher.'))
       .finally(() => setItemsLoading(false));
+
+    api.get('/stock/public/groups')
+      .then((res) => setLoadGroups(res.data.groups || []))
+      .catch(() => {});
   }, [type, isAdmin, navigate]);
+
+  const applyLoadGroupToVoucher = (group) => {
+    if (!group || !(group.items || []).length) return;
+
+    const appliedRows = group.items.map((gItem) => {
+      const matchedStock = stockItems.find((si) =>
+        (gItem.item && String(si._id) === String(gItem.item._id || gItem.item)) ||
+        si.name.toLowerCase() === gItem.itemName.toLowerCase()
+      );
+
+      const price = isSell
+        ? (matchedStock?.sellPrice ?? gItem.price ?? 0)
+        : (matchedStock?.purchasePrice ?? gItem.price ?? 0);
+
+      const qty = Number(gItem.quantity) || 1;
+      const gst = 18;
+      const total = Math.round(qty * price * (1 + gst / 100) * 100) / 100;
+
+      return {
+        item: matchedStock?._id || gItem.item?._id || gItem.item || '',
+        itemName: matchedStock?.name || gItem.itemName,
+        unit: matchedStock?.unit || gItem.unit || 'piece',
+        quantity: qty,
+        price,
+        gst,
+        total,
+      };
+    });
+
+    setRows(appliedRows);
+    toast.success(`Loaded ${group.name} (${group.load}) components into voucher!`);
+  };
 
   const handleItemChange = (idx, itemId) => {
     const stockItem = stockItems.find((i) => i._id === itemId);
@@ -54,10 +126,12 @@ export default function VoucherForm({ type }) {
       itemName: stockItem?.name || '',
       unit: stockItem?.unit || '',
       price: isSell ? (stockItem?.sellPrice ?? '') : (stockItem?.purchasePrice ?? ''),
+      gst: newRows[idx].gst || 18,
     };
     const qty = parseFloat(newRows[idx].quantity) || 0;
     const price = parseFloat(newRows[idx].price) || 0;
-    newRows[idx].total = qty * price;
+    const gst = parseFloat(newRows[idx].gst) || 0;
+    newRows[idx].total = Math.round(qty * price * (1 + gst / 100) * 100) / 100;
     setRows(newRows);
   };
 
@@ -66,11 +140,17 @@ export default function VoucherForm({ type }) {
     newRows[idx] = { ...newRows[idx], [field]: val };
     const qty = parseFloat(newRows[idx].quantity) || 0;
     const price = parseFloat(newRows[idx].price) || 0;
-    newRows[idx].total = qty * price;
+    const gst = parseFloat(newRows[idx].gst) || 0;
+    newRows[idx].total = Math.round(qty * price * (1 + gst / 100) * 100) / 100;
     setRows(newRows);
   };
 
-  const addRow = () => setRows([...rows, emptyVoucherRow()]);
+  const addRow = () => setRows([
+    ...rows,
+    type === 'EXPENSE'
+      ? { item: undefined, itemName: '', unit: 'job', quantity: 1, price: '', gst: 18, total: 0 }
+      : emptyVoucherRow()
+  ]);
   const removeRow = (idx) => rows.length > 1 && setRows(rows.filter((_, i) => i !== idx));
 
   const handleBillSheetApply = ({ rows: appliedRows, party: p, partyAddress: addr }) => {
@@ -92,7 +172,7 @@ export default function VoucherForm({ type }) {
   });
 
   const saveVoucher = useCallback(async () => {
-    const validRows = rows.filter((r) => r.item && Number(r.quantity) > 0);
+    const validRows = rows.filter((r) => (isExpense ? r.itemName : r.item) && Number(r.quantity) > 0);
     if (validRows.length === 0) {
       toast.error('Add at least one item');
       return false;
@@ -107,8 +187,11 @@ export default function VoucherForm({ type }) {
         date,
         items: validRows.map((r) => ({
           item: r.item,
+          itemName: r.itemName,
+          unit: r.unit || 'piece',
           quantity: Number(r.quantity),
           price: Number(r.price),
+          gst: Number(r.gst || 0),
         })),
       };
       const res = await api.post('/stock/vouchers', payload);
@@ -122,7 +205,7 @@ export default function VoucherForm({ type }) {
     } finally {
       setSaving(false);
     }
-  }, [rows, type, party, partyAddress, note, date, addStockVoucher, navigate, title]);
+  }, [rows, type, party, partyAddress, note, date, addStockVoucher, navigate, title, isExpense]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -130,7 +213,7 @@ export default function VoucherForm({ type }) {
   };
 
   const handleOpenPreview = () => {
-    const validRows = rows.filter((r) => r.item && Number(r.quantity) > 0);
+    const validRows = rows.filter((r) => (isExpense ? r.itemName : r.item) && Number(r.quantity) > 0);
     if (validRows.length === 0) return toast.error('Add at least one item before preview');
     setShowFormPreview(true);
   };
@@ -200,15 +283,35 @@ export default function VoucherForm({ type }) {
           <div className="card">
             <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
               <h3 className="font-semibold text-gray-700">Items</h3>
-              <div className="flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  onClick={() => setShowBillSheet(true)}
-                  className="btn-secondary text-xs gap-1.5"
-                  disabled={itemsLoading}
-                >
-                  <FileSpreadsheet className="w-3.5 h-3.5" /> Open Bill Sheet
-                </button>
+              <div className="flex flex-wrap items-center gap-2">
+                {!isExpense && loadGroups.length > 0 && (
+                  <select
+                    className="input text-xs py-1.5 px-2.5 font-bold text-orange-800 bg-orange-50 border-orange-300"
+                    onChange={(e) => {
+                      const g = loadGroups.find(lg => lg._id === e.target.value);
+                      if (g) applyLoadGroupToVoucher(g);
+                      e.target.value = '';
+                    }}
+                    defaultValue=""
+                  >
+                    <option value="" disabled>⚡ Fill from Load Group (e.g. 3 kW)...</option>
+                    {loadGroups.map(lg => (
+                      <option key={lg._id} value={lg._id}>
+                        {lg.load} — {lg.name}
+                      </option>
+                    ))}
+                  </select>
+                )}
+                {!isExpense && (
+                  <button
+                    type="button"
+                    onClick={() => setShowBillSheet(true)}
+                    className="btn-secondary text-xs gap-1.5"
+                    disabled={itemsLoading}
+                  >
+                    <FileSpreadsheet className="w-3.5 h-3.5" /> Open Bill Sheet
+                  </button>
+                )}
                 <button type="button" onClick={addRow} className="btn-secondary text-xs gap-1">
                   <Plus className="w-3.5 h-3.5" /> Add Row
                 </button>
@@ -221,11 +324,12 @@ export default function VoucherForm({ type }) {
                   <tr className="border-b-2 border-gray-100">
                     <th className="text-left py-2 px-2 font-semibold text-gray-600 w-8">#</th>
                     <th className="text-left py-2 px-2 font-semibold text-gray-600">Item</th>
-                    <th className="text-right py-2 px-2 font-semibold text-gray-600 w-28">Quantity</th>
-                    <th className="text-right py-2 px-2 font-semibold text-gray-600 w-36">
-                      {isSell ? 'Sell Price (₹)' : 'Purchase Price (₹)'}
+                    <th className="text-right py-2 px-2 font-semibold text-gray-600 w-24">Quantity</th>
+                    <th className="text-right py-2 px-2 font-semibold text-gray-600 w-32">
+                      {isExpense ? 'Amount (₹)' : isSell ? 'Sell Price (₹)' : 'Purchase Price (₹)'}
                     </th>
-                    <th className="text-right py-2 px-2 font-semibold text-gray-600 w-32">Total (₹)</th>
+                    <th className="text-right py-2 px-2 font-semibold text-gray-600 w-24">GST %</th>
+                    <th className="text-right py-2 px-2 font-semibold text-gray-600 w-28">Total (₹)</th>
                     <th className="w-10" />
                   </tr>
                 </thead>
@@ -234,25 +338,124 @@ export default function VoucherForm({ type }) {
                     <tr key={idx} className="border-b border-gray-50">
                       <td className="py-2 px-2 text-gray-400">{idx + 1}</td>
                       <td className="py-2 px-2">
-                        <select
-                          className="input"
-                          value={row.item}
-                          onChange={(e) => handleItemChange(idx, e.target.value)}
-                          required={idx === 0}
-                        >
-                          <option value="">Select item...</option>
-                          {stockItems.map((i) => (
-                            <option key={i._id} value={i._id}>
-                              {i.name} (Stock: {i.quantity} {i.unit})
-                            </option>
-                          ))}
-                        </select>
+                        {isExpense ? (
+                          <input
+                            type="text"
+                            className="input"
+                            style={{ minWidth: '220px' }}
+                            value={row.itemName || ''}
+                            onChange={(e) => handleRowChange(idx, 'itemName', e.target.value)}
+                            placeholder="Expense description (e.g. Labor, Rent)"
+                            required={idx === 0}
+                          />
+                        ) : (
+                          <div style={{ position: 'relative' }}>
+                            <input type="hidden" value={row.item} required={idx === 0} />
+                            <button
+                              type="button"
+                              className="input text-left flex justify-between items-center w-full"
+                              style={{ background: '#fff', cursor: 'pointer', minWidth: '220px' }}
+                              onClick={(e) => {
+                                if (openDropdownIdx === idx) {
+                                  setOpenDropdownIdx(null);
+                                  setDropdownCoords(null);
+                                  setItemSearchText('');
+                                } else {
+                                  const rect = e.currentTarget.getBoundingClientRect();
+                                  setDropdownCoords({
+                                    top: rect.bottom + window.scrollY,
+                                    left: rect.left + window.scrollX,
+                                    width: rect.width
+                                  });
+                                  setOpenDropdownIdx(idx);
+                                  setItemSearchText('');
+                                }
+                              }}
+                            >
+                              <span className="truncate">
+                                {row.itemName ? `${row.itemName} (${row.unit})` : 'Select item...'}
+                              </span>
+                              <span className="text-gray-400 text-xs ml-1 font-mono">▼</span>
+                            </button>
+
+                            {/* Dropdown Overlay via Portal */}
+                            {openDropdownIdx === idx && dropdownCoords && createPortal(
+                              <>
+                                <div
+                                  style={{ position: 'fixed', inset: 0, zIndex: 199 }}
+                                  onClick={() => {
+                                    setOpenDropdownIdx(null);
+                                    setDropdownCoords(null);
+                                    setItemSearchText('');
+                                  }}
+                                />
+                                
+                                <div
+                                  className="card shadow-xl"
+                                  style={{
+                                    position: 'absolute',
+                                    top: `${dropdownCoords.top}px`,
+                                    left: `${dropdownCoords.left}px`,
+                                    width: `${dropdownCoords.width}px`,
+                                    zIndex: 200,
+                                    maxHeight: '260px',
+                                    overflowY: 'auto',
+                                    marginTop: '4px',
+                                    padding: '8px',
+                                    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
+                                    border: '1px solid #e5e7eb',
+                                    background: '#fff',
+                                  }}
+                                >
+                                  <input
+                                    type="text"
+                                    className="input text-xs mb-2 py-1.5 px-3 w-full"
+                                    placeholder="Type to search..."
+                                    value={itemSearchText}
+                                    onChange={(e) => setItemSearchText(e.target.value)}
+                                    autoFocus
+                                  />
+                                  <div style={{ display: 'grid', gap: '2px' }}>
+                                    {stockItems
+                                      .filter((i) =>
+                                        i.name.toLowerCase().includes(itemSearchText.toLowerCase())
+                                      )
+                                      .map((i) => (
+                                        <button
+                                          key={i._id}
+                                          type="button"
+                                          className="text-left w-full px-2.5 py-2 text-xs font-semibold rounded-lg hover:bg-gray-100 text-gray-800 transition-colors"
+                                          onClick={() => {
+                                            handleItemChange(idx, i._id);
+                                            setOpenDropdownIdx(null);
+                                            setDropdownCoords(null);
+                                            setItemSearchText('');
+                                          }}
+                                        >
+                                          {i.name} (Stock: {formatQty(i.quantity)} {i.unit})
+                                        </button>
+                                      ))}
+                                    {stockItems.filter((i) =>
+                                      i.name.toLowerCase().includes(itemSearchText.toLowerCase())
+                                    ).length === 0 && (
+                                      <div className="text-center text-xs text-gray-400 py-3 font-semibold">
+                                        No items match search
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              </>,
+                              document.body
+                            )}
+                          </div>
+                        )}
                       </td>
                       <td className="py-2 px-2">
                         <input
                           type="number"
+                          step="any"
                           className="input text-right"
-                          min="1"
+                          min="0.0001"
                           value={row.quantity}
                           onChange={(e) => handleRowChange(idx, 'quantity', e.target.value)}
                         />
@@ -260,13 +463,25 @@ export default function VoucherForm({ type }) {
                       <td className="py-2 px-2">
                         <input
                           type="number"
+                          step="any"
                           className="input text-right"
                           value={row.price}
                           onChange={(e) => handleRowChange(idx, 'price', e.target.value)}
                           placeholder="0"
-                          readOnly={isSell}
-                          style={isSell ? { backgroundColor: '#f3f4f6', cursor: 'not-allowed' } : {}}
                         />
+                      </td>
+                      <td className="py-2 px-2">
+                        <select
+                          className="input text-right font-semibold"
+                          value={row.gst ?? 18}
+                          onChange={(e) => handleRowChange(idx, 'gst', e.target.value)}
+                        >
+                          <option value={0}>0%</option>
+                          <option value={5}>5%</option>
+                          <option value={12}>12%</option>
+                          <option value={18}>18%</option>
+                          <option value={28}>28%</option>
+                        </select>
                       </td>
                       <td className="py-2 px-2 text-right font-medium text-gray-700">
                         ₹{(row.total || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 })}
@@ -281,7 +496,7 @@ export default function VoucherForm({ type }) {
                 </tbody>
                 <tfoot>
                   <tr className="border-t-2 border-gray-200 bg-gray-50">
-                    <td colSpan={4} className="py-3 px-2 text-right font-semibold text-gray-700">Total Amount:</td>
+                    <td colSpan={5} className="py-3 px-2 text-right font-semibold text-gray-700">Total Amount:</td>
                     <td className="py-3 px-2 text-right font-bold text-lg text-solar-700">
                       ₹{totalAmount.toLocaleString('en-IN', { maximumFractionDigits: 2 })}
                     </td>
@@ -290,9 +505,11 @@ export default function VoucherForm({ type }) {
                 </tfoot>
               </table>
             </div>
-            <p className="text-xs text-gray-400 mt-3">
-              Use <strong>Open Bill Sheet</strong> for 40-line entry, preview there, then apply. Or preview &amp; save from this form.
-            </p>
+            {!isExpense && (
+              <p className="text-xs text-gray-400 mt-3">
+                Use <strong>Open Bill Sheet</strong> for 40-line entry, preview there, then apply. Or preview &amp; save from this form.
+              </p>
+            )}
           </div>
 
           <div className="flex flex-wrap gap-3">
@@ -307,7 +524,7 @@ export default function VoucherForm({ type }) {
             </button>
             <button
               type="submit"
-              className={`flex-1 min-w-[120px] justify-center ${isSell ? 'btn-primary' : 'btn-success'}`}
+              className={`flex-1 min-w-[120px] justify-center ${isExpense ? 'btn-danger' : isSell ? 'btn-primary' : 'btn-success'}`}
               disabled={saving || itemsLoading}
             >
               <Save className="w-4 h-4" />

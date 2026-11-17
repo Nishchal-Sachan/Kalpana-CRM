@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Plus, Search, Target, Trash2 } from 'lucide-react';
+import { Plus, Search, Target, Trash2, Printer } from 'lucide-react';
 import api from '../../api/axios';
 import Layout from '../../components/Layout';
 import PaginationBar from '../../components/PaginationBar';
+import CustomerReceiptModal from '../../components/CustomerReceiptModal';
 import toast from 'react-hot-toast';
 import { showApiError } from '../../utils/apiError';
 import { useAuth } from '../../context/AuthContext';
@@ -30,16 +31,17 @@ const stageColors = {
 };
 
 export default function Leads() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [stageFilter, setStageFilter] = useState(() => searchParams.get('stage') || '');
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [stageFilter, setStageFilter] = useState('');
   const [page, setPage] = useState(1);
   const [leads, setLeads] = useState([]);
   const [pagination, setPagination] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedIds, setSelectedIds] = useState(() => new Set());
   const [bulkDeleting, setBulkDeleting] = useState(false);
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [receiptLead, setReceiptLead] = useState(null);
   const navigate = useNavigate();
   const { isAdmin } = useAuth();
   const { fetchLeadsPage, removeLead, removeLeads } = useDataCache();
@@ -267,11 +269,12 @@ export default function Leads() {
                       <th className="text-left py-3 px-3 font-semibold text-gray-600">Customer</th>
                       <th className="text-left py-3 px-3 font-semibold text-gray-600">Phone</th>
                       <th className="text-left py-3 px-3 font-semibold text-gray-600">City</th>
+                      <th className="text-left py-3 px-3 font-semibold text-gray-600">Plant Cost</th>
                       <th className="text-left py-3 px-3 font-semibold text-gray-600">Stage</th>
                       <th className="text-left py-3 px-3 font-semibold text-gray-600">Assigned To</th>
                       <th className="text-left py-3 px-3 font-semibold text-gray-600">Created By</th>
                       <th className="text-left py-3 px-3 font-semibold text-gray-600">Date</th>
-                      {isAdmin && <th className="text-center py-3 px-3 font-semibold text-gray-600">Actions</th>}
+                      <th className="text-right py-3 px-3 font-semibold text-gray-600">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -296,26 +299,55 @@ export default function Leads() {
                               />
                             </td>
                           )}
-                          <td className="py-3 px-3 font-medium text-gray-800">{lead.name}</td>
+                          <td className="py-3 px-3">
+                            <span className="font-medium text-gray-800 block">{lead.name}</span>
+                            {(lead.systemSize || lead.panel || lead.inverter || lead.structure || lead.otherMaterials) && (
+                              <span className="text-[10.5px] text-gray-500 block truncate max-w-[200px]" title={[lead.systemSize, lead.panel, lead.inverter, lead.structure, lead.otherMaterials].filter(Boolean).join(' · ')}>
+                                {[lead.systemSize, lead.panel, lead.inverter, lead.structure, lead.otherMaterials].filter(Boolean).join(' · ')}
+                              </span>
+                            )}
+                          </td>
                           <td className="py-3 px-3 text-gray-600">{lead.phone}</td>
                           <td className="py-3 px-3 text-gray-500">{lead.city || '—'}</td>
+                          <td className="py-3 px-3 whitespace-nowrap">
+                            {lead.plantCost > 0 ? (
+                              <div>
+                                <span className="font-semibold text-gray-800">₹{Number(lead.plantCost).toLocaleString('en-IN')}</span>
+                                {lead.totalPaid > 0 && (
+                                  <p className="text-[10px] text-emerald-600 font-bold">₹{Number(lead.totalPaid).toLocaleString('en-IN')} paid</p>
+                                )}
+                              </div>
+                            ) : (
+                              <span className="text-gray-400 text-xs">—</span>
+                            )}
+                          </td>
                           <td className="py-3 px-3">
                             <span className={`badge ${stageColors[lead.stage] || 'bg-gray-100 text-gray-600'}`}>{lead.stage}</span>
                           </td>
                           <td className="py-3 px-3 text-gray-600">{lead.assignedTo?.name || '—'}</td>
                           <td className="py-3 px-3 text-gray-500">{lead.createdBy?.name || '—'}</td>
                           <td className="py-3 px-3 text-gray-400">{new Date(lead.createdAt).toLocaleDateString()}</td>
-                          {isAdmin && (
-                            <td className="py-3 px-3 text-center">
+                          <td className="py-3 px-3 text-right" onClick={(e) => e.stopPropagation()}>
+                            <div className="inline-flex items-center gap-1.5 justify-end">
                               <button
-                                onClick={(e) => handleDelete(e, lead)}
-                                className="btn-danger p-1.5"
-                                title="Delete lead"
+                                type="button"
+                                onClick={() => setReceiptLead(lead)}
+                                className="btn-secondary p-1.5 hover:text-orange-600 hover:bg-orange-50"
+                                title="Print / Download receipt & statement"
                               >
-                                <Trash2 className="w-3.5 h-3.5" />
+                                <Printer className="w-3.5 h-3.5" />
                               </button>
-                            </td>
-                          )}
+                              {isAdmin && (
+                                <button
+                                  onClick={(e) => handleDelete(e, lead)}
+                                  className="btn-danger p-1.5"
+                                  title="Delete lead"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              )}
+                            </div>
+                          </td>
                         </tr>
                       );
                     })}
@@ -332,6 +364,14 @@ export default function Leads() {
             </>
           )}
         </div>
+
+        {/* Receipt Modal */}
+        {receiptLead && (
+          <CustomerReceiptModal
+            lead={receiptLead}
+            onClose={() => setReceiptLead(null)}
+          />
+        )}
       </div>
     </Layout>
   );

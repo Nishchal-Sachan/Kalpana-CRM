@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const StockItem = require('../models/StockItem');
 const StockVoucher = require('../models/StockVoucher');
+const LoadItemGroup = require('../models/LoadItemGroup');
 const {
   protect, stockAccess, stockItemManage, stockTransact, isAdmin,
 } = require('../middleware/auth');
@@ -20,6 +21,19 @@ router.get('/public/items', async (req, res) => {
     res.json({ items });
   } catch (err) {
     sendError(res, err, 'Could not load public stock items.');
+  }
+});
+
+// Public route - get active load groups for leads, quotations & bill forms
+router.get('/public/groups', async (req, res) => {
+  try {
+    const groups = await LoadItemGroup.find({ isActive: true })
+      .populate('items.item', 'name quantity unit sellPrice purchasePrice')
+      .sort({ loadCapacity: 1, name: 1 })
+      .lean();
+    res.json({ groups });
+  } catch (err) {
+    sendError(res, err, 'Could not load public load groups.');
   }
 });
 
@@ -61,11 +75,15 @@ function applyVoucherRowChange(changes, stockItem, type, row) {
     ? (row.price ?? stockItem.purchasePrice)
     : (row.price ?? stockItem.sellPrice);
 
-  change.quantityDelta += type === 'ADD' ? row.quantity : -row.quantity;
-  if (row.price && type === 'ADD') change.purchasePrice = row.price;
-  if (row.price && type === 'SELL') change.sellPrice = row.price;
+  const rowQty = Math.round((Number(row.quantity) || 0) * 10000) / 10000;
+  const delta = type === 'ADD' ? rowQty : -rowQty;
+  change.quantityDelta = Math.round((change.quantityDelta + delta) * 10000) / 10000;
+  if (row.price && type === 'ADD') change.purchasePrice = Number(row.price);
+  if (row.price && type === 'SELL') change.sellPrice = Number(row.price);
 
-  return { price, total: price * row.quantity };
+  const gst = Number(row.gst) || 0;
+  const total = Math.round(price * rowQty * (1 + gst / 100) * 100) / 100;
+  return { price, total, quantity: rowQty };
 }
 
 function buildStockBulkOps(changes) {
@@ -85,7 +103,7 @@ router.get('/items', stockAccess, async (req, res) => {
     const isAdminUser = isAdmin(req.user);
     if (req.query.picker === '1') {
       const search = (req.query.search || '').trim();
-      const limit = Math.min(100, Math.max(1, parseInt(req.query.limit, 10) || 100));
+      const limit = Math.min(1000, Math.max(1, parseInt(req.query.limit, 10) || 1000));
       const filter = { isActive: true };
       if (search) filter.name = { $regex: search, $options: 'i' };
       const selectFields = isAdminUser
@@ -133,6 +151,12 @@ router.post('/items', stockItemManage, async (req, res) => {
   try {
     const body = { ...req.body, name: req.body.name?.trim() };
     if (!body.name) return res.status(400).json({ message: 'Item name required' });
+    if (body.quantity !== undefined && body.quantity !== '') {
+      body.quantity = Math.round(Number(body.quantity) * 10000) / 10000;
+    }
+    if (body.minQuantity !== undefined && body.minQuantity !== '') {
+      body.minQuantity = Math.round(Number(body.minQuantity) * 10000) / 10000;
+    }
 
     const existing = await StockItem.findOne({ name: body.name });
     if (existing) {
@@ -159,6 +183,12 @@ router.put('/items/:id', stockItemManage, async (req, res) => {
   try {
     const body = { ...req.body };
     if (body.name) body.name = body.name.trim();
+    if (body.quantity !== undefined && body.quantity !== '') {
+      body.quantity = Math.round(Number(body.quantity) * 10000) / 10000;
+    }
+    if (body.minQuantity !== undefined && body.minQuantity !== '') {
+      body.minQuantity = Math.round(Number(body.minQuantity) * 10000) / 10000;
+    }
 
     if (body.name) {
       const duplicate = await StockItem.findOne({
@@ -193,7 +223,7 @@ router.delete('/items/:id', stockItemManage, async (req, res) => {
 // Vouchers
 router.get('/vouchers', stockAccess, async (req, res) => {
   try {
-    const { page, limit, skip } = parsePagination(req.query);
+    const { page, limit, skip } = parsePagination(req.query, 20, 1000);
     const filter = {};
     if (req.query.type) filter.type = req.query.type;
 
@@ -216,10 +246,11 @@ router.get('/vouchers', stockAccess, async (req, res) => {
       ]),
     ]);
 
-    const summary = { purchase: 0, sales: 0 };
+    const summary = { purchase: 0, sales: 0, expense: 0 };
     summaryAgg.forEach((row) => {
       if (row._id === 'ADD') summary.purchase = row.total;
       if (row._id === 'SELL') summary.sales = row.total;
+      if (row._id === 'EXPENSE') summary.expense = row.total;
     });
 
     res.json({ vouchers, pagination: paginationMeta(page, limit, total), summary });
@@ -235,8 +266,8 @@ router.get('/vouchers/:id', stockAccess, async (req, res) => {
       .populate('items.item');
     if (!voucher) return res.status(404).json({ message: 'Voucher not found' });
 
-    if (voucher.type === 'ADD' && !isAdmin(req.user)) {
-      return res.status(403).json({ message: 'Only admins can access Purchase Vouchers' });
+    if ((voucher.type === 'ADD' || voucher.type === 'EXPENSE') && !isAdmin(req.user)) {
+      return res.status(403).json({ message: 'Only admins can access Purchase/Expense Vouchers' });
     }
 
     res.json(voucher);
@@ -250,8 +281,8 @@ router.delete('/vouchers/:id', stockTransact, async (req, res) => {
     const voucher = await StockVoucher.findById(req.params.id).populate('items.item');
     if (!voucher) return res.status(404).json({ message: 'Voucher not found' });
 
-    if (voucher.type === 'ADD' && !isAdmin(req.user)) {
-      return res.status(403).json({ message: 'Only admins can delete Purchase Vouchers' });
+    if ((voucher.type === 'ADD' || voucher.type === 'EXPENSE') && !isAdmin(req.user)) {
+      return res.status(403).json({ message: 'Only admins can delete Purchase/Expense Vouchers' });
     }
 
     const reverseType = voucher.type === 'ADD' ? 'SELL' : 'ADD';
@@ -278,11 +309,50 @@ router.delete('/vouchers/:id', stockTransact, async (req, res) => {
 router.post('/vouchers', stockTransact, async (req, res) => {
   try {
     const { type, items, party, partyAddress, note, date } = req.body;
-    if (type === 'ADD' && !isAdmin(req.user)) {
-      return res.status(403).json({ message: 'Only admins can create Purchase Vouchers' });
+    if ((type === 'ADD' || type === 'EXPENSE') && !isAdmin(req.user)) {
+      return res.status(403).json({ message: 'Only admins can create Purchase/Expense Vouchers' });
     }
     if (!items?.length) {
       return res.status(400).json({ message: 'At least one item is required' });
+    }
+
+    if (type === 'EXPENSE') {
+      let totalAmount = 0;
+      const processedItems = [];
+
+      for (const row of items) {
+        const qty = row.quantity != null && row.quantity !== '' ? Number(row.quantity) : 1;
+        const validQty = Math.round(qty * 10000) / 10000;
+        const price = Number(row.price) || 0;
+        const gst = Number(row.gst) || 0;
+        const total = Math.round(validQty * price * (1 + gst / 100) * 100) / 100;
+        totalAmount += total;
+
+        processedItems.push({
+          itemName: row.itemName,
+          unit: row.unit || 'piece',
+          quantity: validQty,
+          price,
+          gst,
+          total,
+        });
+      }
+
+      const voucher = await StockVoucher.create({
+        type,
+        items: processedItems,
+        totalAmount,
+        party,
+        partyAddress,
+        note,
+        date: date ? new Date(date) : new Date(),
+        createdBy: req.user._id,
+      });
+
+      await voucher.populate('createdBy', 'name');
+      dashCache.invalidateStock();
+      dashCache.invalidateAdmin();
+      return res.status(201).json(voucher);
     }
 
     const itemMap = await loadStockItemMap(items.map((row) => row.item));
@@ -296,23 +366,29 @@ router.post('/vouchers', stockTransact, async (req, res) => {
         return res.status(400).json({ message: `Item not found: ${row.item}` });
       }
 
-      const { price, total } = applyVoucherRowChange(changes, stockItem, type, row);
+      const rowQty = Math.round((Number(row.quantity) || 0) * 10000) / 10000;
+      if (rowQty <= 0) {
+        return res.status(400).json({ message: `Quantity must be greater than 0 for ${stockItem.name}` });
+      }
+
+      const { price, total } = applyVoucherRowChange(changes, stockItem, type, { ...row, quantity: rowQty });
       totalAmount += total;
 
       processedItems.push({
         item: stockItem._id,
         itemName: stockItem.name,
         unit: stockItem.unit || 'piece',
-        quantity: row.quantity,
+        quantity: rowQty,
         price,
+        gst: Number(row.gst) || 0,
         total,
       });
     }
 
     for (const change of changes.values()) {
-      const newQuantity = change.item.quantity + change.quantityDelta;
-      if (newQuantity < 0) {
-        return res.status(400).json({ message: `Insufficient stock for ${change.item.name}` });
+      const newQuantity = Math.round((change.item.quantity + change.quantityDelta) * 10000) / 10000;
+      if (newQuantity < -0.00001) {
+        return res.status(400).json({ message: `Insufficient stock for ${change.item.name}. Available: ${change.item.quantity} ${change.item.unit || ''}` });
       }
     }
 
@@ -336,6 +412,122 @@ router.post('/vouchers', stockTransact, async (req, res) => {
     res.status(201).json(voucher);
   } catch (err) {
     sendError(res, err, 'Could not create voucher.');
+  }
+});
+
+// Load Item Groupings (BOM Kits per load capacity like 3 kW, 5 kW)
+router.get('/groups', stockAccess, async (req, res) => {
+  try {
+    const groups = await LoadItemGroup.find({ isActive: true })
+      .populate('items.item', 'name quantity unit sellPrice purchasePrice category')
+      .populate('createdBy', 'name')
+      .sort({ loadCapacity: 1, name: 1 })
+      .lean();
+    res.json({ groups });
+  } catch (err) {
+    sendError(res, err, 'Could not load load groups.');
+  }
+});
+
+router.get('/groups/:id', stockAccess, async (req, res) => {
+  try {
+    const group = await LoadItemGroup.findById(req.params.id)
+      .populate('items.item', 'name quantity unit sellPrice purchasePrice category')
+      .populate('createdBy', 'name');
+    if (!group || !group.isActive) {
+      return res.status(404).json({ message: 'Load group not found' });
+    }
+    res.json(group);
+  } catch (err) {
+    sendError(res, err, 'Could not load load group details.');
+  }
+});
+
+router.post('/groups', stockItemManage, async (req, res) => {
+  try {
+    const { name, load, systemType, description, items } = req.body;
+    if (!name || !load) {
+      return res.status(400).json({ message: 'Name and Load (e.g. 3 kW) are required.' });
+    }
+
+    const numMatch = String(load).match(/[\d.]+/);
+    const loadCapacity = numMatch ? parseFloat(numMatch[0]) : 0;
+
+    const cleanItems = (Array.isArray(items) ? items : []).map((i) => ({
+      item: i.item || undefined,
+      itemName: (i.itemName || '').trim(),
+      category: (i.category || 'General').trim(),
+      quantity: Math.max(0, Math.round((Number(i.quantity) || 0) * 10000) / 10000),
+      unit: (i.unit || 'piece').trim(),
+      price: Number(i.price) || 0,
+      notes: (i.notes || '').trim(),
+    })).filter((i) => i.itemName);
+
+    const totalEstimatedCost = cleanItems.reduce((acc, i) => acc + (i.quantity * i.price), 0);
+
+    const group = await LoadItemGroup.create({
+      name: name.trim(),
+      load: load.trim(),
+      loadCapacity,
+      systemType: (systemType || 'On-Grid').trim(),
+      description: (description || '').trim(),
+      items: cleanItems,
+      totalEstimatedCost,
+      createdBy: req.user._id,
+    });
+
+    await group.populate('items.item', 'name quantity unit sellPrice purchasePrice category');
+    res.status(201).json(group);
+  } catch (err) {
+    sendError(res, err, 'Could not create load group.');
+  }
+});
+
+router.put('/groups/:id', stockItemManage, async (req, res) => {
+  try {
+    const { name, load, systemType, description, items } = req.body;
+    const numMatch = load ? String(load).match(/[\d.]+/) : null;
+    const loadCapacity = numMatch ? parseFloat(numMatch[0]) : undefined;
+
+    const cleanItems = (Array.isArray(items) ? items : []).map((i) => ({
+      item: i.item || undefined,
+      itemName: (i.itemName || '').trim(),
+      category: (i.category || 'General').trim(),
+      quantity: Math.max(0, Math.round((Number(i.quantity) || 0) * 10000) / 10000),
+      unit: (i.unit || 'piece').trim(),
+      price: Number(i.price) || 0,
+      notes: (i.notes || '').trim(),
+    })).filter((i) => i.itemName);
+
+    const totalEstimatedCost = cleanItems.reduce((acc, i) => acc + (i.quantity * i.price), 0);
+
+    const update = {
+      ...(name && { name: name.trim() }),
+      ...(load && { load: load.trim() }),
+      ...(loadCapacity !== undefined && { loadCapacity }),
+      ...(systemType && { systemType: systemType.trim() }),
+      description: (description || '').trim(),
+      items: cleanItems,
+      totalEstimatedCost,
+    };
+
+    const group = await LoadItemGroup.findByIdAndUpdate(req.params.id, update, { new: true })
+      .populate('items.item', 'name quantity unit sellPrice purchasePrice category')
+      .populate('createdBy', 'name');
+
+    if (!group) return res.status(404).json({ message: 'Load group not found' });
+    res.json(group);
+  } catch (err) {
+    sendError(res, err, 'Could not update load group.');
+  }
+});
+
+router.delete('/groups/:id', stockItemManage, async (req, res) => {
+  try {
+    await LoadItemGroup.findByIdAndUpdate(req.params.id, { isActive: false });
+    res.json({ message: 'Load group deactivated successfully' });
+  } catch (err) {
+    sendError(res, err, 'Could not deactivate load group.');
   }
 });
 

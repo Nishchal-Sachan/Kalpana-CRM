@@ -3,10 +3,14 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Edit2, MessageSquare, GitBranch, User, Phone, Mail, MapPin,
   RefreshCw, Star, Clock, Calendar, ImagePlus, X, Trash2,
-  FileText, CreditCard, Building, Receipt, Camera, Upload, ExternalLink, Eye
+  FileText, CreditCard, Building, Receipt, Camera, Upload, ExternalLink, Eye,
+  IndianRupee, Plus, CheckCircle2, Wallet, Banknote, AlertCircle, Printer,
+  Sun, Zap, Layers, Package
 } from 'lucide-react';
 import api from '../../api/axios';
 import Layout from '../../components/Layout';
+import CustomerReceiptModal from '../../components/CustomerReceiptModal';
+import { printCustomerReceipt } from '../../utils/printReceipt';
 import toast from 'react-hot-toast';
 import { showApiError } from '../../utils/apiError';
 import { useAuth } from '../../context/AuthContext';
@@ -24,7 +28,11 @@ const DOCUMENT_SLOTS = [
   { id: 'rooftopPhoto', label: 'Rooftop Photo', icon: Camera },
 ];
 
-const STAGES = ['Lead', 'Calling', 'Visit', 'Filing', 'Loan Filing', 'Loan Process', 'Loan Release', 'Installation', 'Kesco Filing', 'Kesco Process', 'Meter Install', 'Subsidy Apply', 'Subsidy Release', 'Commission'];
+const STAGES = [
+  'Lead', 'Calling', 'Visit', 'Filing', 'Loan Filing', 'Loan Process',
+  'Loan Release', 'Installation', 'Kesco Filing', 'Kesco Process',
+  'Meter Install', 'Subsidy Apply', 'Subsidy Release', 'Commission'
+];
 
 const stageColors = {
   'Lead': 'bg-gray-100 text-gray-700 border-gray-300',
@@ -76,17 +84,40 @@ export default function LeadDetail() {
   } = useDataCache();
   const lead = leadDetails[id];
   const detailLoading = isLoading(`leadDetail:${id}`);
+
+  // Note state
   const [note, setNote] = useState('');
   const [noteImages, setNoteImages] = useState([]); // [{ file, previewUrl }]
   const [addingNote, setAddingNote] = useState(false);
-  const [lightbox, setLightbox] = useState(null); // image url
+  const [lightbox, setLightbox] = useState(null);
   const fileInputRef = useRef(null);
+
+  // Move stage modal
   const [showMoveModal, setShowMoveModal] = useState(false);
   const [moveStage, setMoveStage] = useState('');
   const [moveUser, setMoveUser] = useState('');
   const [moveNote, setMoveNote] = useState('');
   const [moving, setMoving] = useState(false);
+
+  // Document upload state
   const [uploadingDoc, setUploadingDoc] = useState(null);
+
+  // Financial & Payment States (accessible to Admin & Employees)
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [payAmount, setPayAmount] = useState('');
+  const [payMethod, setPayMethod] = useState('cash'); // 'cash' | 'account'
+  const [payDate, setPayDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const [payNote, setPayNote] = useState('');
+  const [submittingPayment, setSubmittingPayment] = useState(false);
+
+  const [showCostModal, setShowCostModal] = useState(false);
+  const [editCost, setEditCost] = useState('');
+  const [updatingCost, setUpdatingCost] = useState(false);
+  const [deletingPaymentId, setDeletingPaymentId] = useState(null);
+
+  // Receipt Modal State
+  const [showReceiptModal, setShowReceiptModal] = useState(false);
+  const [receiptModalPayment, setReceiptModalPayment] = useState(null);
 
   const handleUploadDoc = async (docId, file) => {
     if (!file) return;
@@ -111,23 +142,193 @@ export default function LeadDetail() {
 
   useEffect(() => {
     return () => {
-      // Free any in-memory image previews when leaving the page
       noteImages.forEach((img) => URL.revokeObjectURL(img.previewUrl));
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [noteImages]);
+
+  // Edit Customer Details Modal State
+  const [showEditCustomerModal, setShowEditCustomerModal] = useState(false);
+  const [customerForm, setCustomerForm] = useState({
+    name: '',
+    phone: '',
+    email: '',
+    panNumber: '',
+    aadhaarNumber: '',
+    city: '',
+    address: '',
+    systemSize: '',
+    panel: '',
+    inverter: '',
+    structure: '',
+    otherMaterials: '',
+    referralName: '',
+    requirements: '',
+    loadGroup: '',
+    loadGroupName: '',
+  });
+  const [savingCustomer, setSavingCustomer] = useState(false);
+  const [stockItems, setStockItems] = useState([]);
+  const [loadGroups, setLoadGroups] = useState([]);
+  const [customerLoadMode, setCustomerLoadMode] = useState('group');
 
   useEffect(() => {
     ensureLeadDetail(id);
     fetchAssignees();
+    api.get('/stock/public/items')
+      .then(res => setStockItems(res.data.items || []))
+      .catch(err => console.error('Could not fetch stock items:', err));
+    api.get('/stock/public/groups')
+      .then(res => setLoadGroups(res.data.groups || []))
+      .catch(err => console.error('Could not fetch load groups:', err));
   }, [id, ensureLeadDetail, fetchAssignees]);
+
+  const applyLoadGroupToCustomer = (group) => {
+    if (!group) return;
+    const panels = (group.items || []).filter(i => i.category === 'Solar Panel');
+    const inverters = (group.items || []).filter(i => i.category === 'Inverter');
+    const structures = (group.items || []).filter(i => i.category === 'Structure');
+    const others = (group.items || []).filter(i => !['Solar Panel', 'Inverter', 'Structure'].includes(i.category));
+
+    const panelStr = panels.map(p => `${p.quantity}x ${p.itemName}`).join(', ');
+    const inverterStr = inverters.map(inv => `${inv.quantity}x ${inv.itemName}`).join(', ');
+    const structureStr = structures.map(s => `${s.quantity} ${s.unit || 'set'} ${s.itemName}`).join(', ');
+    const othersStr = others.map(o => `${o.quantity} ${o.unit || ''} ${o.itemName}`).join(', ');
+
+    setCustomerForm(prev => ({
+      ...prev,
+      loadGroup: group._id,
+      loadGroupName: `${group.load} - ${group.name}`,
+      systemSize: group.load || prev.systemSize,
+      panel: panelStr || prev.panel,
+      inverter: inverterStr || prev.inverter,
+      structure: structureStr || prev.structure,
+      otherMaterials: othersStr || prev.otherMaterials,
+    }));
+
+    toast.success(`Applied ${group.load} decided component grouping!`);
+  };
+
+  const appendMaterialToCustomer = (mat) => {
+    setCustomerForm(prev => {
+      const existing = (prev.otherMaterials || '').trim();
+      if (!existing) return { ...prev, otherMaterials: mat };
+      if (existing.toLowerCase().includes(mat.toLowerCase())) {
+        toast('Already added in materials', { icon: 'ℹ️' });
+        return prev;
+      }
+      return { ...prev, otherMaterials: `${existing}, ${mat}` };
+    });
+    toast.success(`Appended "${mat}"!`);
+  };
 
   useEffect(() => {
     if (lead) {
-      setMoveStage(lead.stage);
+      setMoveStage(lead.stage || '');
       setMoveUser(lead.assignedTo?._id || '');
+      setEditCost(lead.plantCost || '');
     }
   }, [lead]);
+
+  const handleOpenEditCustomer = () => {
+    if (!lead) return;
+    setCustomerForm({
+      name: lead.name || '',
+      phone: lead.phone || '',
+      email: lead.email || '',
+      panNumber: lead.panNumber || '',
+      aadhaarNumber: lead.aadhaarNumber || '',
+      city: lead.city || '',
+      address: lead.address || '',
+      systemSize: lead.systemSize || '',
+      panel: lead.panel || '',
+      inverter: lead.inverter || '',
+      structure: lead.structure || '',
+      otherMaterials: lead.otherMaterials || '',
+      referralName: lead.referralName || '',
+      requirements: lead.requirements || '',
+      loadGroup: lead.loadGroup?._id || lead.loadGroup || '',
+      loadGroupName: lead.loadGroupName || lead.loadGroup?.name || '',
+    });
+    setCustomerLoadMode(lead.loadGroup || lead.loadGroupName ? 'group' : 'manual');
+    setShowEditCustomerModal(true);
+  };
+
+  const handleSaveCustomerDetails = async (e) => {
+    e.preventDefault();
+    if (!customerForm.name.trim() || !customerForm.phone.trim()) {
+      return toast.error('Name and Phone are required');
+    }
+    setSavingCustomer(true);
+    try {
+      const res = await api.put(`/leads/${id}`, customerForm);
+      upsertLead(res.data);
+      await refreshLeadDetail(id);
+      setShowEditCustomerModal(false);
+      toast.success('Customer & System details updated successfully!');
+    } catch (err) {
+      showApiError(err, 'Could not update customer details.');
+    } finally {
+      setSavingCustomer(false);
+    }
+  };
+
+  // Payment handlers
+  const handleAddPayment = async (e) => {
+    e.preventDefault();
+    const num = Number(payAmount);
+    if (!num || num <= 0) return toast.error('Please enter a valid payment amount');
+    setSubmittingPayment(true);
+    try {
+      const res = await api.post(`/leads/${id}/payments`, {
+        amount: num,
+        method: payMethod,
+        date: payDate || new Date().toISOString(),
+        note: payNote,
+      });
+      upsertLead(res.data);
+      setShowPaymentModal(false);
+      setPayAmount('');
+      setPayNote('');
+      setPayMethod('cash');
+      toast.success(`Payment of ₹${num.toLocaleString('en-IN')} (${payMethod === 'account' ? 'Bank Account' : 'Cash'}) recorded!`);
+    } catch (err) {
+      showApiError(err, 'Could not record payment.');
+    } finally {
+      setSubmittingPayment(false);
+    }
+  };
+
+  const handleDeletePayment = async (paymentId) => {
+    if (!paymentId) return;
+    if (!window.confirm('Delete this payment record? This action cannot be undone.')) return;
+    setDeletingPaymentId(paymentId);
+    try {
+      const res = await api.delete(`/leads/${id}/payments/${paymentId}`);
+      upsertLead(res.data);
+      toast.success('Payment record deleted');
+    } catch (err) {
+      showApiError(err, 'Could not delete payment record.');
+    } finally {
+      setDeletingPaymentId(null);
+    }
+  };
+
+  const handleUpdatePlantCost = async (e) => {
+    e.preventDefault();
+    setUpdatingCost(true);
+    try {
+      const res = await api.put(`/leads/${id}/plant-cost`, {
+        plantCost: Math.max(0, Number(editCost) || 0),
+      });
+      upsertLead(res.data);
+      setShowCostModal(false);
+      toast.success('Plant cost updated successfully');
+    } catch (err) {
+      showApiError(err, 'Could not update plant cost.');
+    } finally {
+      setUpdatingCost(false);
+    }
+  };
 
   const handleAddNote = async () => {
     const text = note.trim();
@@ -236,21 +437,31 @@ export default function LeadDetail() {
 
   if (detailLoading && !lead) return (
     <Layout module="crm">
-      <div className="flex items-center justify-center h-64 text-gray-400">Loading lead...</div>
+      <div className="flex items-center justify-center h-64 text-gray-400">Loading customer details...</div>
     </Layout>
   );
 
   if (!lead) return (
     <Layout module="crm">
-      <div className="p-4 sm:p-6 text-center text-gray-500">Lead not found</div>
+      <div className="p-4 sm:p-6 text-center text-gray-500">Customer not found</div>
     </Layout>
   );
 
+  // Financial calculations
+  const plantCost = Number(lead.plantCost) || 0;
+  const payments = lead.payments || [];
+  const totalPaid = payments.reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+  const remainingBalance = Math.max(0, plantCost - totalPaid);
+  const sortedPayments = [...payments].sort((a, b) => new Date(a.date) - new Date(b.date));
+  const firstPayment = sortedPayments[0] || null;
+  const firstPaymentAmount = firstPayment ? (Number(firstPayment.amount) || 0) : 0;
+  const percentPaid = plantCost > 0 ? Math.min(100, Math.round((totalPaid / plantCost) * 100)) : (totalPaid > 0 ? 100 : 0);
+
   return (
     <Layout module="crm">
-      <div className="p-4 sm:p-6 max-w-5xl mx-auto">
+      <div className="p-4 sm:p-6 max-w-5xl mx-auto space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between flex-wrap gap-4">
           <div className="flex items-center gap-3">
             <button onClick={() => navigate('/crm/leads')} className="btn-secondary p-2">
               <ArrowLeft className="w-4 h-4" />
@@ -274,6 +485,17 @@ export default function LeadDetail() {
                 </span>
               );
             })()}
+            <button
+              type="button"
+              onClick={() => {
+                setReceiptModalPayment(null);
+                setShowReceiptModal(true);
+              }}
+              className="btn-secondary gap-2"
+              title="Print or Save Payment Statement as PDF"
+            >
+              <Printer className="w-4 h-4" /> Print Statement
+            </button>
             <button onClick={() => setShowMoveModal(true)} className="btn-primary gap-2">
               <RefreshCw className="w-4 h-4" /> Move Stage
             </button>
@@ -286,13 +508,323 @@ export default function LeadDetail() {
         </div>
 
         <div className="grid lg:grid-cols-3 gap-6">
-          {/* Left - Info */}
+          {/* Left Column */}
           <div className="lg:col-span-2 space-y-5">
-            {/* Customer Details */}
+            {/* Plant Financials & Payments Tracking Card */}
+            <div className="card border-orange-100 shadow-sm">
+              <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+                <div className="flex items-center gap-2">
+                  <div className="p-2 rounded-xl bg-orange-100 text-orange-600">
+                    <Wallet className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-gray-900 text-base">Plant Cost & Payment Tracking</h3>
+                    <p className="text-xs text-gray-500">Record payments (Cash / Bank Account) & manage plant value</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setReceiptModalPayment(null);
+                      setShowReceiptModal(true);
+                    }}
+                    className="btn-secondary py-1.5 px-3 text-xs flex items-center gap-1.5 hover:border-orange-300"
+                    title="Print full statement / receipt"
+                  >
+                    <Printer className="w-3.5 h-3.5" />
+                    <span>Print Receipt</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditCost(plantCost || '');
+                      setShowCostModal(true);
+                    }}
+                    className="btn-secondary py-1.5 px-3 text-xs flex items-center gap-1.5 hover:border-orange-300"
+                  >
+                    <Edit2 className="w-3.5 h-3.5" />
+                    <span>{plantCost > 0 ? 'Edit Cost' : 'Set Plant Cost'}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPayAmount('');
+                      setPayNote('');
+                      setPayMethod('cash');
+                      setPayDate(new Date().toISOString().split('T')[0]);
+                      setShowPaymentModal(true);
+                    }}
+                    className="btn-primary py-1.5 px-3 text-xs flex items-center gap-1.5"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Record Payment</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* 4 Financial Metric Cards */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+                {/* Plant Cost */}
+                <div className="p-3 rounded-xl bg-gray-50 border border-gray-200">
+                  <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Total Plant Cost</p>
+                  <p className="text-lg font-black text-gray-900 mt-1">₹{plantCost.toLocaleString('en-IN')}</p>
+                  <p className="text-[11px] text-gray-500 mt-0.5">{lead.systemSize || 'Standard'}</p>
+                </div>
+
+                {/* Total Paid */}
+                <div className="p-3 rounded-xl bg-emerald-50/60 border border-emerald-200">
+                  <p className="text-[11px] font-bold text-emerald-700 uppercase tracking-wider">Total Paid</p>
+                  <p className="text-lg font-black text-emerald-800 mt-1">₹{totalPaid.toLocaleString('en-IN')}</p>
+                  <p className="text-[11px] text-emerald-600 font-semibold mt-0.5">{percentPaid}% completed</p>
+                </div>
+
+                {/* First Payment */}
+                <div className="p-3 rounded-xl bg-blue-50/60 border border-blue-200">
+                  <p className="text-[11px] font-bold text-blue-700 uppercase tracking-wider">First Payment</p>
+                  <p className="text-lg font-black text-blue-900 mt-1">
+                    {firstPayment ? `₹${firstPaymentAmount.toLocaleString('en-IN')}` : '—'}
+                  </p>
+                  <p className="text-[11px] text-blue-600 mt-0.5 truncate">
+                    {firstPayment ? `${firstPayment.method.toUpperCase()} · ${new Date(firstPayment.date).toLocaleDateString('en-IN', { day:'2-digit', month:'short' })}` : 'Not paid yet'}
+                  </p>
+                </div>
+
+                {/* Remaining Balance */}
+                <div className={`p-3 rounded-xl border ${remainingBalance === 0 && plantCost > 0 ? 'bg-emerald-50 border-emerald-300' : 'bg-amber-50/60 border-amber-200'}`}>
+                  <p className={`text-[11px] font-bold uppercase tracking-wider ${remainingBalance === 0 && plantCost > 0 ? 'text-emerald-700' : 'text-amber-800'}`}>
+                    Balance Left
+                  </p>
+                  <p className={`text-lg font-black mt-1 ${remainingBalance === 0 && plantCost > 0 ? 'text-emerald-800' : 'text-amber-900'}`}>
+                    ₹{remainingBalance.toLocaleString('en-IN')}
+                  </p>
+                  <span className={`inline-block text-[10px] font-extrabold px-2 py-0.5 rounded-full mt-0.5 ${remainingBalance === 0 && plantCost > 0 ? 'bg-emerald-200 text-emerald-900' : 'bg-amber-200 text-amber-900'}`}>
+                    {remainingBalance === 0 && plantCost > 0 ? 'FULLY PAID' : 'PENDING'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Progress Bar */}
+              {plantCost > 0 && (
+                <div className="mb-5 bg-gray-100 rounded-full h-2 overflow-hidden">
+                  <div
+                    className={`h-full transition-all duration-500 rounded-full ${remainingBalance === 0 ? 'bg-emerald-500' : 'bg-gradient-to-r from-orange-500 to-emerald-500'}`}
+                    style={{ width: `${percentPaid}%` }}
+                  />
+                </div>
+              )}
+
+              {/* Payment History List / Table */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center gap-1.5">
+                    <Receipt className="w-3.5 h-3.5 text-solar-500" />
+                    Payment History ({payments.length})
+                  </h4>
+                  {payments.length > 0 && (
+                    <span className="text-[11px] text-gray-500 font-medium">
+                      {payments.length} installment{payments.length > 1 ? 's' : ''} recorded
+                    </span>
+                  )}
+                </div>
+
+                {payments.length === 0 ? (
+                  <div className="p-6 text-center border border-dashed border-gray-200 rounded-xl bg-gray-50/50">
+                    <Banknote className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                    <p className="text-xs font-semibold text-gray-600">No payment records found</p>
+                    <p className="text-[11px] text-gray-400 mt-0.5">Click "Record Payment" to record cash or bank account transactions</p>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto rounded-xl border border-gray-200">
+                    <table className="w-full text-left text-xs">
+                      <thead className="bg-gray-50/80 text-gray-500 border-b border-gray-200">
+                        <tr>
+                          <th className="py-2.5 px-3 font-semibold">#</th>
+                          <th className="py-2.5 px-3 font-semibold">Date</th>
+                          <th className="py-2.5 px-3 font-semibold">Amount</th>
+                          <th className="py-2.5 px-3 font-semibold">Method</th>
+                          <th className="py-2.5 px-3 font-semibold">Note / Remarks</th>
+                          <th className="py-2.5 px-3 font-semibold">Recorded By</th>
+                          <th className="py-2.5 px-3 font-semibold text-right">Action</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 bg-white">
+                        {sortedPayments.map((p, idx) => {
+                          const isFirst = idx === 0;
+                          return (
+                            <tr key={p._id || idx} className="hover:bg-gray-50/60 transition-colors">
+                              <td className="py-2.5 px-3 text-gray-400 font-mono">
+                                {idx + 1}
+                                {isFirst && (
+                                  <span className="ml-1.5 inline-block text-[9px] font-black bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded">
+                                    1ST
+                                  </span>
+                                )}
+                              </td>
+                              <td className="py-2.5 px-3 font-medium text-gray-800 whitespace-nowrap">
+                                {new Date(p.date).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' })}
+                              </td>
+                              <td className="py-2.5 px-3 font-bold text-gray-900 whitespace-nowrap">
+                                ₹{Number(p.amount).toLocaleString('en-IN')}
+                              </td>
+                              <td className="py-2.5 px-3 whitespace-nowrap">
+                                <span className={`inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full ${
+                                  p.method === 'account'
+                                    ? 'bg-blue-100 text-blue-700 border border-blue-200'
+                                    : 'bg-emerald-100 text-emerald-700 border border-emerald-200'
+                                }`}>
+                                  {p.method === 'account' ? 'Bank Account' : 'Cash'}
+                                </span>
+                              </td>
+                              <td className="py-2.5 px-3 text-gray-600 max-w-[200px] truncate">
+                                {p.note || '—'}
+                              </td>
+                              <td className="py-2.5 px-3 text-gray-500 whitespace-nowrap">
+                                {p.recordedBy?.name || '—'}
+                              </td>
+                              <td className="py-2.5 px-3 text-right whitespace-nowrap">
+                                <div className="inline-flex items-center gap-1.5 justify-end">
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setReceiptModalPayment(p);
+                                      setShowReceiptModal(true);
+                                    }}
+                                    className="p-1 rounded text-gray-400 hover:text-orange-600 hover:bg-orange-50 transition-colors"
+                                    title="Print receipt for this installment"
+                                  >
+                                    <Printer className="w-3.5 h-3.5" />
+                                  </button>
+                                  {(isAdmin || (p.recordedBy?._id || p.recordedBy) === user?._id) && (
+                                    <button
+                                      type="button"
+                                      onClick={() => handleDeletePayment(p._id)}
+                                      disabled={deletingPaymentId === p._id}
+                                      className="p-1 rounded text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                                      title="Delete payment"
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    </button>
+                                  )}
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Customer & System Details */}
             <div className="card">
-              <h3 className="font-semibold text-gray-700 mb-4 flex items-center gap-2">
-                <User className="w-4 h-4 text-solar-500" /> Customer Details
-              </h3>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-semibold text-gray-800 flex items-center gap-2">
+                  <User className="w-4 h-4 text-orange-500" /> Customer & System Details
+                </h3>
+                <button
+                  type="button"
+                  onClick={handleOpenEditCustomer}
+                  className="btn-secondary py-1.5 px-3 text-xs flex items-center gap-1.5 hover:border-orange-300"
+                >
+                  <Edit2 className="w-3.5 h-3.5" />
+                  <span>Edit Details</span>
+                </button>
+              </div>
+
+              {/* Equipment Highlight Box */}
+              {(() => {
+                const hasEquipment = Boolean(lead.panel || lead.inverter || lead.structure || lead.otherMaterials);
+                return (
+                  <div className="mb-4 bg-orange-50/60 border border-orange-200/80 rounded-xl p-3.5">
+                    <div className="flex items-center justify-between mb-2.5">
+                      <div className="flex items-center gap-2">
+                        <p className="text-[10px] font-bold text-orange-800 uppercase tracking-wider flex items-center gap-1.5">
+                          <Sun className="w-3.5 h-3.5 text-orange-600" />
+                          <span>Solar System & Equipment Specifications</span>
+                        </p>
+                        {(lead.loadGroupName || lead.loadGroup?.name) && (
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-orange-100 text-orange-800 border border-orange-200">
+                            ⚡ Kit: {lead.loadGroupName || lead.loadGroup?.name}
+                          </span>
+                        )}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleOpenEditCustomer}
+                        className="text-[11px] font-semibold text-orange-700 hover:text-orange-900 flex items-center gap-1 underline underline-offset-2"
+                      >
+                        <Edit2 className="w-3 h-3" />
+                        <span>{hasEquipment ? 'Edit Materials' : '+ Add Materials Anytime'}</span>
+                      </button>
+                    </div>
+
+                    {!hasEquipment && (
+                      <div className="bg-white/80 border border-orange-200/60 rounded-lg p-3 text-xs text-orange-900 flex items-center justify-between gap-3 mb-2.5">
+                        <div className="flex items-center gap-2">
+                          <Package className="w-4 h-4 text-orange-500 flex-shrink-0" />
+                          <span>Materials not specified yet. You can add panels, inverters, structures, or BOS equipment anytime.</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleOpenEditCustomer}
+                          className="btn-primary py-1 px-2.5 text-xs whitespace-nowrap"
+                        >
+                          + Add Materials
+                        </button>
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                      <div className="bg-white p-2.5 rounded-lg border border-orange-100 shadow-2xs">
+                        <div className="flex items-center gap-1 text-orange-600 mb-0.5">
+                          <Zap className="w-3 h-3" />
+                          <span className="text-[10px] font-bold uppercase">Capacity</span>
+                        </div>
+                        <p className="font-bold text-gray-900 truncate">{lead.systemSize || 'Standard'}</p>
+                      </div>
+
+                      <div className="bg-white p-2.5 rounded-lg border border-orange-100 shadow-2xs">
+                        <div className="flex items-center gap-1 text-orange-600 mb-0.5">
+                          <Sun className="w-3 h-3" />
+                          <span className="text-[10px] font-bold uppercase">Solar Panel</span>
+                        </div>
+                        <p className="font-bold text-gray-900 truncate" title={lead.panel || 'Not specified'}>{lead.panel || '—'}</p>
+                      </div>
+
+                      <div className="bg-white p-2.5 rounded-lg border border-orange-100 shadow-2xs">
+                        <div className="flex items-center gap-1 text-orange-600 mb-0.5">
+                          <Zap className="w-3 h-3" />
+                          <span className="text-[10px] font-bold uppercase">Inverter</span>
+                        </div>
+                        <p className="font-bold text-gray-900 truncate" title={lead.inverter || 'Not specified'}>{lead.inverter || '—'}</p>
+                      </div>
+
+                      <div className="bg-white p-2.5 rounded-lg border border-orange-100 shadow-2xs">
+                        <div className="flex items-center gap-1 text-orange-600 mb-0.5">
+                          <Layers className="w-3 h-3" />
+                          <span className="text-[10px] font-bold uppercase">Structure</span>
+                        </div>
+                        <p className="font-bold text-gray-900 truncate" title={lead.structure || 'Not specified'}>{lead.structure || '—'}</p>
+                      </div>
+                    </div>
+
+                    {lead.otherMaterials && (
+                      <div className="mt-2.5 bg-white p-2.5 rounded-lg border border-orange-100 shadow-2xs text-xs flex items-center justify-between">
+                        <div className="flex items-center gap-1.5 truncate">
+                          <Package className="w-3.5 h-3.5 text-orange-600 flex-shrink-0" />
+                          <span className="text-[10px] font-bold uppercase text-orange-700 flex-shrink-0">Other Materials & BOS:</span>
+                          <span className="text-gray-800 font-medium truncate">{lead.otherMaterials}</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+
               <div className="grid md:grid-cols-2 gap-4 text-sm">
                 {[
                   { icon: User, label: 'Name', value: lead.name },
@@ -302,8 +834,9 @@ export default function LeadDetail() {
                   { icon: CreditCard, label: 'Aadhaar Number', value: lead.aadhaarNumber || '—' },
                   { icon: MapPin, label: 'City', value: lead.city || '—' },
                   { icon: MapPin, label: 'Address', value: lead.address || '—' },
-                  { icon: User, label: 'System Size', value: lead.systemSize || '—' },
+                  { icon: IndianRupee, label: 'Plant Cost', value: plantCost ? `₹${plantCost.toLocaleString('en-IN')}` : '—' },
                   { icon: User, label: 'Source', value: lead.source || 'Manual' },
+                  { icon: User, label: 'Referral Name', value: lead.referralName || '—' },
                   { icon: User, label: 'Created By', value: lead.createdBy?.name || '—' },
                 ].map(({ icon: Icon, label, value }) => (
                   <div key={label} className="flex items-start gap-2">
@@ -500,7 +1033,7 @@ export default function LeadDetail() {
             </div>
           </div>
 
-          {/* Right - Stage History */}
+          {/* Right Column - Stage History & Assignee */}
           <div className="space-y-5">
             <div className="card">
               <h3 className="font-semibold text-gray-700 mb-4 flex items-center gap-2">
@@ -575,6 +1108,182 @@ export default function LeadDetail() {
           </div>
         )}
 
+        {/* Record Payment Modal for Admin & Employees */}
+        {showPaymentModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-5 sm:p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="font-bold text-gray-900 text-lg flex items-center gap-2">
+                    <Banknote className="w-5 h-5 text-emerald-600" /> Record Payment
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    Customer: <span className="font-semibold text-gray-800">{lead.name}</span>
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowPaymentModal(false)}
+                  className="text-gray-400 hover:text-gray-600 p-1 rounded-full"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <form onSubmit={handleAddPayment} className="space-y-4">
+                <div>
+                  <label className="label">Payment Amount (₹) *</label>
+                  <div className="relative">
+                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 font-bold">₹</span>
+                    <input
+                      className="input pl-8 font-semibold text-base"
+                      type="number"
+                      min="1"
+                      required
+                      placeholder="e.g. 50000"
+                      value={payAmount}
+                      onChange={e => setPayAmount(e.target.value)}
+                      autoFocus
+                    />
+                  </div>
+                  {remainingBalance > 0 && (
+                    <p className="text-[11px] text-gray-500 mt-1">
+                      Current balance pending: <span className="font-bold text-amber-700">₹{remainingBalance.toLocaleString('en-IN')}</span>
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="label">Payment Method *</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setPayMethod('cash')}
+                      className={`p-2.5 rounded-xl border flex items-center justify-center gap-2 font-bold text-xs transition-all ${
+                        payMethod === 'cash'
+                          ? 'bg-emerald-500 text-white border-emerald-600 shadow-sm'
+                          : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
+                      }`}
+                    >
+                      <Banknote className="w-4 h-4" />
+                      <span>Cash</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPayMethod('account')}
+                      className={`p-2.5 rounded-xl border flex items-center justify-center gap-2 font-bold text-xs transition-all ${
+                        payMethod === 'account'
+                          ? 'bg-blue-600 text-white border-blue-700 shadow-sm'
+                          : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
+                      }`}
+                    >
+                      <CreditCard className="w-4 h-4" />
+                      <span>Bank Account</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="label">Payment Date</label>
+                  <input
+                    className="input"
+                    type="date"
+                    value={payDate}
+                    onChange={e => setPayDate(e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <label className="label">Note / Reference (optional)</label>
+                  <input
+                    className="input"
+                    placeholder="e.g. Advance token, Cheque #123, UPI Txn ID"
+                    value={payNote}
+                    onChange={e => setPayNote(e.target.value)}
+                  />
+                </div>
+
+                <div className="flex gap-3 pt-2">
+                  <button
+                    type="button"
+                    className="btn-secondary flex-1 justify-center"
+                    onClick={() => setShowPaymentModal(false)}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="btn-primary flex-1 justify-center gap-2"
+                    disabled={submittingPayment}
+                  >
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>{submittingPayment ? 'Recording...' : 'Save Payment'}</span>
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* Edit Plant Cost Modal */}
+        {showCostModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-5 sm:p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-bold text-gray-900 text-lg flex items-center gap-2">
+                  <Wallet className="w-5 h-5 text-orange-500" /> Set / Update Plant Cost
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => setShowCostModal(false)}
+                  className="text-gray-400 hover:text-gray-600 p-1 rounded-full"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <form onSubmit={handleUpdatePlantCost} className="space-y-4">
+                <div>
+                  <label className="label">Total Plant Cost (₹) *</label>
+                  <div className="relative">
+                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 font-bold">₹</span>
+                    <input
+                      className="input pl-8 font-semibold text-base"
+                      type="number"
+                      min="0"
+                      required
+                      placeholder="e.g. 250000"
+                      value={editCost}
+                      onChange={e => setEditCost(e.target.value)}
+                      autoFocus
+                    />
+                  </div>
+                  <p className="text-[11px] text-gray-500 mt-1">
+                    System Size: <span className="font-semibold text-gray-700">{lead.systemSize || 'Not specified'}</span>
+                  </p>
+                </div>
+
+                <div className="flex gap-3 pt-2">
+                  <button
+                    type="button"
+                    className="btn-secondary flex-1 justify-center"
+                    onClick={() => setShowCostModal(false)}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="btn-primary flex-1 justify-center gap-2"
+                    disabled={updatingCost}
+                  >
+                    <span>{updatingCost ? 'Saving...' : 'Save Plant Cost'}</span>
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
         {/* Move Stage Modal */}
         {showMoveModal && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -609,6 +1318,333 @@ export default function LeadDetail() {
               </div>
             </div>
           </div>
+        )}
+
+        {/* Edit Customer & System Details Modal */}
+        {showEditCustomerModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3 sm:p-4 overflow-y-auto">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-5 sm:p-6 my-auto animate-in fade-in zoom-in-95">
+              <div className="flex items-center justify-between mb-4 border-b border-gray-100 pb-3">
+                <h3 className="font-bold text-gray-900 text-lg flex items-center gap-2">
+                  <Edit2 className="w-5 h-5 text-orange-500" /> Edit Customer & System Details
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => setShowEditCustomerModal(false)}
+                  className="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <form onSubmit={handleSaveCustomerDetails} className="space-y-4">
+                <div className="grid sm:grid-cols-2 gap-3.5">
+                  <div>
+                    <label className="label">Customer Name *</label>
+                    <input
+                      className="input"
+                      required
+                      value={customerForm.name}
+                      onChange={e => setCustomerForm(p => ({ ...p, name: e.target.value }))}
+                      placeholder="e.g. Ramesh Kumar"
+                    />
+                  </div>
+                  <div>
+                    <label className="label">Phone Number *</label>
+                    <input
+                      className="input"
+                      required
+                      value={customerForm.phone}
+                      onChange={e => setCustomerForm(p => ({ ...p, phone: e.target.value }))}
+                      placeholder="+91 98765 43210"
+                    />
+                  </div>
+                  <div>
+                    <label className="label">Email Address</label>
+                    <input
+                      className="input"
+                      type="email"
+                      value={customerForm.email}
+                      onChange={e => setCustomerForm(p => ({ ...p, email: e.target.value }))}
+                      placeholder="ramesh@example.com"
+                    />
+                  </div>
+                  <div>
+                    <label className="label">City</label>
+                    <input
+                      className="input"
+                      value={customerForm.city}
+                      onChange={e => setCustomerForm(p => ({ ...p, city: e.target.value }))}
+                      placeholder="Kanpur"
+                    />
+                  </div>
+                  <div>
+                    <label className="label">PAN Number</label>
+                    <input
+                      className="input uppercase"
+                      value={customerForm.panNumber}
+                      onChange={e => setCustomerForm(p => ({ ...p, panNumber: e.target.value.toUpperCase() }))}
+                      placeholder="ABCDE1234F"
+                      maxLength={10}
+                    />
+                  </div>
+                  <div>
+                    <label className="label">Aadhaar Number</label>
+                    <input
+                      className="input"
+                      value={customerForm.aadhaarNumber}
+                      onChange={e => setCustomerForm(p => ({ ...p, aadhaarNumber: e.target.value }))}
+                      placeholder="1234 5678 9012"
+                      maxLength={14}
+                    />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="label">Full Address</label>
+                    <input
+                      className="input"
+                      value={customerForm.address}
+                      onChange={e => setCustomerForm(p => ({ ...p, address: e.target.value }))}
+                      placeholder="House No., Street, Landmark"
+                    />
+                  </div>
+                </div>
+
+                {/* Equipment & System Specifications */}
+                <div className="bg-orange-50/50 border border-orange-200 rounded-xl p-3.5 space-y-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <h4 className="font-bold text-xs text-orange-900 uppercase tracking-wider flex items-center gap-1.5">
+                      <Sun className="w-3.5 h-3.5 text-orange-600" />
+                      <span>Solar System & Load Management</span>
+                    </h4>
+
+                    {/* Mode Toggle Buttons */}
+                    <div className="inline-flex rounded-lg p-0.5 bg-white border border-orange-200 text-[10.5px] font-semibold">
+                      <button
+                        type="button"
+                        onClick={() => setCustomerLoadMode('group')}
+                        className={`px-2.5 py-1 rounded transition-all ${
+                          customerLoadMode === 'group'
+                            ? 'bg-orange-500 text-white font-bold shadow-2xs'
+                            : 'text-gray-600 hover:text-gray-900'
+                        }`}
+                      >
+                        ⚡ Use Load Group
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setCustomerLoadMode('manual');
+                          setCustomerForm(p => ({ ...p, loadGroup: '', loadGroupName: '' }));
+                        }}
+                        className={`px-2.5 py-1 rounded transition-all ${
+                          customerLoadMode === 'manual'
+                            ? 'bg-orange-500 text-white font-bold shadow-2xs'
+                            : 'text-gray-600 hover:text-gray-900'
+                        }`}
+                      >
+                        ✍️ Edit Manually
+                      </button>
+                    </div>
+                  </div>
+
+                  {customerLoadMode === 'group' && loadGroups.length > 0 && (
+                    <div className="p-2.5 bg-white border border-orange-200/90 rounded-lg space-y-2">
+                      <div className="flex items-center justify-between gap-1">
+                        <span className="text-[11px] font-bold text-gray-800 flex items-center gap-1">
+                          ⚡ Select Load Group (BOM Kit):
+                        </span>
+                        <span className="text-[10px] text-gray-400">Picks decided standard components</span>
+                      </div>
+                      <select
+                        className="input text-xs bg-white py-1 px-2 font-semibold text-gray-800"
+                        value={customerForm.loadGroup || ''}
+                        onChange={(e) => {
+                          const g = loadGroups.find(lg => lg._id === e.target.value);
+                          if (g) applyLoadGroupToCustomer(g);
+                        }}
+                      >
+                        <option value="">-- Choose a Load Group Kit --</option>
+                        {loadGroups.map(lg => (
+                          <option key={lg._id} value={lg._id}>
+                            {lg.load} — {lg.name} ({lg.systemType || 'On-Grid'}) • ₹{(lg.totalEstimatedCost || 0).toLocaleString('en-IN')}
+                          </option>
+                        ))}
+                      </select>
+
+                      <div className="flex flex-wrap gap-1.5 pt-1">
+                        {loadGroups.map(lg => (
+                          <button
+                            key={lg._id}
+                            type="button"
+                            onClick={() => applyLoadGroupToCustomer(lg)}
+                            className={`text-[10.5px] py-0.5 px-2 font-bold rounded border transition-all ${
+                              customerForm.loadGroup === lg._id
+                                ? 'bg-orange-500 text-white border-orange-600 shadow-2xs'
+                                : 'bg-orange-50/50 text-gray-700 border-orange-200 hover:border-orange-500 hover:bg-orange-100'
+                            }`}
+                            title={`Apply decided components for ${lg.name}`}
+                          >
+                            {lg.load} ({lg.name})
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="grid sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="label text-[11px]">System Size / Capacity</label>
+                      <input
+                        className="input bg-white"
+                        value={customerForm.systemSize}
+                        onChange={e => setCustomerForm(p => ({ ...p, systemSize: e.target.value }))}
+                        placeholder="e.g. 3 kW, 5 kW"
+                      />
+                    </div>
+                    <div>
+                      <label className="label text-[11px]">Solar Panel Model</label>
+                      <input
+                        className="input bg-white"
+                        list="modalPanelList"
+                        value={customerForm.panel}
+                        onChange={e => setCustomerForm(p => ({ ...p, panel: e.target.value }))}
+                        placeholder="e.g. Adani 550W Mono PERC"
+                      />
+                      <datalist id="modalPanelList">
+                        {stockItems.filter(i => i.category === 'Solar Panel').map(i => (
+                          <option key={i._id} value={i.name} />
+                        ))}
+                      </datalist>
+                    </div>
+                    <div>
+                      <label className="label text-[11px]">Inverter Model</label>
+                      <input
+                        className="input bg-white"
+                        list="modalInverterList"
+                        value={customerForm.inverter}
+                        onChange={e => setCustomerForm(p => ({ ...p, inverter: e.target.value }))}
+                        placeholder="e.g. Solis 5kW On-Grid Inverter"
+                      />
+                      <datalist id="modalInverterList">
+                        {stockItems.filter(i => i.category === 'Inverter').map(i => (
+                          <option key={i._id} value={i.name} />
+                        ))}
+                      </datalist>
+                    </div>
+                    <div>
+                      <label className="label text-[11px]">Mounting Structure Type</label>
+                      <input
+                        className="input bg-white"
+                        list="modalStructureList"
+                        value={customerForm.structure}
+                        onChange={e => setCustomerForm(p => ({ ...p, structure: e.target.value }))}
+                        placeholder="e.g. GI High-Rise Elevated Structure"
+                      />
+                      <datalist id="modalStructureList">
+                        {stockItems.filter(i => i.category === 'Structure').map(i => (
+                          <option key={i._id} value={i.name} />
+                        ))}
+                      </datalist>
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label className="label text-[11px] flex items-center justify-between">
+                        <span className="flex items-center gap-1">
+                          <Package className="w-3.5 h-3.5 text-gray-500" />
+                          Other Materials & BOS
+                        </span>
+                        <span className="text-[10px] text-gray-400 font-normal">Optional</span>
+                      </label>
+                      <input
+                        className="input bg-white"
+                        value={customerForm.otherMaterials}
+                        onChange={e => setCustomerForm(p => ({ ...p, otherMaterials: e.target.value }))}
+                        placeholder="e.g. Havells ACDB/DCDB, 4mm DC Cables, Earthing kit, Batteries"
+                      />
+                      <p className="text-[10px] text-gray-400 mt-1">Cables, distribution boxes, protection devices, earthing, etc. Can be added or edited anytime.</p>
+                    </div>
+                  </div>
+
+                  {/* Quick BOS material chips */}
+                  <div className="pt-1 border-t border-orange-200/60">
+                    <span className="text-[10px] font-bold text-orange-900 block mb-1">
+                      + Quick Append BOS Materials:
+                    </span>
+                    <div className="flex flex-wrap gap-1">
+                      {[
+                        'Havells ACDB/DCDB',
+                        '4mm DC Solar Wire (50m)',
+                        'Chemical Earthing Kit',
+                        'Lightning Arrester',
+                        'Net Meter',
+                        '150Ah Battery',
+                      ].map(mat => (
+                        <button
+                          key={mat}
+                          type="button"
+                          onClick={() => appendMaterialToCustomer(mat)}
+                          className="text-[10px] py-0.5 px-1.5 bg-white text-gray-700 font-semibold rounded border border-orange-200 hover:border-orange-500 hover:bg-orange-50"
+                        >
+                          + {mat}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid sm:grid-cols-2 gap-3.5">
+                  <div className="sm:col-span-2">
+                    <label className="label">Referral Name</label>
+                    <input
+                      className="input"
+                      value={customerForm.referralName}
+                      onChange={e => setCustomerForm(p => ({ ...p, referralName: e.target.value }))}
+                      placeholder="Referral person / partner name"
+                    />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="label">Requirements / Notes</label>
+                    <textarea
+                      className="input"
+                      rows={2}
+                      value={customerForm.requirements}
+                      onChange={e => setCustomerForm(p => ({ ...p, requirements: e.target.value }))}
+                      placeholder="Special requirements, rooftop details, etc."
+                    />
+                  </div>
+                </div>
+
+                <div className="flex gap-3 pt-3 border-t border-gray-100">
+                  <button
+                    type="button"
+                    className="btn-secondary flex-1 justify-center"
+                    onClick={() => setShowEditCustomerModal(false)}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="btn-primary flex-1 justify-center gap-2"
+                    disabled={savingCustomer}
+                  >
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>{savingCustomer ? 'Saving...' : 'Save Changes'}</span>
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* Customer Receipt & Statement Modal */}
+        {showReceiptModal && (
+          <CustomerReceiptModal
+            lead={lead}
+            singlePayment={receiptModalPayment}
+            onClose={() => {
+              setShowReceiptModal(false);
+              setReceiptModalPayment(null);
+            }}
+          />
         )}
       </div>
     </Layout>
