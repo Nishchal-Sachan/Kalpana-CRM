@@ -147,7 +147,20 @@ export default function Sidebar({ module, onNavigate, onCloseMobile }) {
 
         <div style={{ height:12 }} />
         <SectionLabel t="Navigate" />
-        <NavBtn onClick={() => { navigate('/'); onNavigate?.(); }}     label="Website" icon={Home}   />
+        <a
+          href="https://kalpanasolar.com/"
+          onClick={() => onNavigate?.()}
+          style={{
+            display:'flex', alignItems:'center', gap:10, padding:'9px 10px', width:'100%',
+            borderRadius:11, border:'1px solid transparent', background:'transparent',
+            color:'rgba(255,255,255,.4)', fontSize:'.85rem', fontWeight:500, cursor:'pointer',
+            transition:'all .13s', marginBottom:2, textDecoration:'none', boxSizing:'border-box',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background='rgba(255,255,255,.05)'; e.currentTarget.style.color='rgba(255,255,255,.8)'; }}
+          onMouseLeave={e => { e.currentTarget.style.background='transparent'; e.currentTarget.style.color='rgba(255,255,255,.4)'; }}
+        >
+          <Home size={15} style={{ opacity:.6 }} /> Website
+        </a>
         {module !== 'crm'   && <NavBtn onClick={() => { navigate('/crm'); onNavigate?.(); }}   label="CRM"   icon={Target} />}
         {module !== 'stock' && canAccessStock && <NavBtn onClick={() => { navigate('/stock'); onNavigate?.(); }} label="Stock" icon={Layers} />}
       </nav>

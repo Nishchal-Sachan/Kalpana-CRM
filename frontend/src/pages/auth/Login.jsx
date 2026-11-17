@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import toast from 'react-hot-toast';
@@ -12,16 +12,22 @@ export default function Login() {
   const [form, setForm] = useState({ email:'', password:'' });
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, user } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user) {
+      navigate('/crm', { replace: true });
+    }
+  }, [user, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const user = await login(form.email, form.password);
-      toast.success(`Welcome back, ${user.name}!`);
-      navigate(user.role === 'admin' ? '/admin' : user.role === 'stock_manager' ? '/stock' : '/crm');
+      const loggedUser = await login(form.email, form.password);
+      toast.success(`Welcome back, ${loggedUser.name}!`);
+      navigate('/crm');
     } catch (err) {
       showApiError(err, 'Login failed. Check your email and password.');
     } finally { setLoading(false); }
