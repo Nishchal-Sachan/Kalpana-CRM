@@ -1,24 +1,26 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FileText, Plus, Trash2, Printer, ChevronLeft, RefreshCw, Sparkles, PlusCircle, Save, History, Search, X } from 'lucide-react';
+import {
+  FileText, Plus, Trash2, Printer, ChevronLeft, Save, History, Search, X,
+  MessageSquare, Mail, ShieldCheck, CheckCircle2, Building2, Zap, Phone,
+  MapPin, Calendar, Clock, AlertTriangle, Layers, ChevronDown, ChevronUp, Sun
+} from 'lucide-react';
 import api from '../../api/axios';
 import Layout from '../../components/Layout';
 import toast from 'react-hot-toast';
-import { showApiError } from '../../utils/apiError';
 import logo from '../../assets/kalpana-logo.png';
 import signature from '../../assets/signature.png';
 
-const ACCENT_COLOR = '#4758da'; // Brand blue color
+const ACCENT_COLOR = '#4758da'; // Brand blue
 const DARK_GRAY = '#1E1E1E';
-
-
 
 // Helper for Indian Rupees format
 function fmt(n) {
-  return '₹\u00a0' + Math.round(n).toLocaleString('en-IN');
+  const val = Number(n) || 0;
+  return '₹ ' + Math.round(val).toLocaleString('en-IN');
 }
 
-// Convert numbers to Words in Lakhs/Crores
+// Convert numbers to Words in Indian numbering (Lakhs/Crores)
 function numWords(num) {
   const a = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine',
              'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen',
@@ -37,69 +39,116 @@ function numWords(num) {
   return result ? result + ' Rupees Only' : 'Zero Rupees Only';
 }
 
+const WIRING_OPTIONS = [
+  'Complete DC Copper Wiring',
+  'DC Copper + Armoured Cable + 16 mm Aluminium',
+  'DC Copper + Armoured Cable + Copper Earthing',
+];
+
+const STRUCTURE_OPTIONS = [
+  'Standard Elevated GI Structure (6x8 ft)',
+  'GI High-Rise Elevated Structure (6–8 ft)',
+  'Tin Shed Short Rail Aluminium Structure',
+  'Flat Roof Ballast / Angle Structure',
+];
+
 export default function AdminQuotations() {
   const navigate = useNavigate();
-  
-  // Tab category selection
-  const [category, setCategory] = useState('rooftop');
-  
-  // Customer details
+
+  // Mode: builder vs history
+  const [viewMode, setViewMode] = useState('builder');
+  const [history, setHistory] = useState([]);
+
+  // Page 1: Customer Details
   const [customerName, setCustomerName] = useState('');
-  const [customerAddress, setCustomerAddress] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
+  const [customerCity, setCustomerCity] = useState('');
+  const [customerAddress, setCustomerAddress] = useState('');
   const [customerEmail, setCustomerEmail] = useState('');
-  
-  // Invoice general settings
+
+  // Invoice identifiers
   const [estimateNo, setEstimateNo] = useState(() => String(Math.floor(Math.random() * 9000) + 1000));
   const [estimateDate, setEstimateDate] = useState(() => {
     const d = new Date();
     return `${d.getDate().toString().padStart(2, '0')}-${(d.getMonth() + 1).toString().padStart(2, '0')}-${d.getFullYear()}`;
   });
-  
-  // Quotation items (starts empty by default, fully customizable)
+
+  // Page 2: Solar System Details
+  const [projectCategory, setProjectCategory] = useState('Residential'); // Residential | Commercial
+  const [systemType, setSystemType] = useState('On-Grid'); // On-Grid | Hybrid | Off-Grid
+
+  // Solar Panels
+  const [panelCompanyType, setPanelCompanyType] = useState('Tata Power 550W Mono PERC Bifacial');
+  const [panelWattage, setPanelWattage] = useState('550 W');
+  const [panelQty, setPanelQty] = useState(6);
+  const [panelWarranty, setPanelWarranty] = useState('25');
+
+  // Inverter
+  const [inverterNameType, setInverterNameType] = useState('Solis Dual MPPT Grid-Tie');
+  const [inverterLoad, setInverterLoad] = useState('3.3 kW');
+  const [inverterWarranty, setInverterWarranty] = useState('5');
+
+  // Battery (Conditional for Hybrid / Off-Grid)
+  const [batteryNameType, setBatteryNameType] = useState('Luminous Solar Tubular Battery');
+  const [batteryCapacity, setBatteryCapacity] = useState('150 Ah');
+  const [batteryQty, setBatteryQty] = useState(2);
+  const [batteryWarranty, setBatteryWarranty] = useState('3');
+
+  // Structure & Wiring
+  const [structureType, setStructureType] = useState(STRUCTURE_OPTIONS[0]);
+  const [wiringType, setWiringType] = useState(WIRING_OPTIONS[0]);
+
+  // Quoted Total System Amount (₹)
+  const [totalSystemAmount, setTotalSystemAmount] = useState('195000');
+
+  // Optional: Detailed itemized list (for custom components / inventory integration)
+  const [showItemizedSection, setShowItemizedSection] = useState(false);
   const [items, setItems] = useState([]);
-
-  // View mode & history state
-  const [viewMode, setViewMode] = useState('builder'); // 'builder' or 'history'
-  const [history, setHistory] = useState([]);
-
-  // Inventory items for product picker
   const [stockItems, setStockItems] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
 
+  // Automatic Payment Calculation (Section 4)
+  const numericTotal = Number(totalSystemAmount) || 0;
+  const advancePayment70 = Math.round(numericTotal * 0.70);
+  const balancePayment30 = Math.round(numericTotal * 0.30);
+
+  // Calculated system capacity in kW (from panels)
+  const calculatedCapacityKW = (() => {
+    const w = parseFloat(panelWattage) || 0;
+    const q = parseFloat(panelQty) || 0;
+    if (w > 0 && q > 0) {
+      return ((w * q) / 1000).toFixed(2) + ' kW';
+    }
+    return inverterLoad || '3 kW';
+  })();
+
   // Fetch quotations history
   const fetchHistory = () => {
     api.get('/quotations')
-      .then(res => {
-        setHistory(res.data || []);
-      })
-      .catch(err => {
-        console.error('Failed to load history:', err);
-      });
+      .then(res => setHistory(res.data || []))
+      .catch(err => console.error('Failed to load history:', err));
   };
 
   useEffect(() => {
     fetchHistory();
-  }, []);
-
-  useEffect(() => {
     api.get('/stock/items', { params: { picker: 1, limit: 1000 } })
-      .then(res => {
-        setStockItems(res.data.items || []);
-      })
-      .catch(err => {
-        console.error('Failed to load stock items:', err);
-      });
+      .then(res => setStockItems(res.data.items || []))
+      .catch(err => console.error('Failed to load stock items:', err));
   }, []);
 
+  // Save Quotation to History
   const handleSaveQuotation = async () => {
     if (!customerName.trim()) {
-      toast.error('Please enter a Client Name.');
+      toast.error('Please enter Customer Name.');
       return;
     }
-    if (items.length === 0) {
-      toast.error('Please add at least one component to the quotation list.');
+    if (!customerPhone.trim()) {
+      toast.error('Please enter Customer Phone Number.');
+      return;
+    }
+    if (numericTotal <= 0) {
+      toast.error('Please enter a valid Total System Amount.');
       return;
     }
 
@@ -107,31 +156,63 @@ export default function AdminQuotations() {
       await api.post('/quotations', {
         estimateNo,
         date: estimateDate,
-        customerName,
-        customerPhone,
-        customerAddress,
-        category,
-        items,
-        subTotal: totals.subTotal,
-        totalGst: totals.totalGst,
-        grandTotal: totals.grandTotal
+        customerName: customerName.trim(),
+        customerPhone: customerPhone.trim(),
+        customerCity: customerCity.trim(),
+        customerAddress: customerAddress.trim(),
+        category: projectCategory.toLowerCase(),
+        projectCategory,
+        systemType,
+        systemDetails: {
+          panelCompanyType,
+          panelWattage,
+          panelQty: Number(panelQty) || 0,
+          panelWarranty,
+          inverterNameType,
+          inverterLoad,
+          inverterWarranty,
+          batteryNameType: systemType === 'On-Grid' ? 'N/A' : batteryNameType,
+          batteryCapacity: systemType === 'On-Grid' ? 'N/A' : batteryCapacity,
+          batteryQty: systemType === 'On-Grid' ? 0 : Number(batteryQty) || 0,
+          batteryWarranty: systemType === 'On-Grid' ? 'N/A' : batteryWarranty,
+          structureType,
+          wiringType,
+          totalSystemAmount: numericTotal,
+        },
+        paymentSplit: {
+          advance70: advancePayment70,
+          balance30: balancePayment30,
+        },
+        items: items.length > 0 ? items : [{
+          name: `${projectCategory} ${systemType} Solar System (${calculatedCapacityKW})`,
+          hsn: '8541',
+          qty: 1,
+          unit: 'Set',
+          price: numericTotal,
+          gst: 0
+        }],
+        subTotal: numericTotal,
+        totalGst: 0,
+        grandTotal: numericTotal,
       });
+
       toast.success('Quotation saved to history!');
       fetchHistory();
-      setViewMode('history'); // Switch to history tab to view saved record
+      setViewMode('history');
     } catch (err) {
       console.error(err);
       toast.error(err.response?.data?.message || 'Failed to save quotation');
     }
   };
 
+  // Print / Save PDF
   const handlePrintQuotation = async () => {
     if (!customerName.trim()) {
-      toast.error('Please enter a Client Name before printing.');
+      toast.error('Please enter Customer Name before printing.');
       return;
     }
-    if (items.length === 0) {
-      toast.error('Please add at least one component to the quotation list.');
+    if (numericTotal <= 0) {
+      toast.error('Please enter a valid Total System Amount.');
       return;
     }
 
@@ -139,44 +220,202 @@ export default function AdminQuotations() {
       await api.post('/quotations', {
         estimateNo,
         date: estimateDate,
-        customerName,
-        customerPhone,
-        customerAddress,
-        category,
-        items,
-        subTotal: totals.subTotal,
-        totalGst: totals.totalGst,
-        grandTotal: totals.grandTotal
+        customerName: customerName.trim(),
+        customerPhone: customerPhone.trim(),
+        customerCity: customerCity.trim(),
+        customerAddress: customerAddress.trim(),
+        category: projectCategory.toLowerCase(),
+        projectCategory,
+        systemType,
+        systemDetails: {
+          panelCompanyType,
+          panelWattage,
+          panelQty: Number(panelQty) || 0,
+          panelWarranty,
+          inverterNameType,
+          inverterLoad,
+          inverterWarranty,
+          batteryNameType: systemType === 'On-Grid' ? 'N/A' : batteryNameType,
+          batteryCapacity: systemType === 'On-Grid' ? 'N/A' : batteryCapacity,
+          batteryQty: systemType === 'On-Grid' ? 0 : Number(batteryQty) || 0,
+          batteryWarranty: systemType === 'On-Grid' ? 'N/A' : batteryWarranty,
+          structureType,
+          wiringType,
+          totalSystemAmount: numericTotal,
+        },
+        paymentSplit: {
+          advance70: advancePayment70,
+          balance30: balancePayment30,
+        },
+        items: items.length > 0 ? items : [{
+          name: `${projectCategory} ${systemType} Solar System (${calculatedCapacityKW})`,
+          hsn: '8541',
+          qty: 1,
+          unit: 'Set',
+          price: numericTotal,
+          gst: 0
+        }],
+        subTotal: numericTotal,
+        totalGst: 0,
+        grandTotal: numericTotal,
       });
       fetchHistory();
-      toast.success('Quotation archived to history!');
     } catch (err) {
-      console.error('Auto-save before print failed:', err);
-      toast.error('Failed to auto-save quotation to history.');
+      console.warn('Auto-save before print note:', err);
     }
 
     window.print();
   };
 
+  // Share via WhatsApp
+  const handleShareWhatsApp = () => {
+    if (!customerName.trim() || numericTotal <= 0) {
+      toast.error('Please enter Customer Name and System Amount.');
+      return;
+    }
+    const cleanPhone = customerPhone.replace(/\D/g, '');
+    const isBatteryApplicable = systemType !== 'On-Grid';
+
+    const msg = `*KALPANA SOLAR — QUOTATION ESTIMATE #${estimateNo}*
+📅 *Date:* ${estimateDate}
+---------------------------------------
+👤 *Customer:* ${customerName}
+📞 *Phone:* ${customerPhone || '—'}
+📍 *City / Address:* ${customerCity ? `${customerCity}, ` : ''}${customerAddress || '—'}
+
+⚡ *SYSTEM SPECIFICATIONS:*
+• *Category:* ${projectCategory} (${systemType} System)
+• *Capacity:* ${calculatedCapacityKW}
+• *Solar Panels:* ${panelCompanyType} (${panelWattage} × ${panelQty} Nos)
+• *Panel Warranty:* ${panelWarranty} Years
+• *Inverter:* ${inverterNameType} (${inverterLoad})
+• *Inverter Warranty:* ${inverterWarranty} Years
+${isBatteryApplicable ? `• *Battery Bank:* ${batteryNameType} (${batteryCapacity} × ${batteryQty} Nos)\n• *Battery Warranty:* ${batteryWarranty} Years\n` : ''}• *Structure:* ${structureType}
+• *Wiring:* ${wiringType}
+
+💰 *COMMERCIALS & PAYMENT TERMS:*
+• *Total System Cost:* ₹ ${numericTotal.toLocaleString('en-IN')} (All inclusive)
+• *70% Advance:* ₹ ${advancePayment70.toLocaleString('en-IN')}
+• *30% After Installation:* ₹ ${balancePayment30.toLocaleString('en-IN')}
+
+✅ *INCLUDED:* GST, Transportation, Installation & Civil Work
+ℹ️ *Paperwork:* Extra charges apply for DISCOM & cash-related paperwork
+⏳ *Validity:* 7 Days from quotation date
+
+🏦 *BANK DETAILS FOR PAYMENT:*
+Beneficiary: Kalpana Solar
+Bank: Bank of India | A/C: 733020110000286 | IFSC: BKID0007330
+
+Kalpana Solar · Kanpur (U.P.)
+📞 8736992133 | ✉️ kalpanasolartradersinfo@gmail.com`;
+
+    const url = cleanPhone.length >= 10
+      ? `https://wa.me/91${cleanPhone.slice(-10)}?text=${encodeURIComponent(msg)}`
+      : `https://wa.me/?text=${encodeURIComponent(msg)}`;
+    window.open(url, '_blank');
+  };
+
+  // Share via Email
+  const handleShareEmail = () => {
+    if (!customerName.trim() || numericTotal <= 0) {
+      toast.error('Please enter Customer Name and System Amount.');
+      return;
+    }
+    const isBatteryApplicable = systemType !== 'On-Grid';
+    const subject = `Solar System Quotation Estimate #${estimateNo} for ${customerName} — Kalpana Solar`;
+    const body = `Dear ${customerName},
+
+Thank you for choosing Kalpana Solar. Please find the details of your Solar System Quotation below:
+
+Quotation No: ${estimateNo}
+Date: ${estimateDate}
+Customer Name: ${customerName}
+Phone: ${customerPhone}
+Address: ${customerAddress} ${customerCity ? `(${customerCity})` : ''}
+
+SYSTEM CONFIGURATION:
+• Project Category: ${projectCategory}
+• System Type: ${systemType}
+• Total Capacity: ${calculatedCapacityKW}
+• Solar Panels: ${panelCompanyType} (${panelWattage} × ${panelQty} Nos) — ${panelWarranty} Years Warranty
+• Solar Inverter: ${inverterNameType} (${inverterLoad}) — ${inverterWarranty} Years Warranty
+${isBatteryApplicable ? `• Battery Bank: ${batteryNameType} (${batteryCapacity} × ${batteryQty} Nos) — ${batteryWarranty} Years Warranty\n` : ''}• Mounting Structure: ${structureType}
+• Cabling & Wiring: ${wiringType}
+
+COMMERCIAL TERMS:
+• Total Quoted Amount: ₹ ${numericTotal.toLocaleString('en-IN')}
+• Advance Payment (70%): ₹ ${advancePayment70.toLocaleString('en-IN')}
+• Balance After Installation (30%): ₹ ${balancePayment30.toLocaleString('en-IN')}
+
+STANDARD INCLUSIONS & NOTES:
+• GST, Transportation, Installation and Civil Work are included in system cost.
+• Extra charges will apply for DISCOM and cash-related paperwork.
+• Quoted cost is based on installation up to a two-floor building height; additional height is chargeable.
+• Quotation valid for 7 days from the quotation date.
+
+BANK DETAILS FOR NEFT/RTGS/IMPS:
+Beneficiary: Kalpana Solar
+Bank Name: Bank of India
+Account No.: 733020110000286
+IFSC Code: BKID0007330
+
+Please let us know if you need any further assistance.
+
+Warm regards,
+Kalpana Solar Team
+Phone: 8736992133
+Email: kalpanasolartradersinfo@gmail.com
+Office: 12 A Rajendra Nagar Naubasta Kanpur 208021`;
+
+    window.open(`mailto:${customerEmail || ''}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
+  };
+
+  // Load quotation from history
   const loadQuotation = (q) => {
     setEstimateNo(q.estimateNo);
     setEstimateDate(q.date);
     setCustomerName(q.customerName || '');
     setCustomerPhone(q.customerPhone || '');
+    setCustomerCity(q.customerCity || '');
     setCustomerAddress(q.customerAddress || '');
-    setCategory(q.category || 'rooftop');
-    setItems(q.items.map(item => ({
-      name: item.name,
-      hsn: item.hsn || '',
-      qty: item.qty,
-      unit: item.unit || 'Nos',
-      price: item.price,
-      gst: item.gst
-    })));
+    setProjectCategory(q.projectCategory || (q.category === 'commercial' ? 'Commercial' : 'Residential'));
+    setSystemType(q.systemType || 'On-Grid');
+
+    if (q.systemDetails) {
+      setPanelCompanyType(q.systemDetails.panelCompanyType || '');
+      setPanelWattage(q.systemDetails.panelWattage || '');
+      setPanelQty(q.systemDetails.panelQty || 1);
+      setPanelWarranty(q.systemDetails.panelWarranty || '25');
+      setInverterNameType(q.systemDetails.inverterNameType || '');
+      setInverterLoad(q.systemDetails.inverterLoad || '');
+      setInverterWarranty(q.systemDetails.inverterWarranty || '5');
+      setBatteryNameType(q.systemDetails.batteryNameType || '');
+      setBatteryCapacity(q.systemDetails.batteryCapacity || '');
+      setBatteryQty(q.systemDetails.batteryQty || 1);
+      setBatteryWarranty(q.systemDetails.batteryWarranty || '3');
+      setStructureType(q.systemDetails.structureType || STRUCTURE_OPTIONS[0]);
+      setWiringType(q.systemDetails.wiringType || WIRING_OPTIONS[0]);
+      setTotalSystemAmount(String(q.systemDetails.totalSystemAmount || q.grandTotal || ''));
+    } else {
+      setTotalSystemAmount(String(q.grandTotal || ''));
+    }
+
+    if (q.items && q.items.length > 0) {
+      setItems(q.items.map(item => ({
+        name: item.name,
+        hsn: item.hsn || '',
+        qty: item.qty,
+        unit: item.unit || 'Nos',
+        price: item.price,
+        gst: item.gst
+      })));
+    }
+
     setViewMode('builder');
     toast.success(`Loaded Estimate #${q.estimateNo}`);
   };
 
+  // Delete quotation from history
   const deleteQuotation = async (id) => {
     if (!window.confirm('Are you sure you want to delete this quotation from history?')) return;
     try {
@@ -189,14 +428,7 @@ export default function AdminQuotations() {
     }
   };
 
-  // Stock items dependency removed (fully editable custom mode)
-
-  // Handle category change
-  const handleCategoryChange = (cat) => {
-    setCategory(cat);
-  };
-
-  // Handle cell edit
+  // Itemized table helper handlers
   const handleItemChange = (index, field, value) => {
     const updated = [...items];
     if (field === 'price' || field === 'qty' || field === 'gst') {
@@ -207,12 +439,10 @@ export default function AdminQuotations() {
     setItems(updated);
   };
 
-  // Add empty row
   const addRow = () => {
-    setItems([...items, { name: '', hsn: '', qty: 1, unit: 'Nos', price: 0, gst: 18 }]);
+    setItems([...items, { name: '', hsn: '', qty: 1, unit: 'Nos', price: 0, gst: 0 }]);
   };
 
-  // Add item from inventory
   const addInventoryItem = (item) => {
     const newItem = {
       name: item.name,
@@ -220,70 +450,33 @@ export default function AdminQuotations() {
       qty: 1,
       unit: item.unit || 'Nos',
       price: item.sellPrice || 0,
-      gst: 18
+      gst: 0
     };
     setItems([...items, newItem]);
     toast.success(`Added "${item.name}" from inventory`);
   };
 
-  // Add stock item function removed
-
-  // Remove row
   const removeRow = (index) => {
     setItems(items.filter((_, i) => i !== index));
   };
 
+  // Calculate sum of itemized items if user uses them
+  const itemizedTotal = items.reduce((sum, it) => sum + (it.qty * it.price * (1 + (it.gst || 0) / 100)), 0);
 
-
-  // Calculations
-  const calculateTotals = () => {
-    let subTotal = 0;
-    let totalGst = 0;
-    const gstGroups = {};
-
-    items.forEach(item => {
-      const baseAmount = item.qty * item.price;
-      const gstAmt = baseAmount * (item.gst / 100);
-      subTotal += baseAmount;
-      totalGst += gstAmt;
-
-      // Group by GST rate for CGST/SGST breakdown
-      const rate = item.gst;
-      if (!gstGroups[rate]) {
-        gstGroups[rate] = 0;
-      }
-      gstGroups[rate] += baseAmount;
-    });
-
-    const grandTotal = subTotal + totalGst;
-
-    return {
-      subTotal,
-      totalGst,
-      grandTotal,
-      gstGroups
-    };
-  };
-
-  const totals = calculateTotals();
-
-  // Filtered stock items helper removed
+  const isBatteryApplicable = systemType !== 'On-Grid';
 
   return (
     <Layout module="crm">
       {/* CSS Print Styles */}
       <style>{`
         @page {
-          size: A4;
-          margin: 0;
+          size: A4 portrait;
+          margin: 6mm;
         }
         @media print {
-          /* Hide all non-printable elements */
           header, aside, .no-print {
             display: none !important;
           }
-          
-          /* Reset layout constraints for printing to fill the page */
           html, body, #root, div[class*="h-screen"], main, .print-invoice-wrapper {
             width: 100% !important;
             max-width: 100% !important;
@@ -297,547 +490,670 @@ export default function AdminQuotations() {
             padding: 0 !important;
             box-sizing: border-box !important;
           }
-
           #print-invoice, #print-invoice * {
             visibility: visible !important;
           }
-
           #print-invoice {
             display: block !important;
             position: relative !important;
             width: 100% !important;
             max-width: 100% !important;
-            min-height: 297mm !important;
             margin: 0 !important;
             padding: 0 !important;
             box-shadow: none !important;
-            border: none !important;
+            border: 1px solid #e5e7eb !important;
             color: #000 !important;
             background: white !important;
             box-sizing: border-box !important;
           }
-          /* Remove borders & backgrounds for input style pre-views */
-          input, textarea, select {
-            border: none !important;
-            outline: none !important;
-            background: transparent !important;
-            padding: 0 !important;
-            margin: 0 !important;
-            width: auto !important;
-            appearance: none;
-            -moz-appearance: none;
-            -webkit-appearance: none;
-          }
-          .badge-print {
-            border: none !important;
-            background: transparent !important;
-            color: #000 !important;
-          }
-          /* Ensure header colors print accurately */
           .print-header-bg {
             background-color: ${ACCENT_COLOR} !important;
             color: #ffffff !important;
-            padding-top: 6mm !important;
-            padding-bottom: 2mm !important;
-            padding-left: 12mm !important;
-            padding-right: 12mm !important;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
           }
           .print-dark-bg {
             background-color: ${DARK_GRAY} !important;
             color: #ffffff !important;
-            padding-top: 3mm !important;
-            padding-bottom: 3mm !important;
-            padding-left: 12mm !important;
-            padding-right: 12mm !important;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
           }
-          .table-header-print {
-            background-color: ${ACCENT_COLOR} !important;
-            color: #ffffff !important;
+          .print-badge-bg {
+            background-color: #eff2fe !important;
+            color: #1e2566 !important;
+            border: 1px solid #c7d2fa !important;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
-          }
-          .print-border-accent {
-            border-color: ${ACCENT_COLOR} !important;
-          }
-
-          /* Spacing compression overrides to force everything onto a single page */
-          #print-invoice table th, #print-invoice table td {
-            padding-top: 1.2mm !important;
-            padding-bottom: 1.2mm !important;
-          }
-          #print-invoice .mt-6 {
-            margin-top: 3mm !important;
-          }
-          #print-invoice .mb-6 {
-            margin-bottom: 3mm !important;
-          }
-          #print-invoice .mt-8 {
-            margin-top: 3mm !important;
-          }
-          #print-invoice .pt-4 {
-            padding-top: 2mm !important;
-          }
-          .print-content-wrapper {
-            margin-top: 3mm !important;
-            padding-bottom: 2mm !important;
-          }
-          #print-invoice .pb-6 {
-            padding-bottom: 3mm !important;
-          }
-          #print-invoice .gap-6 {
-            gap: 3mm !important;
-          }
-          #print-invoice .mt-12 {
-            margin-top: 4mm !important;
           }
         }
       `}</style>
 
-      <div className="no-print p-6 max-w-7xl mx-auto">
-        {/* Back and Page Title */}
+      <div className="no-print p-4 sm:p-6 max-w-7xl mx-auto">
+        {/* Top Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
           <div className="flex items-center gap-3">
             <button
               onClick={() => navigate('/admin')}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-600 text-sm font-medium hover:bg-gray-50 transition"
-              style={{ cursor: 'pointer' }}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-gray-200 bg-white text-gray-600 text-sm font-semibold hover:bg-gray-50 transition shadow-xs"
             >
               <ChevronLeft size={16} /> Admin Panel
             </button>
             <div>
-              <h1 className="text-2xl font-black text-gray-900 tracking-tight flex items-center gap-2">
-                <FileText className="text-brand-500" /> Admin Quotation Creator
+              <h1 className="text-xl sm:text-2xl font-black text-gray-900 tracking-tight flex items-center gap-2">
+                <FileText className="text-brand-500" /> Solar Quotation Generator
               </h1>
-              <p className="text-sm text-gray-500">Generate, customize, save and print Estimates/Proformas</p>
+              <p className="text-xs sm:text-sm text-gray-500">Create, customize, share and print official Kalpana Solar quotations</p>
             </div>
           </div>
-          
+
           {viewMode === 'builder' && (
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <button
-                onClick={handleSaveQuotation}
-                style={{
-                  background: '#1f2937',
-                  color: '#ffffff',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px',
-                  padding: '10px 20px',
-                  borderRadius: '12px',
-                  fontWeight: 'bold',
-                  border: 'none',
-                  boxShadow: '0 4px 12px rgba(31, 41, 55, 0.15)',
-                  cursor: 'pointer',
-                  transition: 'all 0.15s'
-                }}
-                onMouseEnter={e => e.currentTarget.style.background = '#111827'}
-                onMouseLeave={e => e.currentTarget.style.background = '#1f2937'}
+                type="button"
+                onClick={handleShareWhatsApp}
+                className="btn-secondary py-2 px-3 text-xs inline-flex items-center gap-1.5 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-300"
+                title="Share quotation summary on WhatsApp"
               >
-                <Save size={16} /> Save to History
+                <MessageSquare size={15} className="text-emerald-600" />
+                <span>WhatsApp</span>
               </button>
               <button
-                onClick={handlePrintQuotation}
-                className="btn-primary"
-                style={{
-                  background: '#4758da',
-                  color: '#ffffff',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px',
-                  padding: '10px 20px',
-                  borderRadius: '12px',
-                  fontWeight: 'bold',
-                  border: 'none',
-                  boxShadow: '0 4px 12px rgba(71, 88, 218, 0.3)',
-                  cursor: 'pointer',
-                  transition: 'all 0.15s'
-                }}
-                onMouseEnter={e => e.currentTarget.style.background = '#3645b8'}
-                onMouseLeave={e => e.currentTarget.style.background = '#4758da'}
+                type="button"
+                onClick={handleShareEmail}
+                className="btn-secondary py-2 px-3 text-xs inline-flex items-center gap-1.5 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-300"
+                title="Email quotation summary"
               >
-                <Printer size={16} /> Print / Save PDF
+                <Mail size={15} className="text-blue-600" />
+                <span>Email</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveQuotation}
+                className="btn-secondary py-2 px-3 text-xs inline-flex items-center gap-1.5"
+              >
+                <Save size={15} />
+                <span>Save to History</span>
+              </button>
+              <button
+                type="button"
+                onClick={handlePrintQuotation}
+                className="btn-primary py-2 px-3.5 text-xs inline-flex items-center gap-1.5"
+              >
+                <Printer size={15} />
+                <span>Print / Save PDF</span>
               </button>
             </div>
           )}
         </div>
 
-        {/* Header Tabs: Builder vs History */}
-        <div className="flex border-b border-gray-100 mb-6 gap-6">
+        {/* View Mode Tabs: Builder vs History */}
+        <div className="flex border-b border-gray-200 mb-6 gap-6">
           <button
             onClick={() => setViewMode('builder')}
             className={`pb-3 font-bold text-sm border-b-2 transition ${viewMode === 'builder' ? 'border-brand-500 text-brand-600 font-extrabold' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
-            style={{ background: 'transparent', borderTop: 'none', borderLeft: 'none', borderRight: 'none', cursor: 'pointer' }}
           >
             Quotation Builder
           </button>
           <button
             onClick={() => setViewMode('history')}
             className={`pb-3 font-bold text-sm border-b-2 transition ${viewMode === 'history' ? 'border-brand-500 text-brand-600 font-extrabold' : 'border-transparent text-gray-500 hover:text-gray-700'} flex items-center gap-1.5`}
-            style={{ background: 'transparent', borderTop: 'none', borderLeft: 'none', borderRight: 'none', cursor: 'pointer' }}
           >
             <History size={15} /> Saved History ({history.length})
           </button>
         </div>
 
         {viewMode === 'builder' && (
-          <>
-            {/* ── Configuration Form (No Print) ── */}
-            <div className="mb-8">
-          
-          {/* Customer Details Form */}
-          <div className="w-full bg-white rounded-2xl border border-gray-100 p-6 shadow-sm flex flex-col gap-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-50 pb-3">
-              <h3 className="font-bold text-gray-800 text-base">Customer & Estimate Information</h3>
-              
-              {/* Three Category Selector */}
-              <div style={{ display: 'flex', gap: 6, background: '#f3f4f6', padding: 4, borderRadius: 12, border: '1px solid #e2e8f0', minWidth: '320px' }}>
-                {['rooftop', 'pump', 'chakki'].map(cat => {
-                  const active = category === cat;
-                  const label = cat === 'rooftop' ? 'Rooftop Solar' : cat === 'pump' ? 'Water Pump' : 'Chakki';
-                  return (
-                    <button
-                      key={cat}
-                      onClick={() => handleCategoryChange(cat)}
-                      style={{
-                        flex: 1,
-                        padding: '6px 12px',
-                        textAlign: 'center',
-                        fontWeight: 'bold',
-                        fontSize: '0.72rem',
-                        borderRadius: 8,
-                        transition: 'all 0.15s',
-                        border: 'none',
-                        cursor: 'pointer',
-                        background: active ? '#4758da' : 'transparent',
-                        color: active ? '#ffffff' : '#4b5563',
-                        boxShadow: active ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'
-                      }}
-                      onMouseEnter={e => { if(!active) e.currentTarget.style.background = '#e2e8f0'; }}
-                      onMouseLeave={e => { if(!active) e.currentTarget.style.background = 'transparent'; }}
-                    >
-                      {label}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Client Name *</label>
-                <input
-                  type="text"
-                  value={customerName}
-                  onChange={(e) => setCustomerName(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
-                  placeholder="e.g John Doe"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Client Contact / Phone</label>
-                <input
-                  type="text"
-                  value={customerPhone}
-                  onChange={(e) => setCustomerPhone(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
-                  placeholder="e.g. 1234567890"
-                />
+          <div className="space-y-6">
+            {/* ── Section 1: Customer Details (Page 1 Requirements) ── */}
+            <div className="card p-5 sm:p-6">
+              <div className="flex items-center justify-between border-b border-gray-100 pb-3 mb-4">
+                <div className="flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-lg bg-brand-100 text-brand-700 flex items-center justify-center font-bold text-xs">1</span>
+                  <h3 className="font-bold text-gray-900 text-base">Customer Details (Basic Information)</h3>
+                </div>
+                <div className="flex items-center gap-2 text-xs text-gray-500 font-mono">
+                  <span>Est #{estimateNo}</span> · <span>{estimateDate}</span>
+                </div>
               </div>
 
-              <div className="md:col-span-2">
-                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Installation Address</label>
-                <input
-                  type="text"
-                  value={customerAddress}
-                  onChange={(e) => setCustomerAddress(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
-                  placeholder="e.g. 123 Main Street, Anytown, USA"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Estimate / Performa No.</label>
-                <input
-                  type="text"
-                  value={estimateNo}
-                  onChange={(e) => setEstimateNo(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-brand-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Invoice Date</label>
-                <input
-                  type="text"
-                  value={estimateDate}
-                  onChange={(e) => setEstimateDate(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-brand-500"
-                  placeholder="DD-MM-YYYY"
-                />
-              </div>
-            </div>
-          </div>        </div>
-
-        {/* ── Editable Item Table (No Print) ── */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm mb-8 overflow-hidden">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-            <h3 className="font-bold text-gray-800 text-base">Quotation Components List</h3>
-            <div className="flex flex-wrap items-center gap-2">
-              {/* Search Inventory Dropdown */}
-              <div className="relative">
-                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-700 text-xs">
-                  <Search size={14} className="text-gray-400" />
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div>
+                  <label className="label">Customer Name *</label>
                   <input
                     type="text"
-                    placeholder="Search inventory..."
-                    value={searchQuery}
-                    onChange={(e) => {
-                      setSearchQuery(e.target.value);
-                      setShowDropdown(true);
-                    }}
-                    onFocus={() => setShowDropdown(true)}
-                    onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
-                    className="border-none outline-none text-xs bg-transparent w-36 focus:ring-0 focus:outline-none"
+                    value={customerName}
+                    onChange={(e) => setCustomerName(e.target.value)}
+                    className="input"
+                    placeholder="e.g. Ramesh Kumar"
+                    required
                   />
-                  {searchQuery && (
-                    <button
-                      type="button"
-                      onClick={() => setSearchQuery('')}
-                      className="text-gray-400 hover:text-gray-600 border-none bg-transparent cursor-pointer p-0"
-                    >
-                      <X size={12} />
-                    </button>
-                  )}
                 </div>
 
-                {showDropdown && (
-                  <div className="absolute right-0 mt-1 w-72 bg-white border border-gray-200 rounded-xl shadow-xl z-50 max-h-60 overflow-y-auto">
-                    {stockItems
-                      .filter(item => 
-                        item.name.toLowerCase().includes(searchQuery.toLowerCase())
-                      )
-                      .map(item => (
-                        <button
-                          key={item._id}
-                          type="button"
-                          onMouseDown={(e) => {
-                            e.preventDefault(); // Prevents input blur before click registers
-                            addInventoryItem(item);
-                            setSearchQuery('');
-                            setShowDropdown(false);
-                          }}
-                          className="w-full text-left px-4 py-2 hover:bg-orange-50/50 flex flex-col gap-0.5 border-b border-gray-100 last:border-0 transition"
-                          style={{ borderTop: 'none', borderLeft: 'none', borderRight: 'none', cursor: 'pointer' }}
-                        >
-                          <span className="font-bold text-xs text-gray-800">{item.name}</span>
-                          <span className="text-[10px] text-gray-500 flex justify-between w-full">
-                            <span>Price: ₹{item.sellPrice?.toLocaleString('en-IN')}</span>
-                            <span>Stock: {item.quantity} {item.unit}</span>
-                          </span>
-                        </button>
-                      ))}
-                    {stockItems.filter(item => 
-                      item.name.toLowerCase().includes(searchQuery.toLowerCase())
-                    ).length === 0 && (
-                      <div className="p-3 text-center text-xs text-gray-400 italic">
-                        No matching items in inventory
-                      </div>
-                    )}
+                <div>
+                  <label className="label">Phone Number *</label>
+                  <input
+                    type="tel"
+                    value={customerPhone}
+                    onChange={(e) => setCustomerPhone(e.target.value)}
+                    className="input"
+                    placeholder="e.g. 9876543210"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="label">City</label>
+                  <input
+                    type="text"
+                    value={customerCity}
+                    onChange={(e) => setCustomerCity(e.target.value)}
+                    className="input"
+                    placeholder="e.g. Kanpur"
+                  />
+                </div>
+
+                <div>
+                  <label className="label">Estimate / Quotation No.</label>
+                  <input
+                    type="text"
+                    value={estimateNo}
+                    onChange={(e) => setEstimateNo(e.target.value)}
+                    className="input"
+                  />
+                </div>
+
+                <div className="sm:col-span-2 lg:col-span-3">
+                  <label className="label">Complete Address (Multi-line text)</label>
+                  <textarea
+                    rows={2}
+                    value={customerAddress}
+                    onChange={(e) => setCustomerAddress(e.target.value)}
+                    className="input resize-none"
+                    placeholder="e.g. Plot No. 45, Near Hanuman Mandir, Barra-2, Kanpur 208027"
+                  />
+                </div>
+
+                <div>
+                  <label className="label">Quotation Date</label>
+                  <input
+                    type="text"
+                    value={estimateDate}
+                    onChange={(e) => setEstimateDate(e.target.value)}
+                    className="input"
+                    placeholder="DD-MM-YYYY"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* ── Section 2: Solar System Details (Page 2 Requirements) ── */}
+            <div className="card p-5 sm:p-6 space-y-5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-100 pb-3">
+                <div className="flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-lg bg-brand-100 text-brand-700 flex items-center justify-center font-bold text-xs">2</span>
+                  <h3 className="font-bold text-gray-900 text-base">Solar System Details & Specifications</h3>
+                </div>
+
+                {/* Project Category & System Type Selectors */}
+                <div className="flex flex-wrap items-center gap-2">
+                  {/* Category */}
+                  <div className="inline-flex rounded-xl p-1 bg-gray-100 border border-gray-200 text-xs">
+                    {['Residential', 'Commercial'].map((cat) => (
+                      <button
+                        key={cat}
+                        type="button"
+                        onClick={() => setProjectCategory(cat)}
+                        className={`px-3 py-1 rounded-lg font-bold transition-all ${
+                          projectCategory === cat
+                            ? 'bg-brand-500 text-white shadow-xs'
+                            : 'text-gray-600 hover:text-gray-900'
+                        }`}
+                      >
+                        {cat}
+                      </button>
+                    ))}
                   </div>
-                )}
+
+                  {/* System Type */}
+                  <div className="inline-flex rounded-xl p-1 bg-gray-100 border border-gray-200 text-xs">
+                    {['On-Grid', 'Hybrid', 'Off-Grid'].map((st) => (
+                      <button
+                        key={st}
+                        type="button"
+                        onClick={() => setSystemType(st)}
+                        className={`px-3 py-1 rounded-lg font-bold transition-all ${
+                          systemType === st
+                            ? 'bg-brand-500 text-white shadow-xs'
+                            : 'text-gray-600 hover:text-gray-900'
+                        }`}
+                      >
+                        {st}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
 
-              <button
-                type="button"
-                onClick={() => {
-                  if (window.confirm('Clear all components from the quotation?')) {
-                    setItems([]);
-                  }
-                }}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-red-200 text-xs font-semibold text-red-600 hover:bg-red-50 transition"
-                style={{ cursor: 'pointer', background: 'transparent' }}
-              >
-                <Trash2 size={12} /> Clear All
-              </button>
+              {/* Grid of System Configuration Fields */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* 3. Panel Company & Type */}
+                <div className="sm:col-span-2">
+                  <label className="label">Panel Company & Type (Free-text)</label>
+                  <input
+                    type="text"
+                    value={panelCompanyType}
+                    onChange={(e) => setPanelCompanyType(e.target.value)}
+                    className="input"
+                    placeholder="e.g. Tata Power 550W Mono PERC Bifacial"
+                  />
+                </div>
 
-              <button
-                type="button"
-                onClick={addRow}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  padding: '8px 16px',
-                  borderRadius: '10px',
-                  background: '#111827', // Dark Gray/Black
-                  color: '#ffffff',
-                  fontSize: '0.78rem',
-                  fontWeight: 'bold',
-                  border: 'none',
-                  cursor: 'pointer',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                  transition: 'all 0.15s'
-                }}
-                onMouseEnter={e => e.currentTarget.style.background = '#1f2937'}
-                onMouseLeave={e => e.currentTarget.style.background = '#111827'}
-              >
-                <Plus size={14} /> Add Row
-              </button>
-            </div>
-          </div>
+                {/* 4. Panel Voltage / Wattage */}
+                <div>
+                  <label className="label">Panel Wattage / Voltage (W / V)</label>
+                  <input
+                    type="text"
+                    value={panelWattage}
+                    onChange={(e) => setPanelWattage(e.target.value)}
+                    className="input"
+                    placeholder="e.g. 550 W"
+                  />
+                </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse text-sm">
-              <thead>
-                <tr className="border-b border-gray-100 text-gray-400 text-xs font-bold uppercase tracking-wider">
-                  <th className="py-3 px-2 w-[5%]">S.No.</th>
-                  <th className="py-3 px-2 w-[40%]">Item Name / Description</th>
-                  <th className="py-3 px-2 w-[10%]">HSN/SAC</th>
-                  <th className="py-3 px-2 w-[8%] text-center">Qty</th>
-                  <th className="py-3 px-2 w-[8%]">Unit</th>
-                  <th className="py-3 px-2 w-[12%]">Rate (₹)</th>
-                  <th className="py-3 px-2 w-[8%]">GST %</th>
-                  <th className="py-3 px-2 w-[12%] text-right">Amt (GST Incl)</th>
-                  <th className="py-3 px-2 w-[5%] text-center">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-50">
-                {items.map((item, idx) => {
-                  const base = item.qty * item.price;
-                  const gstVal = base * (item.gst / 100);
-                  const total = base + gstVal;
-                  return (
-                    <tr key={idx} className="hover:bg-gray-50/50">
-                      <td className="py-2.5 px-2 font-bold text-gray-400">{idx + 1}</td>
-                      <td className="py-2.5 px-2">
-                        <input
-                          type="text"
-                          value={item.name}
-                          onChange={(e) => handleItemChange(idx, 'name', e.target.value)}
-                          className="w-full px-2 py-1 border border-gray-100 rounded focus:border-brand-500 focus:outline-none text-sm font-medium"
-                          placeholder="Component Description"
-                        />
-                      </td>
-                      <td className="py-2.5 px-2">
-                        <input
-                          type="text"
-                          value={item.hsn}
-                          onChange={(e) => handleItemChange(idx, 'hsn', e.target.value)}
-                          className="w-full px-2 py-1 border border-gray-100 rounded focus:border-brand-500 focus:outline-none text-sm"
-                          placeholder="e.g. 8504"
-                        />
-                      </td>
-                      <td className="py-2.5 px-2 text-center">
+                {/* 5. Panel Quantity & 6. Warranty */}
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="label">Panel Qty</label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={panelQty}
+                      onChange={(e) => setPanelQty(e.target.value)}
+                      className="input font-bold"
+                    />
+                  </div>
+                  <div>
+                    <label className="label">Warranty (Yrs)</label>
+                    <input
+                      type="text"
+                      value={panelWarranty}
+                      onChange={(e) => setPanelWarranty(e.target.value)}
+                      className="input"
+                      placeholder="e.g. 25"
+                    />
+                  </div>
+                </div>
+
+                {/* 7. Inverter Name & Type */}
+                <div className="sm:col-span-2">
+                  <label className="label">Inverter Name & Type (Free-text)</label>
+                  <input
+                    type="text"
+                    value={inverterNameType}
+                    onChange={(e) => setInverterNameType(e.target.value)}
+                    className="input"
+                    placeholder="e.g. Solis 3.3kW Dual MPPT On-Grid Inverter"
+                  />
+                </div>
+
+                {/* 8. Inverter Load */}
+                <div>
+                  <label className="label">Inverter Load (kW / kVA)</label>
+                  <input
+                    type="text"
+                    value={inverterLoad}
+                    onChange={(e) => setInverterLoad(e.target.value)}
+                    className="input"
+                    placeholder="e.g. 3.3 kW"
+                  />
+                </div>
+
+                {/* 9. Inverter Warranty */}
+                <div>
+                  <label className="label">Inverter Warranty (Yrs)</label>
+                  <input
+                    type="text"
+                    value={inverterWarranty}
+                    onChange={(e) => setInverterWarranty(e.target.value)}
+                    className="input"
+                    placeholder="e.g. 5"
+                  />
+                </div>
+
+                {/* 10-13. Battery Fields (Conditional: Hidden/Disabled for On-Grid) */}
+                {isBatteryApplicable ? (
+                  <>
+                    <div className="sm:col-span-2 bg-amber-50/50 p-3 rounded-xl border border-amber-200/60">
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="label text-amber-800">Battery Name & Type ({systemType})</label>
+                        <span className="text-[10px] font-bold text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded">Required for {systemType}</span>
+                      </div>
+                      <input
+                        type="text"
+                        value={batteryNameType}
+                        onChange={(e) => setBatteryNameType(e.target.value)}
+                        className="input bg-white"
+                        placeholder="e.g. Luminous Solar Tubular Battery 150Ah"
+                      />
+                    </div>
+
+                    <div className="bg-amber-50/50 p-3 rounded-xl border border-amber-200/60">
+                      <label className="label text-amber-800">Battery Capacity</label>
+                      <input
+                        type="text"
+                        value={batteryCapacity}
+                        onChange={(e) => setBatteryCapacity(e.target.value)}
+                        className="input bg-white"
+                        placeholder="e.g. 150 Ah / 48V"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 bg-amber-50/50 p-3 rounded-xl border border-amber-200/60">
+                      <div>
+                        <label className="label text-amber-800">Battery Qty</label>
                         <input
                           type="number"
-                          value={item.qty}
-                          onChange={(e) => handleItemChange(idx, 'qty', e.target.value)}
-                          className="w-16 px-1.5 py-1 border border-gray-100 rounded focus:border-brand-500 focus:outline-none text-center text-sm font-semibold"
                           min="1"
+                          value={batteryQty}
+                          onChange={(e) => setBatteryQty(e.target.value)}
+                          className="input bg-white font-bold"
                         />
-                      </td>
-                      <td className="py-2.5 px-2">
+                      </div>
+                      <div>
+                        <label className="label text-amber-800">Warranty</label>
                         <input
                           type="text"
-                          value={item.unit}
-                          onChange={(e) => handleItemChange(idx, 'unit', e.target.value)}
-                          className="w-16 px-1.5 py-1 border border-gray-100 rounded focus:border-brand-500 focus:outline-none text-sm"
-                          placeholder="Nos / Sets"
+                          value={batteryWarranty}
+                          onChange={(e) => setBatteryWarranty(e.target.value)}
+                          className="input bg-white"
+                          placeholder="e.g. 3 Yrs"
                         />
-                      </td>
-                      <td className="py-2.5 px-2">
-                        <input
-                          type="number"
-                          value={item.price}
-                          onChange={(e) => handleItemChange(idx, 'price', e.target.value)}
-                          className="w-24 px-2 py-1 border border-gray-100 rounded focus:border-brand-500 focus:outline-none text-sm font-semibold"
-                          min="0"
-                          step="0.01"
-                        />
-                      </td>
-                      <td className="py-2.5 px-2">
-                        <select
-                          value={item.gst}
-                          onChange={(e) => handleItemChange(idx, 'gst', e.target.value)}
-                          className="w-16 px-1 py-1 border border-gray-100 rounded focus:border-brand-500 focus:outline-none text-sm font-semibold"
-                        >
-                          <option value={0}>0%</option>
-                          <option value={5}>5%</option>
-                          <option value={12}>12%</option>
-                          <option value={18}>18%</option>
-                          <option value={28}>28%</option>
-                        </select>
-                      </td>
-                      <td className="py-2.5 px-2 text-right font-bold text-gray-800">
-                        {fmt(total)}
-                      </td>
-                      <td className="py-2.5 px-2 text-center">
-                        <button
-                          onClick={() => removeRow(idx)}
-                          className="text-red-500 hover:text-red-700 hover:bg-red-50 p-1.5 rounded transition"
-                          title="Delete Row"
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-          {items.length === 0 && (
-            <div className="py-12 text-center bg-gray-50/50 rounded-xl border border-dashed border-gray-200 my-4 flex flex-col items-center justify-center">
-              <FileText size={48} className="text-gray-300 mb-3" />
-              <p className="text-gray-500 font-medium mb-4">No components added to this quotation yet.</p>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div className="sm:col-span-2 lg:col-span-4 p-3 bg-gray-50 border border-dashed border-gray-200 rounded-xl flex items-center justify-between text-xs text-gray-500">
+                    <span className="flex items-center gap-2">
+                      <ShieldCheck size={16} className="text-gray-400" />
+                      <span><strong>Battery Bank:</strong> Not Applicable for On-Grid Systems (Grid-Tied Net Metering).</span>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setSystemType('Hybrid')}
+                      className="text-brand-600 font-bold hover:underline"
+                    >
+                      Switch to Hybrid / Off-Grid
+                    </button>
+                  </div>
+                )}
+
+                {/* 14. Structure Type */}
+                <div className="sm:col-span-2">
+                  <label className="label">Structure Type (Standard 6x8 ft / 2-floor height)</label>
+                  <select
+                    value={structureType}
+                    onChange={(e) => setStructureType(e.target.value)}
+                    className="input"
+                  >
+                    {STRUCTURE_OPTIONS.map((st) => (
+                      <option key={st} value={st}>{st}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* 15. Wiring Type */}
+                <div className="sm:col-span-2">
+                  <label className="label">Wiring Type (Dropdown options)</label>
+                  <select
+                    value={wiringType}
+                    onChange={(e) => setWiringType(e.target.value)}
+                    className="input"
+                  >
+                    {WIRING_OPTIONS.map((wt) => (
+                      <option key={wt} value={wt}>{wt}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* 16. Total System Amount */}
+                <div className="sm:col-span-2 lg:col-span-4 bg-brand-50/60 p-4 rounded-2xl border border-brand-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div className="flex-1 w-full sm:w-auto">
+                    <label className="label text-brand-900 font-bold">Total Quoted System Amount (₹) *</label>
+                    <div className="relative mt-1">
+                      <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 font-extrabold text-lg">₹</span>
+                      <input
+                        type="number"
+                        min="1"
+                        value={totalSystemAmount}
+                        onChange={(e) => setTotalSystemAmount(e.target.value)}
+                        className="input pl-8 font-black text-lg text-brand-900 bg-white"
+                        placeholder="e.g. 195000"
+                        required
+                      />
+                    </div>
+                    <p className="text-xs text-brand-700 font-semibold mt-1">
+                      {numericTotal > 0 ? numWords(numericTotal) : 'Enter total amount to compute payment split'}
+                    </p>
+                  </div>
+
+                  {/* Section 4: Automatic Payment Calculation Display */}
+                  <div className="grid grid-cols-2 gap-3 w-full sm:w-auto">
+                    <div className="bg-white p-3 rounded-xl border border-brand-200/80 shadow-xs text-center min-w-[140px]">
+                      <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">70% Advance</p>
+                      <p className="text-base font-black text-brand-700 mt-0.5">{fmt(advancePayment70)}</p>
+                      <p className="text-[9px] text-gray-400">At booking time</p>
+                    </div>
+                    <div className="bg-white p-3 rounded-xl border border-brand-200/80 shadow-xs text-center min-w-[140px]">
+                      <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">30% Post Install</p>
+                      <p className="text-base font-black text-emerald-700 mt-0.5">{fmt(balancePayment30)}</p>
+                      <p className="text-[9px] text-gray-400">After installation</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* ── Section 3: Standard Inclusions & Terms Card ── */}
+            <div className="card p-5 sm:p-6 bg-gradient-to-br from-white to-gray-50/70">
+              <div className="flex items-center gap-2 border-b border-gray-100 pb-3 mb-3">
+                <span className="w-6 h-6 rounded-lg bg-brand-100 text-brand-700 flex items-center justify-center font-bold text-xs">3</span>
+                <h3 className="font-bold text-gray-900 text-base">Standard Quotation Inclusions & Terms</h3>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+                <div className="p-3 bg-white rounded-xl border border-gray-200">
+                  <p className="font-bold text-gray-700">GST, Transport & Installation</p>
+                  <p className="text-emerald-700 font-semibold mt-0.5">✓ Included in system cost</p>
+                </div>
+                <div className="p-3 bg-white rounded-xl border border-gray-200">
+                  <p className="font-bold text-gray-700">Civil Work & Foundations</p>
+                  <p className="text-emerald-700 font-semibold mt-0.5">✓ Included in system cost</p>
+                </div>
+                <div className="p-3 bg-white rounded-xl border border-gray-200">
+                  <p className="font-bold text-gray-700">Standard Project Height</p>
+                  <p className="text-gray-600 mt-0.5">2-floor building height (extra height chargeable)</p>
+                </div>
+                <div className="p-3 bg-white rounded-xl border border-gray-200">
+                  <p className="font-bold text-gray-700">DISCOM & Paperwork</p>
+                  <p className="text-amber-700 font-semibold mt-0.5">Extra charges apply</p>
+                </div>
+              </div>
+            </div>
+
+            {/* ── Optional Collapsible Section: Custom Itemized Line Items & Inventory Picker ── */}
+            <div className="card p-4 sm:p-5">
               <button
                 type="button"
-                onClick={addRow}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  padding: '10px 20px',
-                  borderRadius: '12px',
-                  background: '#4758da', // Brand blue
-                  color: '#ffffff',
-                  fontSize: '0.85rem',
-                  fontWeight: 'bold',
-                  border: 'none',
-                  cursor: 'pointer',
-                  boxShadow: '0 4px 12px rgba(71, 88, 218, 0.25)',
-                  transition: 'all 0.15s'
-                }}
-                onMouseEnter={e => e.currentTarget.style.background = '#3645b8'}
-                onMouseLeave={e => e.currentTarget.style.background = '#4758da'}
+                onClick={() => setShowItemizedSection(!showItemizedSection)}
+                className="w-full flex items-center justify-between text-left font-bold text-gray-800 text-sm"
               >
-                <Plus size={16} /> Add First Component
+                <span className="flex items-center gap-2">
+                  <Layers size={16} className="text-brand-500" />
+                  <span>Optional: Component Line Items & Inventory Picker ({items.length} items)</span>
+                </span>
+                {showItemizedSection ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
               </button>
+
+              {showItemizedSection && (
+                <div className="mt-4 pt-4 border-t border-gray-100 space-y-4">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <p className="text-xs text-gray-500">
+                      Add specific component stock items if you wish to generate an itemized BOM alongside the solar specification.
+                    </p>
+                    <div className="flex items-center gap-2">
+                      {/* Inventory Dropdown Search */}
+                      <div className="relative">
+                        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-700 text-xs">
+                          <Search size={14} className="text-gray-400" />
+                          <input
+                            type="text"
+                            placeholder="Pick from inventory..."
+                            value={searchQuery}
+                            onChange={(e) => {
+                              setSearchQuery(e.target.value);
+                              setShowDropdown(true);
+                            }}
+                            onFocus={() => setShowDropdown(true)}
+                            className="border-none outline-none text-xs bg-transparent w-36"
+                          />
+                        </div>
+
+                        {showDropdown && (
+                          <div className="absolute right-0 mt-1 w-72 bg-white border border-gray-200 rounded-xl shadow-xl z-50 max-h-60 overflow-y-auto">
+                            {stockItems
+                              .filter(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()))
+                              .map(item => (
+                                <button
+                                  key={item._id}
+                                  type="button"
+                                  onMouseDown={(e) => {
+                                    e.preventDefault();
+                                    addInventoryItem(item);
+                                    setSearchQuery('');
+                                    setShowDropdown(false);
+                                  }}
+                                  className="w-full text-left px-4 py-2 hover:bg-brand-50/50 flex flex-col gap-0.5 border-b border-gray-100 last:border-0 transition"
+                                >
+                                  <span className="font-bold text-xs text-gray-800">{item.name}</span>
+                                  <span className="text-[10px] text-gray-500 flex justify-between w-full">
+                                    <span>Price: ₹{item.sellPrice?.toLocaleString('en-IN')}</span>
+                                    <span>Stock: {item.quantity} {item.unit}</span>
+                                  </span>
+                                </button>
+                              ))}
+                          </div>
+                        )}
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={addRow}
+                        className="btn-secondary py-1.5 px-3 text-xs inline-flex items-center gap-1"
+                      >
+                        <Plus size={14} /> Add Row
+                      </button>
+
+                      {items.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => setTotalSystemAmount(String(Math.round(itemizedTotal)))}
+                          className="btn-secondary py-1.5 px-3 text-xs text-brand-700 border-brand-200 bg-brand-50 hover:bg-brand-100"
+                        >
+                          Use Item Sum (₹{Math.round(itemizedTotal).toLocaleString('en-IN')})
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {items.length > 0 && (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left border-collapse text-xs">
+                        <thead>
+                          <tr className="border-b border-gray-200 text-gray-500 font-bold uppercase">
+                            <th className="py-2 px-2">#</th>
+                            <th className="py-2 px-2">Item Description</th>
+                            <th className="py-2 px-2 text-center">Qty</th>
+                            <th className="py-2 px-2">Unit</th>
+                            <th className="py-2 px-2 text-right">Price</th>
+                            <th className="py-2 px-2 text-right">Total</th>
+                            <th className="py-2 px-2 text-center">Action</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100">
+                          {items.map((it, idx) => (
+                            <tr key={idx}>
+                              <td className="py-2 px-2 font-mono text-gray-400">{idx + 1}</td>
+                              <td className="py-2 px-2">
+                                <input
+                                  type="text"
+                                  value={it.name}
+                                  onChange={(e) => handleItemChange(idx, 'name', e.target.value)}
+                                  className="input py-1 text-xs"
+                                  placeholder="Component name"
+                                />
+                              </td>
+                              <td className="py-2 px-2 text-center">
+                                <input
+                                  type="number"
+                                  min="1"
+                                  value={it.qty}
+                                  onChange={(e) => handleItemChange(idx, 'qty', e.target.value)}
+                                  className="input py-1 text-xs text-center w-16"
+                                />
+                              </td>
+                              <td className="py-2 px-2">
+                                <input
+                                  type="text"
+                                  value={it.unit}
+                                  onChange={(e) => handleItemChange(idx, 'unit', e.target.value)}
+                                  className="input py-1 text-xs w-16"
+                                />
+                              </td>
+                              <td className="py-2 px-2 text-right">
+                                <input
+                                  type="number"
+                                  value={it.price}
+                                  onChange={(e) => handleItemChange(idx, 'price', e.target.value)}
+                                  className="input py-1 text-xs text-right w-24"
+                                />
+                              </td>
+                              <td className="py-2 px-2 text-right font-bold text-gray-800">
+                                {fmt(it.qty * it.price)}
+                              </td>
+                              <td className="py-2 px-2 text-center">
+                                <button
+                                  type="button"
+                                  onClick={() => removeRow(idx)}
+                                  className="p-1 text-red-500 hover:text-red-700"
+                                >
+                                  <Trash2 size={14} />
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
-          )}
-        </div>
-        </>
+          </div>
         )}
 
+        {/* ── View Mode: Saved History ── */}
         {viewMode === 'history' && (
-          <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm mb-8 overflow-hidden">
-            <h3 className="font-bold text-gray-800 text-base mb-4 border-b border-gray-50 pb-2">Saved Quotation Records</h3>
+          <div className="card p-5 sm:p-6 overflow-hidden">
+            <h3 className="font-bold text-gray-900 text-base mb-4 border-b border-gray-100 pb-3">
+              Saved Quotation History ({history.length} records)
+            </h3>
             {history.length === 0 ? (
               <div className="py-12 text-center">
                 <FileText size={48} className="mx-auto text-gray-300 mb-3" />
-                <p className="text-gray-500 font-medium mb-4">No quotations have been saved to history yet.</p>
+                <p className="text-gray-500 font-medium mb-3">No quotations saved to history yet.</p>
                 <button
                   type="button"
                   onClick={() => setViewMode('builder')}
-                  className="btn-primary"
-                  style={{ background: '#4758da', color: '#fff', padding: '10px 20px', borderRadius: '12px', fontWeight: 'bold', border: 'none', cursor: 'pointer' }}
+                  className="btn-primary py-2 px-4 text-xs"
                 >
                   Create Your First Quotation
                 </button>
@@ -850,53 +1166,47 @@ export default function AdminQuotations() {
                       <th className="py-3 px-4">Est No.</th>
                       <th className="py-3 px-4">Date</th>
                       <th className="py-3 px-4">Customer Details</th>
-                      <th className="py-3 px-4">Category</th>
-                      <th className="py-3 px-4 text-right">Grand Total</th>
+                      <th className="py-3 px-4">Category & System</th>
+                      <th className="py-3 px-4 text-right">Quoted Amount</th>
                       <th className="py-3 px-4 text-center">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-50">
+                  <tbody className="divide-y divide-gray-100">
                     {history.map((q) => (
                       <tr key={q._id} className="hover:bg-gray-50/50">
-                        <td className="py-3 px-4 font-bold text-gray-700">#{q.estimateNo}</td>
-                        <td className="py-3 px-4 text-gray-500">{q.date}</td>
+                        <td className="py-3 px-4 font-mono font-bold text-brand-700">#{q.estimateNo}</td>
+                        <td className="py-3 px-4 text-gray-500 text-xs">{q.date}</td>
                         <td className="py-3 px-4">
-                          <div className="font-semibold text-gray-900">{q.customerName}</div>
-                          {q.customerPhone && <div className="text-xs text-gray-400">{q.customerPhone}</div>}
-                          {q.customerAddress && <div className="text-xs text-gray-400 truncate max-w-[200px]" title={q.customerAddress}>{q.customerAddress}</div>}
+                          <p className="font-bold text-gray-900">{q.customerName}</p>
+                          <div className="text-xs text-gray-400 flex items-center gap-2 mt-0.5">
+                            {q.customerPhone && <span>{q.customerPhone}</span>}
+                            {q.customerCity && <span>· {q.customerCity}</span>}
+                          </div>
                         </td>
                         <td className="py-3 px-4">
-                          <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider ${
-                            q.category === 'rooftop' 
-                              ? 'bg-amber-50 text-amber-600 border border-amber-100' 
-                              : q.category === 'pump' 
-                              ? 'bg-blue-50 text-blue-600 border border-blue-100' 
-                              : 'bg-emerald-50 text-emerald-600 border border-emerald-100'
-                          }`}>
-                            {q.category === 'rooftop' ? 'Solar' : q.category === 'pump' ? 'Pump' : 'Chakki'}
+                          <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-bold bg-brand-50 text-brand-700 border border-brand-200">
+                            {q.projectCategory || q.category} · {q.systemType || 'On-Grid'}
                           </span>
                         </td>
                         <td className="py-3 px-4 text-right font-black text-gray-900">
-                          ₹{q.grandTotal.toLocaleString('en-IN', { maximumFractionDigits: 2 })}
+                          {fmt(q.grandTotal)}
                         </td>
                         <td className="py-3 px-4 text-center">
-                          <div className="flex justify-center gap-2">
+                          <div className="inline-flex items-center gap-2">
                             <button
                               type="button"
                               onClick={() => loadQuotation(q)}
-                              className="px-2.5 py-1 rounded bg-brand-50 text-brand-600 hover:bg-brand-100 text-xs font-bold transition"
-                              style={{ border: 'none', cursor: 'pointer' }}
+                              className="px-2.5 py-1 rounded-lg bg-brand-50 text-brand-700 hover:bg-brand-100 text-xs font-bold"
                             >
                               Load & Edit
                             </button>
                             <button
                               type="button"
                               onClick={() => deleteQuotation(q._id)}
-                              className="p-1 rounded text-red-500 hover:bg-red-50 hover:text-red-700 transition"
-                              style={{ border: 'none', cursor: 'pointer' }}
-                              title="Delete Record"
+                              className="p-1 rounded text-red-500 hover:bg-red-50"
+                              title="Delete"
                             >
-                              <Trash2 size={16} />
+                              <Trash2 size={15} />
                             </button>
                           </div>
                         </td>
@@ -910,252 +1220,297 @@ export default function AdminQuotations() {
         )}
       </div>
 
-      {/* ── High-Fidelity Printable Estimate Sheet ── */}
+      {/* ── High-Fidelity Printable Estimate Sheet (#print-invoice) ── */}
       {viewMode === 'builder' && (
         <div className="flex justify-center bg-gray-50 pb-16 print-invoice-wrapper">
           <div
-          id="print-invoice"
-          className="bg-white w-[210mm] min-h-[297mm] shadow-lg border border-gray-200/50 mx-auto text-black font-sans relative"
-          style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
-        >
-          {/* Header Graphic Section (Rising Solar Energy letterhead mockup) - full bleed */}
-          <div className="relative pb-2">
-            
-            {/* Top red header banner */}
-            <div className="print-header-bg text-white px-4 py-2 flex items-center justify-between" style={{ backgroundColor: ACCENT_COLOR, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', fontSize: '10px', fontWeight: 'bold', whiteSpace: 'nowrap' }}>
-                <span>📞 {'8736992133'}</span>
+            id="print-invoice"
+            className="bg-white w-[210mm] min-h-[297mm] shadow-lg border border-gray-200 mx-auto text-black font-sans relative"
+            style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}
+          >
+            {/* Top Red/Brand Header Banner */}
+            <div
+              className="print-header-bg text-white px-6 py-2 flex items-center justify-between text-[10px] font-bold"
+              style={{ backgroundColor: ACCENT_COLOR }}
+            >
+              <div className="flex items-center gap-4">
+                <span>📞 8736992133</span>
                 <span>✉️ kalpanasolartradersinfo@gmail.com</span>
               </div>
-              <div style={{ fontSize: '10px', fontWeight: 'bold', textAlign: 'right', lineHeight: '1.3', maxWidth: '60%' }}>
+              <div className="text-right">
                 OFFICE ADD: 12 A Rajendra Nagar Naubasta Kanpur 208021
               </div>
             </div>
 
-            {/* Main title block - merged with top banner (no mt-1 gap) */}
-            <div className="print-dark-bg text-white px-4 py-3 flex items-center justify-between shadow-sm" style={{ backgroundColor: DARK_GRAY }}>
-              <div className="flex items-center gap-3">
+            {/* Dark Brand Block with Logo */}
+            <div
+              className="print-dark-bg text-white px-6 py-3.5 flex items-center justify-between shadow-sm"
+              style={{ backgroundColor: DARK_GRAY }}
+            >
+              <div className="flex items-center gap-3.5">
                 <img
                   src={logo}
                   alt="Kalpana Solar"
-                  className="w-14 h-14 rounded-lg object-contain bg-white p-1 border border-white/10"
+                  className="w-14 h-14 rounded-xl object-contain bg-white p-1 border border-white/20"
                   onError={(e) => { e.target.src = '/kalpana-logo.png'; }}
                 />
                 <div>
-                  <h2 className="text-lg md:text-xl font-black tracking-tight leading-none">KALPANA SOLAR</h2>
-                  <p className="text-[9px] text-gray-300 mt-1 uppercase font-bold tracking-wider">GSTIN: <span className="text-yellow-400">09CWZPS4610R1Z8</span> · State: 09-Uttar Pradesh</p>
-                </div>
-              </div>
-              
-              <div className="text-right">
-                <h1 className="text-xl md:text-2xl font-black italic tracking-wider leading-none text-white/95">Estimate\Performa</h1>
-                <p className="text-[11px] text-yellow-400 font-bold uppercase tracking-wider mt-1.5 font-sans">
-                  Product: {category === 'rooftop' ? 'Rooftop Solar' : category === 'pump' ? 'Water Pump' : category === 'chakki' ? 'Chakki' : category}
-                </p>
-                <p className="text-[10px] text-gray-300 font-semibold mt-1">Estimate No. {estimateNo}</p>
-              </div>
-            </div>
-
-          </div>
-
-          {/* Elegant padded content wrapper for internal elements */}
-          <div className="px-[12mm] pb-[12mm] mt-6 print-content-wrapper">
-            <div className="flex justify-between items-end text-xs mb-6">
-              <div>
-                <p className="text-gray-500 font-bold uppercase tracking-wider text-[10px] mb-1">Estimate For:</p>
-                <p className="font-extrabold text-base text-gray-900">{customerName || '—'}</p>
-                <p className="text-gray-600 mt-0.5">{customerAddress || '—'}</p>
-              </div>
-              <div className="text-right">
-                <p className="text-gray-500 font-bold uppercase tracking-wider text-[10px] mb-0.5">Date:</p>
-                <p className="font-bold text-gray-800">{estimateDate}</p>
-              </div>
-            </div>
-
-          {/* Items Table */}
-          <table className="w-full text-xs text-left border-collapse mb-6">
-            <thead>
-              <tr className="print-header-bg text-white text-[10px] font-bold uppercase tracking-wider" style={{ backgroundColor: ACCENT_COLOR }}>
-                <th className="py-2.5 px-3 text-center rounded-l-md w-[5%]">S.No.</th>
-                <th className="py-2.5 px-3 w-[45%]">Item Name / Description</th>
-                <th className="py-2.5 px-2 text-center w-[12%]">HSN/SAC</th>
-                <th className="py-2.5 px-2 text-center w-[8%]">Qty</th>
-                <th className="py-2.5 px-2 text-center w-[8%]">Unit</th>
-                <th className="py-2.5 px-2 text-right w-[10%]">Price / Unit</th>
-                <th className="py-2.5 px-2 text-center w-[10%]">GST</th>
-                <th className="py-2.5 px-3 text-right rounded-r-md w-[12%]">Amount</th>
-              </tr>
-            </thead>
-            <tbody>
-              {items.map((item, idx) => {
-                const baseAmount = item.qty * item.price;
-                const gstAmount = baseAmount * (item.gst / 100);
-                const itemTotal = baseAmount + gstAmount;
-                return (
-                  <tr key={idx} className="border-b border-gray-100 even:bg-gray-50/40 hover:bg-gray-50/20">
-                    <td className="py-2.5 px-3 text-center font-bold text-gray-500">{idx + 1}</td>
-                    <td className="py-2.5 px-3 font-semibold text-gray-800 leading-tight">{item.name || '—'}</td>
-                    <td className="py-2.5 px-2 text-center text-gray-600 font-mono">{item.hsn || '—'}</td>
-                    <td className="py-2.5 px-2 text-center font-bold text-gray-800">{item.qty}</td>
-                    <td className="py-2.5 px-2 text-center text-gray-600">{item.unit || '—'}</td>
-                    <td className="py-2.5 px-2 text-right font-mono text-gray-700">{fmt(item.price)}</td>
-                    <td className="py-2.5 px-2 text-center leading-tight">
-                      <span className="font-mono text-gray-700">{fmt(gstAmount)}</span>
-                      <span className="block text-[8px] text-gray-500 font-bold">({item.gst}%)</span>
-                    </td>
-                    <td className="py-2.5 px-3 text-right font-black font-mono text-gray-900">{fmt(itemTotal)}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-            <tfoot>
-              <tr className="border-t-2 border-brand-500 font-bold bg-gray-50/50 text-gray-800">
-                <td colSpan="3" className="py-3 px-3 uppercase tracking-wider text-[10px] text-gray-500">Total Summary</td>
-                <td className="py-3 px-2 text-center font-black text-gray-900">
-                  {items.reduce((sum, item) => sum + item.qty, 0)}
-                </td>
-                <td colSpan="3" className="py-3 px-2"></td>
-                <td className="py-3 px-3 text-right font-black font-mono text-gray-900 text-sm">
-                  {fmt(totals.grandTotal)}
-                </td>
-              </tr>
-            </tfoot>
-          </table>
-
-          {/* Amount In Words */}
-          <div className="border border-gray-300 rounded-lg p-2.5 mb-6 text-xs bg-gray-50/50">
-            <span className="font-bold text-gray-700">Amount in Words:</span>{' '}
-            <span className="font-extrabold italic text-gray-900">{numWords(totals.grandTotal)}</span>
-          </div>
-
-          {/* Tax Breakdown & Final Summary Side-by-Side */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-            
-            {/* GST Splits */}
-            <div className="border border-gray-300 rounded-lg overflow-hidden">
-              <div className="bg-gray-100 py-1.5 px-3 border-b border-gray-300 text-[10px] font-bold uppercase tracking-wider text-gray-700">
-                GST Rate Breakdown
-              </div>
-              <table className="w-full text-[10px] border-collapse">
-                <thead>
-                  <tr className="border-b border-gray-300 text-gray-500 font-semibold bg-gray-50">
-                    <th className="py-1 px-3 text-left">GST Rate</th>
-                    <th className="py-1 px-2 text-right">Taxable Value</th>
-                    <th className="py-1 px-2 text-right">CGST</th>
-                    <th className="py-1 px-3 text-right">SGST</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {Object.keys(totals.gstGroups).map((rateStr) => {
-                    const rate = parseFloat(rateStr);
-                    const baseAmt = totals.gstGroups[rateStr];
-                    const halfRate = rate / 2;
-                    const halfTax = baseAmt * (halfRate / 100);
-                    return (
-                      <tr key={rateStr} className="font-mono">
-                        <td className="py-1.5 px-3 font-sans font-bold text-gray-700">{rate}%</td>
-                        <td className="py-1.5 px-2 text-right">{fmt(baseAmt)}</td>
-                        <td className="py-1.5 px-2 text-right">{fmt(halfTax)} <span className="text-[7px] text-gray-400 block font-sans font-semibold">({halfRate.toFixed(1)}%)</span></td>
-                        <td className="py-1.5 px-3 text-right">{fmt(halfTax)} <span className="text-[7px] text-gray-400 block font-sans font-semibold">({halfRate.toFixed(1)}%)</span></td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Final Subtotal Blocks */}
-            <div className="border border-gray-300 rounded-lg overflow-hidden flex flex-col font-mono text-xs">
-              <div className="flex justify-between py-2 px-3 border-b border-gray-200 bg-gray-50/50">
-                <span className="font-bold text-gray-600 font-sans">Sub Total:</span>
-                <span className="font-bold text-gray-900">{fmt(totals.subTotal)}</span>
-              </div>
-              
-              {/* Output individual taxes in summary */}
-              {Object.keys(totals.gstGroups).map((rateStr) => {
-                const rate = parseFloat(rateStr);
-                if (rate === 0) return null;
-                const baseAmt = totals.gstGroups[rateStr];
-                const halfRate = rate / 2;
-                const halfTax = baseAmt * (halfRate / 100);
-                return (
-                  <div key={rateStr} className="flex flex-col border-b border-gray-100">
-                    <div className="flex justify-between py-1.5 px-3 text-[10px]">
-                      <span className="text-gray-500 font-sans">SGST@{halfRate.toFixed(1)}% on {fmt(baseAmt)}:</span>
-                      <span className="text-gray-700">{fmt(halfTax)}</span>
-                    </div>
-                    <div className="flex justify-between py-1.5 px-3 text-[10px]">
-                      <span className="text-gray-500 font-sans">CGST@{halfRate.toFixed(1)}% on {fmt(baseAmt)}:</span>
-                      <span className="text-gray-700">{fmt(halfTax)}</span>
-                    </div>
-                  </div>
-                );
-              })}
-
-              <div className="flex justify-between py-2.5 px-3 bg-red-50/30 print-header-bg text-white" style={{ backgroundColor: ACCENT_COLOR }}>
-                <span className="font-black uppercase tracking-wider font-sans">Grand Total:</span>
-                <span className="font-black text-sm">{fmt(totals.grandTotal)}</span>
-              </div>
-            </div>
-
-          </div>
-
-          {/* Bank Details & Terms & Signature */}
-          <div className="mt-8 pt-4 border-t border-gray-200 grid grid-cols-1 md:grid-cols-2 gap-6 text-[10px] text-gray-500">
-            
-            {/* Left Section: Bank details and Terms */}
-            <div className="space-y-4">
-              {/* Bank Details Card */}
-              <div className="border border-gray-200 rounded-lg p-3 bg-gray-50/30">
-                <p className="font-bold text-gray-800 text-[11px] mb-1.5 uppercase tracking-wider flex items-center gap-1">
-                  🏦 Bank Account Details
-                </p>
-                <div className="space-y-1 text-gray-600">
-                  <div className="flex" style={{ display: 'flex', gap: '8px' }}>
-                    <span style={{ width: '85px', minWidth: '85px', fontWeight: '500', color: '#6b7280' }}>Beneficiary:</span>
-                    <span style={{ fontWeight: 'bold', color: '#1f2937' }}>Kalpana Solar</span>
-                  </div>
-                  <div className="flex" style={{ display: 'flex', gap: '8px' }}>
-                    <span style={{ width: '85px', minWidth: '85px', fontWeight: '500', color: '#6b7280' }}>Bank Name:</span>
-                    <span style={{ fontWeight: 'bold', color: '#1f2937' }}>Bank of India</span>
-                  </div>
-                  <div className="flex" style={{ display: 'flex', gap: '8px' }}>
-                    <span style={{ width: '85px', minWidth: '85px', fontWeight: '500', color: '#6b7280' }}>Account No.:</span>
-                    <span style={{ fontWeight: 'bold', color: '#111827', fontFamily: 'monospace' }}>733020110000286</span>
-                  </div>
-                  <div className="flex" style={{ display: 'flex', gap: '8px' }}>
-                    <span style={{ width: '85px', minWidth: '85px', fontWeight: '500', color: '#6b7280' }}>IFSC Code:</span>
-                    <span style={{ fontWeight: 'bold', color: '#111827', fontFamily: 'monospace' }}>BKID0007330</span>
-                  </div>
+                  <h2 className="text-xl font-black tracking-tight leading-none text-white">KALPANA SOLAR</h2>
+                  <p className="text-[9px] text-gray-300 mt-1 uppercase font-bold tracking-wider">
+                    GSTIN: <span className="text-yellow-400">09CWZPS4610R1Z8</span> · State: 09-Uttar Pradesh
+                  </p>
+                  <p className="text-[9px] text-gray-300">Complete Solar Rooftop, Hybrid & Off-Grid Solutions</p>
                 </div>
               </div>
 
-              {/* Terms & Conditions */}
-              <div>
-                <p className="font-bold text-gray-700 mb-1 uppercase tracking-wider text-[9px]">Terms & Conditions:</p>
-                <ul className="list-disc pl-4 space-y-0.5 text-gray-500">
-                  <li>GST rates are subject to change as per government norms.</li>
-                  <li>Validity of this estimate is 15 days from the date of issue.</li>
-                  <li>Delivery within 2-3 weeks after receipt of advance payment.</li>
-                </ul>
+              <div className="text-right">
+                <h1 className="text-2xl font-black tracking-wider leading-none text-white italic">Solar System Quotation</h1>
+                <p className="text-[11px] text-yellow-400 font-bold uppercase tracking-wider mt-1.5">
+                  {projectCategory} · {systemType} System ({calculatedCapacityKW})
+                </p>
+                <p className="text-[10px] text-gray-300 font-semibold mt-0.5">Estimate No. #{estimateNo}</p>
               </div>
             </div>
 
-            {/* Right Section: Signature block */}
-            <div className="text-right flex flex-col justify-end items-end h-full pb-2">
-              <img
-                src={signature}
-                alt="Signature Stamp"
-                className="h-16 object-contain mb-1"
-                style={{ mixBlendMode: 'multiply' }}
-              />
-              <p className="font-bold text-gray-800 text-[11px]">For Kalpana Solar</p>
-              <p className="text-[9px] text-gray-400 mt-0.5">Authorized Signatory</p>
+            {/* Main Content Area */}
+            <div className="px-6 py-4 space-y-4">
+              {/* Customer Info & Estimate Meta Box */}
+              <div className="grid grid-cols-2 gap-4 p-3.5 rounded-xl border border-gray-200 bg-gray-50/60 text-xs">
+                <div>
+                  <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Quotation Prepared For:</p>
+                  <p className="font-extrabold text-sm text-gray-900 mt-0.5">{customerName || '—'}</p>
+                  <p className="text-gray-700 font-semibold mt-0.5">📞 {customerPhone || '—'}</p>
+                  <p className="text-gray-600 mt-0.5 leading-snug">
+                    📍 {customerAddress || '—'} {customerCity ? `(${customerCity})` : ''}
+                  </p>
+                </div>
+                <div className="text-right flex flex-col justify-between">
+                  <div>
+                    <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Quotation Details:</p>
+                    <p className="font-bold text-gray-800 mt-0.5">Date: {estimateDate}</p>
+                    <p className="font-bold text-gray-800">Estimate No: #{estimateNo}</p>
+                    <p className="text-brand-700 font-bold mt-0.5">
+                      Type: {projectCategory} ({systemType})
+                    </p>
+                  </div>
+                  <p className="text-[10px] font-bold text-emerald-700">
+                    Validity: 7 days from quotation date
+                  </p>
+                </div>
+              </div>
+
+              {/* ── Solar System Specifications Table (Section 2 & 5) ── */}
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <h4 className="text-[11px] font-bold text-gray-900 uppercase tracking-wider flex items-center gap-1.5">
+                    <Sun size={14} className="text-brand-600" /> System Specifications & Bill of Materials
+                  </h4>
+                  <span className="text-[10px] font-bold text-brand-700 bg-brand-50 px-2 py-0.5 rounded border border-brand-200">
+                    Plant Capacity: {calculatedCapacityKW}
+                  </span>
+                </div>
+
+                <table className="w-full text-[11px] border-collapse border border-gray-200">
+                  <thead>
+                    <tr className="print-header-bg text-white text-[9px] font-bold uppercase tracking-wider" style={{ backgroundColor: ACCENT_COLOR }}>
+                      <th className="py-2 px-3 text-left w-[30%]">Equipment / Item</th>
+                      <th className="py-2 px-3 text-left w-[42%]">Specification Details</th>
+                      <th className="py-2 px-2 text-center w-[12%]">Quantity</th>
+                      <th className="py-2 px-3 text-center w-[16%]">Warranty</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200 text-gray-800">
+                    {/* Solar PV Modules */}
+                    <tr className="bg-white">
+                      <td className="py-2 px-3 font-bold text-gray-900">
+                        Solar PV Modules
+                        <span className="block text-[9px] text-gray-500 font-normal">Tier-1 High Efficiency Panels</span>
+                      </td>
+                      <td className="py-2 px-3 font-medium">
+                        {panelCompanyType || 'Mono PERC Bifacial'} ({panelWattage || '550 W'})
+                      </td>
+                      <td className="py-2 px-2 text-center font-bold">{panelQty} Nos</td>
+                      <td className="py-2 px-3 text-center font-bold text-brand-700 bg-brand-50/40">
+                        {panelWarranty} Years
+                      </td>
+                    </tr>
+
+                    {/* Solar Inverter */}
+                    <tr className="bg-gray-50/40">
+                      <td className="py-2 px-3 font-bold text-gray-900">
+                        Solar Inverter
+                        <span className="block text-[9px] text-gray-500 font-normal">Advanced MPPT Technology</span>
+                      </td>
+                      <td className="py-2 px-3 font-medium">
+                        {inverterNameType || 'Grid-Tie MPPT'} ({inverterLoad || 'Standard'})
+                      </td>
+                      <td className="py-2 px-2 text-center font-bold">1 Set</td>
+                      <td className="py-2 px-3 text-center font-bold text-brand-700 bg-brand-50/40">
+                        {inverterWarranty} Years
+                      </td>
+                    </tr>
+
+                    {/* Battery Bank (Conditional) */}
+                    <tr className="bg-white">
+                      <td className="py-2 px-3 font-bold text-gray-900">
+                        Battery Storage
+                        <span className="block text-[9px] text-gray-500 font-normal">Energy Backup Bank</span>
+                      </td>
+                      <td className="py-2 px-3 font-medium">
+                        {isBatteryApplicable
+                          ? `${batteryNameType} (${batteryCapacity})`
+                          : 'Not Applicable (Grid-Tied Net Metering System)'}
+                      </td>
+                      <td className="py-2 px-2 text-center font-bold">
+                        {isBatteryApplicable ? `${batteryQty} Nos` : 'N/A'}
+                      </td>
+                      <td className="py-2 px-3 text-center font-bold text-brand-700 bg-brand-50/40">
+                        {isBatteryApplicable ? `${batteryWarranty} Years` : 'N/A'}
+                      </td>
+                    </tr>
+
+                    {/* Structure */}
+                    <tr className="bg-gray-50/40">
+                      <td className="py-2 px-3 font-bold text-gray-900">
+                        Module Mounting Structure
+                        <span className="block text-[9px] text-gray-500 font-normal">Galvanized Iron / Rust Resistant</span>
+                      </td>
+                      <td className="py-2 px-3 font-medium">
+                        {structureType} (Standard height 6–8 ft up to 2-floor roof)
+                      </td>
+                      <td className="py-2 px-2 text-center font-bold">1 Complete Set</td>
+                      <td className="py-2 px-3 text-center font-semibold text-gray-600">Standard 5 Yrs</td>
+                    </tr>
+
+                    {/* Wiring & BOS */}
+                    <tr className="bg-white">
+                      <td className="py-2 px-3 font-bold text-gray-900">
+                        AC/DC Cabling & Balance of System
+                        <span className="block text-[9px] text-gray-500 font-normal">Safety Earthing & Switchgear</span>
+                      </td>
+                      <td className="py-2 px-3 font-medium">
+                        {wiringType} + ACDB / DCDB, SPD, MCB & Copper Earthing Kit
+                      </td>
+                      <td className="py-2 px-2 text-center font-bold">1 Complete Set</td>
+                      <td className="py-2 px-3 text-center font-semibold text-gray-600">Standard 1 Yr</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              {/* ── Section 4 & 5: Commercial Offer & Automatic 70/30 Payment Split ── */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
+                {/* Commercial Summary Box */}
+                <div className="p-3.5 rounded-xl border-2 border-brand-500 bg-brand-50/40 flex flex-col justify-between">
+                  <div>
+                    <p className="text-[10px] font-bold text-brand-900 uppercase tracking-wider">Total Quoted System Cost</p>
+                    <p className="text-2xl font-black text-brand-900 mt-0.5">{fmt(numericTotal)}</p>
+                    <p className="text-[10px] text-brand-800 font-semibold mt-1">
+                      (All-inclusive: System Cost, GST, Transportation & Installation)
+                    </p>
+                  </div>
+                  <div className="mt-2 pt-2 border-t border-brand-200 text-[10px] text-gray-700">
+                    <span className="font-bold">In Words:</span>{' '}
+                    <span className="italic font-extrabold text-gray-900">{numWords(numericTotal)}</span>
+                  </div>
+                </div>
+
+                {/* 70% / 30% Payment Terms Split */}
+                <div className="p-3.5 rounded-xl border border-gray-200 bg-white flex flex-col justify-between">
+                  <div>
+                    <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                      <span>Automatic Payment Schedule</span>
+                      <span className="text-brand-600 font-extrabold">70% / 30% Split</span>
+                    </p>
+                    <div className="space-y-1.5 text-xs">
+                      <div className="flex justify-between items-center p-2 rounded-lg bg-gray-50 border border-gray-100">
+                        <div>
+                          <span className="font-bold text-gray-900 block">1. Advance Payment (70%)</span>
+                          <span className="text-[9px] text-gray-500">Payable at project booking & order confirmation</span>
+                        </div>
+                        <span className="font-black text-brand-700 text-sm">{fmt(advancePayment70)}</span>
+                      </div>
+                      <div className="flex justify-between items-center p-2 rounded-lg bg-gray-50 border border-gray-100">
+                        <div>
+                          <span className="font-bold text-gray-900 block">2. Balance Payment (30%)</span>
+                          <span className="text-[9px] text-gray-500">Payable immediately after physical on-site installation</span>
+                        </div>
+                        <span className="font-black text-emerald-700 text-sm">{fmt(balancePayment30)}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* ── Section 3: Standard Inclusions & Terms Table ── */}
+              <div>
+                <h4 className="text-[11px] font-bold text-gray-900 uppercase tracking-wider mb-1.5">
+                  Standard Inclusions & Technical Terms
+                </h4>
+                <div className="grid grid-cols-2 gap-2 text-[10px] border border-gray-200 rounded-xl p-3 bg-gray-50/50">
+                  <div className="space-y-1">
+                    <p><strong className="text-gray-900">• GST:</strong> Included in the system cost.</p>
+                    <p><strong className="text-gray-900">• Transportation:</strong> Included in the system cost.</p>
+                    <p><strong className="text-gray-900">• Installation:</strong> Included in the system cost.</p>
+                    <p><strong className="text-gray-900">• Civil Work:</strong> Included in the system cost.</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p><strong className="text-gray-900">• DISCOM & Paperwork:</strong> Extra charges will apply for DISCOM & cash-related paperwork.</p>
+                    <p><strong className="text-gray-900">• Standard Height:</strong> Quoted cost is based on installation at a two-floor building height (6–8 ft structure size).</p>
+                    <p><strong className="text-gray-900">• Additional Height:</strong> Additional charges apply for installation above standard 2nd-floor height.</p>
+                    <p><strong className="text-gray-900">• Validity:</strong> Valid for 7 days from the quotation date.</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Bank Details & Signature Blocks */}
+              <div className="pt-2 border-t border-gray-200 grid grid-cols-2 gap-4 text-[10px]">
+                {/* Bank Account Details */}
+                <div className="p-2.5 rounded-lg border border-gray-200 bg-gray-50/40">
+                  <p className="font-bold text-gray-800 text-[10px] uppercase tracking-wider mb-1 flex items-center gap-1">
+                    🏦 Bank Account for Payment (NEFT / RTGS / IMPS)
+                  </p>
+                  <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 text-gray-600">
+                    <div>Beneficiary: <strong className="text-gray-900">Kalpana Solar</strong></div>
+                    <div>Bank: <strong className="text-gray-900">Bank of India</strong></div>
+                    <div>A/C No.: <strong className="font-mono text-gray-900">733020110000286</strong></div>
+                    <div>IFSC: <strong className="font-mono text-gray-900">BKID0007330</strong></div>
+                  </div>
+                </div>
+
+                {/* Signatures: Customer Acceptance & Kalpana Solar Signatory */}
+                <div className="grid grid-cols-2 gap-2 text-center">
+                  {/* Customer Acceptance */}
+                  <div className="p-2 rounded-lg border border-dashed border-gray-300 flex flex-col justify-between h-20">
+                    <p className="text-[9px] font-bold text-gray-500 uppercase">Customer Acceptance</p>
+                    <div className="border-t border-gray-300 pt-1 text-[9px] text-gray-500">
+                      Sign & Date
+                    </div>
+                  </div>
+
+                  {/* Kalpana Solar Signatory */}
+                  <div className="p-2 rounded-lg border border-gray-200 flex flex-col justify-between items-center h-20 bg-white">
+                    <img
+                      src={signature}
+                      alt="Signature"
+                      className="h-9 object-contain"
+                      style={{ mixBlendMode: 'multiply' }}
+                    />
+                    <div className="border-t border-gray-200 w-full pt-0.5 text-[9px] font-bold text-gray-900 leading-tight">
+                      For Kalpana Solar
+                      <span className="block text-[8px] text-gray-400 font-normal">Authorized Signatory</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Footer Note */}
+              <div className="text-center text-[8px] text-gray-400 pt-1 border-t border-gray-100">
+                Kalpana Solar · 12 A Rajendra Nagar Naubasta Kanpur 208021 · Phone: 8736992133 · Email: kalpanasolartradersinfo@gmail.com
+              </div>
             </div>
           </div>
         </div>
-        </div>
-      </div>
       )}
     </Layout>
   );
