@@ -280,7 +280,11 @@ export default function LeadDetail() {
     }
     setSavingCustomer(true);
     try {
-      const res = await api.put(`/leads/${id}`, customerForm);
+      const payload = { ...customerForm };
+      if (!payload.loadGroup || !String(payload.loadGroup).trim()) {
+        payload.loadGroup = null;
+      }
+      const res = await api.put(`/leads/${id}`, payload);
       upsertLead(res.data);
       await refreshLeadDetail(id);
       setShowEditCustomerModal(false);

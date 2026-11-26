@@ -40,16 +40,16 @@ function numWords(num) {
 }
 
 const WIRING_OPTIONS = [
-  'Complete DC Copper Wiring',
-  'DC Copper + Armoured Cable + 16 mm Aluminium',
-  'DC Copper + Armoured Cable + Copper Earthing',
+  'Complete Copper Wiring',
+  'Copper + Armoured Cable + 16 mm Aluminium',
+  'Copper + Armoured Cable + Copper Earthing',
 ];
 
 const STRUCTURE_OPTIONS = [
-  'Standard Elevated GI Structure (6x8 ft)',
-  'GI High-Rise Elevated Structure (6–8 ft)',
-  'Tin Shed Short Rail Aluminium Structure',
-  'Flat Roof Ballast / Angle Structure',
+  '3inch gi',
+  '4inch gi',
+  '6inch gi',
+  'hdgi 5inch',
 ];
 
 export default function AdminQuotations() {
@@ -303,8 +303,9 @@ ${isBatteryApplicable ? `• *Battery Bank:* ${batteryNameType} (${batteryCapaci
 ⏳ *Validity:* 7 Days from quotation date
 
 🏦 *BANK DETAILS FOR PAYMENT:*
-Beneficiary: Kalpana Solar
-Bank: Bank of India | A/C: 733020110000286 | IFSC: BKID0007330
+Beneficiary: KALPANA SOLAR TRADERS
+Bank: Canara Bank (Kidwai nagar) | A/C: 120038425487 | IFSC: CNRB0018744
+GST: 09BBDPY7262H1Z3
 
 Kalpana Solar · Kanpur (U.P.)
 📞 8736992133 | ✉️ kalpanasolartradersinfo@gmail.com`;
@@ -354,10 +355,12 @@ STANDARD INCLUSIONS & NOTES:
 • Quotation valid for 7 days from the quotation date.
 
 BANK DETAILS FOR NEFT/RTGS/IMPS:
-Beneficiary: Kalpana Solar
-Bank Name: Bank of India
-Account No.: 733020110000286
-IFSC Code: BKID0007330
+Beneficiary: KALPANA SOLAR TRADERS
+Bank Name: Canara Bank
+Branch: Kidwai nagar
+Account No.: 120038425487
+IFSC Code: CNRB0018744
+GST: 09BBDPY7262H1Z3
 
 Please let us know if you need any further assistance.
 
@@ -988,7 +991,7 @@ Office: 12 A Rajendra Nagar Naubasta Kanpur 208021`;
               >
                 <span className="flex items-center gap-2">
                   <Layers size={16} className="text-brand-500" />
-                  <span>Optional: Component Line Items & Inventory Picker ({items.length} items)</span>
+                  <span>Optional or Additionals</span>
                 </span>
                 {showItemizedSection ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
               </button>
@@ -1257,7 +1260,7 @@ Office: 12 A Rajendra Nagar Naubasta Kanpur 208021`;
                 <div>
                   <h2 className="text-xl font-black tracking-tight leading-none text-white">KALPANA SOLAR</h2>
                   <p className="text-[9px] text-gray-300 mt-1 uppercase font-bold tracking-wider">
-                    GSTIN: <span className="text-yellow-400">09CWZPS4610R1Z8</span> · State: 09-Uttar Pradesh
+                    GSTIN: <span className="text-yellow-400">09BBDPY7262H1Z3</span> · State: 09-Uttar Pradesh
                   </p>
                   <p className="text-[9px] text-gray-300">Complete Solar Rooftop, Hybrid & Off-Grid Solutions</p>
                 </div>
@@ -1373,13 +1376,12 @@ Office: 12 A Rajendra Nagar Naubasta Kanpur 208021`;
                     <tr className="bg-gray-50/40">
                       <td className="py-2 px-3 font-bold text-gray-900">
                         Module Mounting Structure
-                        <span className="block text-[9px] text-gray-500 font-normal">Galvanized Iron / Rust Resistant</span>
                       </td>
                       <td className="py-2 px-3 font-medium">
                         {structureType} (Standard height 6–8 ft up to 2-floor roof)
                       </td>
                       <td className="py-2 px-2 text-center font-bold">1 Complete Set</td>
-                      <td className="py-2 px-3 text-center font-semibold text-gray-600">Standard 5 Yrs</td>
+                      <td className="py-2 px-3 text-center font-semibold text-gray-400">—</td>
                     </tr>
 
                     {/* Wiring & BOS */}
@@ -1471,10 +1473,12 @@ Office: 12 A Rajendra Nagar Naubasta Kanpur 208021`;
                     🏦 Bank Account for Payment (NEFT / RTGS / IMPS)
                   </p>
                   <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 text-gray-600">
-                    <div>Beneficiary: <strong className="text-gray-900">Kalpana Solar</strong></div>
-                    <div>Bank: <strong className="text-gray-900">Bank of India</strong></div>
-                    <div>A/C No.: <strong className="font-mono text-gray-900">733020110000286</strong></div>
-                    <div>IFSC: <strong className="font-mono text-gray-900">BKID0007330</strong></div>
+                    <div>Beneficiary: <strong className="text-gray-900">KALPANA SOLAR TRADERS</strong></div>
+                    <div>Bank: <strong className="text-gray-900">Canara Bank</strong></div>
+                    <div>A/C No.: <strong className="font-mono text-gray-900">120038425487</strong></div>
+                    <div>IFSC: <strong className="font-mono text-gray-900">CNRB0018744</strong></div>
+                    <div>Branch: <strong className="text-gray-900">Kidwai nagar</strong></div>
+                    <div>GST: <strong className="font-mono text-gray-900">09BBDPY7262H1Z3</strong></div>
                   </div>
                 </div>
 
@@ -1497,7 +1501,7 @@ Office: 12 A Rajendra Nagar Naubasta Kanpur 208021`;
                       style={{ mixBlendMode: 'multiply' }}
                     />
                     <div className="border-t border-gray-200 w-full pt-0.5 text-[9px] font-bold text-gray-900 leading-tight">
-                      For Kalpana Solar
+                      For KALPANA SOLAR TRADERS
                       <span className="block text-[8px] text-gray-400 font-normal">Authorized Signatory</span>
                     </div>
                   </div>

@@ -812,7 +812,31 @@ router.delete('/:id/notes/:noteId', protect, async (req, res) => {
 
 router.put('/:id', protect, async (req, res) => {
   try {
-    const lead = await Lead.findByIdAndUpdate(req.params.id, req.body, { new: true })
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: 'Invalid lead ID' });
+    }
+
+    const updateData = { ...req.body };
+    delete updateData._id;
+    delete updateData.createdAt;
+    delete updateData.createdBy;
+
+    // Sanitize ObjectId reference fields if passed as empty string or invalid
+    if ('loadGroup' in updateData) {
+      if (!updateData.loadGroup || !mongoose.Types.ObjectId.isValid(updateData.loadGroup)) {
+        updateData.loadGroup = null;
+      }
+    }
+    if ('assignedTo' in updateData) {
+      if (!updateData.assignedTo || !mongoose.Types.ObjectId.isValid(updateData.assignedTo)) {
+        updateData.assignedTo = null;
+      }
+    }
+    if (typeof updateData.referralName === 'string') {
+      updateData.referralName = updateData.referralName.trim();
+    }
+
+    const lead = await Lead.findByIdAndUpdate(req.params.id, updateData, { new: true })
       .populate(LEAD_DETAIL_FIELDS);
     if (!lead) return res.status(404).json({ message: 'Lead not found' });
     dashCache.invalidateCrm();
