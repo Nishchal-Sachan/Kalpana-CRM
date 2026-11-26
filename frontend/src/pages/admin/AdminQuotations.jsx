@@ -46,10 +46,10 @@ const WIRING_OPTIONS = [
 ];
 
 const STRUCTURE_OPTIONS = [
-  '3inch gi',
-  '4inch gi',
-  '6inch gi',
-  'hdgi 5inch',
+  '3 Inch GI',
+  '4 Inch GI',
+  '6 Inch GI',
+  '5 Inch HDGI',
 ];
 
 export default function AdminQuotations() {
@@ -901,6 +901,9 @@ Office: 12 A Rajendra Nagar Naubasta Kanpur 208021`;
                     {STRUCTURE_OPTIONS.map((st) => (
                       <option key={st} value={st}>{st}</option>
                     ))}
+                    {!STRUCTURE_OPTIONS.includes(structureType) && structureType && (
+                      <option value={structureType}>{structureType}</option>
+                    )}
                   </select>
                 </div>
 
@@ -1381,7 +1384,7 @@ Office: 12 A Rajendra Nagar Naubasta Kanpur 208021`;
                         {structureType} (Standard height 6–8 ft up to 2-floor roof)
                       </td>
                       <td className="py-2 px-2 text-center font-bold">1 Complete Set</td>
-                      <td className="py-2 px-3 text-center font-semibold text-gray-400">—</td>
+                      <td className="py-2 px-3 text-center font-bold text-brand-700 bg-brand-50/40">N/A</td>
                     </tr>
 
                     {/* Wiring & BOS */}
