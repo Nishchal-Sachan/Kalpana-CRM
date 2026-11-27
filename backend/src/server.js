@@ -7,11 +7,21 @@ const connectDB = require('./config/db');
 connectDB();
 
 const app = express();
+app.disable('x-powered-by');
 app.set('etag', false);
 app.use(compression());
 
+// Security headers
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  next();
+});
+
 const allowedOrigins = process.env.CLIENT_URL
-  ? process.env.CLIENT_URL.split(',').map(o => o.trim())
+  ? process.env.CLIENT_URL.split(',').map(o => o.trim()).filter(Boolean)
   : [];
 
 app.use(cors({
@@ -24,6 +34,10 @@ app.use(cors({
     }
     // Allow explicitly listed production origins
     if (allowedOrigins.includes(origin)) return callback(null, true);
+    // Allow Kalpana Solar production domains, Render app URLs, and Vercel deployments
+    if (/^https?:\/\/([a-zA-Z0-9-]+\.)*(kalpanasolar\.com|onrender\.com|vercel\.app)$/.test(origin)) {
+      return callback(null, true);
+    }
     callback(new Error(`CORS: origin ${origin} not allowed`));
   },
   credentials: true,

@@ -1,5 +1,6 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { preloadRoute } from '../App';
 import {
   LayoutDashboard, Users, Target, Package, ShoppingCart, FileText,
   LogOut, Settings, PlusCircle, BarChart3, Home, Layers, ChevronRight, X, AlertCircle, Clock,
@@ -43,7 +44,14 @@ function SectionLabel({ t }) {
 
 function SLink({ to, label, icon:Icon, end, onNavigate }) {
   return (
-    <NavLink to={to} end={end} style={{ textDecoration:'none', display:'block' }} onClick={() => onNavigate?.()}>
+    <NavLink
+      to={to}
+      end={end}
+      style={{ textDecoration:'none', display:'block' }}
+      onClick={() => onNavigate?.()}
+      onMouseEnter={() => preloadRoute(to)}
+      onTouchStart={() => preloadRoute(to)}
+    >
       {({ isActive }) => (
         <div style={{
           display:'flex', alignItems:'center', gap:10, padding:'9px 10px',

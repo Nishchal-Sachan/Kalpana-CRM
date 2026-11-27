@@ -160,6 +160,9 @@ leadSchema.index({ assignedTo: 1, updatedAt: -1 });
 leadSchema.index({ stage: 1, updatedAt: -1 });
 leadSchema.index({ plantCost: 1 });
 leadSchema.index({ 'payments.date': 1 });
+leadSchema.index({ 'payments.0': 1 });
+leadSchema.index({ assignedTo: 1, stage: 1 });
+leadSchema.index({ updatedAt: -1 });
 leadSchema.index({ createdAt: -1 });
 
 module.exports = mongoose.model('Lead', leadSchema);

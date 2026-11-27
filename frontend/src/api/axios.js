@@ -1,9 +1,10 @@
-﻿import axios from "axios";
+import axios from "axios";
 import { getToken, clearToken, applyRefreshedToken } from "../utils/session";
 import { API_BASE_URL } from "../config/api";
 
 const api = axios.create({
   baseURL: API_BASE_URL,
+  timeout: 30000,
 });
 
 api.interceptors.request.use((config) => {

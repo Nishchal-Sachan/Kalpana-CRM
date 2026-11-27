@@ -1,34 +1,64 @@
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import ProtectedRoute from './components/ProtectedRoute'
 
 import Login from './pages/auth/Login'
 
-const CRMDashboard = lazy(() => import('./pages/crm/CRMDashboard'))
-const Leads = lazy(() => import('./pages/crm/Leads'))
-const NewLead = lazy(() => import('./pages/crm/NewLead'))
-const LeadDetail = lazy(() => import('./pages/crm/LeadDetail'))
-const Users = lazy(() => import('./pages/crm/Users'))
-const Team = lazy(() => import('./pages/crm/Team'))
-const Complaints = lazy(() => import('./pages/crm/Complaints'))
-const Orders = lazy(() => import('./pages/crm/Orders'))
-const StockDashboard = lazy(() => import('./pages/stock/StockDashboard'))
-const StockItems = lazy(() => import('./pages/stock/StockItems'))
-const LoadGroups = lazy(() => import('./pages/stock/LoadGroups'))
-const VoucherForm = lazy(() => import('./pages/stock/VoucherForm'))
-const VoucherList = lazy(() => import('./pages/stock/VoucherList'))
-const VoucherPreview = lazy(() => import('./pages/stock/VoucherPreview'))
-const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'))
-const AdminQuotations = lazy(() => import('./pages/admin/AdminQuotations'))
-const Attendance = lazy(() => import('./pages/crm/Attendance'))
-const FirstPaid = lazy(() => import('./pages/crm/FirstPaid'))
-const PendingBalance = lazy(() => import('./pages/crm/PendingBalance'))
+export const routeLoaders = {
+  '/crm': () => import('./pages/crm/CRMDashboard'),
+  '/crm/leads': () => import('./pages/crm/Leads'),
+  '/crm/first-paid': () => import('./pages/crm/FirstPaid'),
+  '/crm/pending-balance': () => import('./pages/crm/PendingBalance'),
+  '/crm/leads/new': () => import('./pages/crm/NewLead'),
+  '/crm/leads/:id': () => import('./pages/crm/LeadDetail'),
+  '/crm/users': () => import('./pages/crm/Users'),
+  '/crm/team': () => import('./pages/crm/Team'),
+  '/crm/complaints': () => import('./pages/crm/Complaints'),
+  '/crm/orders': () => import('./pages/crm/Orders'),
+  '/crm/attendance': () => import('./pages/crm/Attendance'),
+  '/stock': () => import('./pages/stock/StockDashboard'),
+  '/stock/items': () => import('./pages/stock/StockItems'),
+  '/stock/groups': () => import('./pages/stock/LoadGroups'),
+  '/stock/voucher/add': () => import('./pages/stock/VoucherForm'),
+  '/stock/vouchers': () => import('./pages/stock/VoucherList'),
+  '/stock/vouchers/:id/preview': () => import('./pages/stock/VoucherPreview'),
+  '/admin': () => import('./pages/admin/AdminDashboard'),
+  '/admin/quotations': () => import('./pages/admin/AdminQuotations'),
+};
+
+export function preloadRoute(path) {
+  const loader = routeLoaders[path];
+  if (loader) {
+    try { loader(); } catch {}
+  }
+}
+
+const CRMDashboard = lazy(routeLoaders['/crm'])
+const Leads = lazy(routeLoaders['/crm/leads'])
+const NewLead = lazy(routeLoaders['/crm/leads/new'])
+const LeadDetail = lazy(routeLoaders['/crm/leads/:id'])
+const Users = lazy(routeLoaders['/crm/users'])
+const Team = lazy(routeLoaders['/crm/team'])
+const Complaints = lazy(routeLoaders['/crm/complaints'])
+const Orders = lazy(routeLoaders['/crm/orders'])
+const StockDashboard = lazy(routeLoaders['/stock'])
+const StockItems = lazy(routeLoaders['/stock/items'])
+const LoadGroups = lazy(routeLoaders['/stock/groups'])
+const VoucherForm = lazy(routeLoaders['/stock/voucher/add'])
+const VoucherList = lazy(routeLoaders['/stock/vouchers'])
+const VoucherPreview = lazy(routeLoaders['/stock/vouchers/:id/preview'])
+const AdminDashboard = lazy(routeLoaders['/admin'])
+const AdminQuotations = lazy(routeLoaders['/admin/quotations'])
+const Attendance = lazy(routeLoaders['/crm/attendance'])
+const FirstPaid = lazy(routeLoaders['/crm/first-paid'])
+const PendingBalance = lazy(routeLoaders['/crm/pending-balance'])
 
 function PageLoader() {
   return (
-    <div className="flex items-center justify-center h-screen">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-solar-500" />
+    <div className="flex flex-col items-center justify-center min-h-[50vh] p-8 text-gray-400">
+      <div className="animate-spin rounded-full h-9 w-9 border-2 border-brand-200 border-t-brand-600 mb-2" />
+      <span className="text-xs font-semibold text-gray-400">Loading...</span>
     </div>
   )
 }
@@ -44,6 +74,23 @@ function LazyPage({ children, ...routeProps }) {
 }
 
 export default function App() {
+  useEffect(() => {
+    // When browser is idle, pre-warm core CRM routes so page transitions feel instant
+    const preloadCommon = () => {
+      routeLoaders['/crm']?.();
+      routeLoaders['/crm/leads']?.();
+      routeLoaders['/crm/first-paid']?.();
+      routeLoaders['/crm/pending-balance']?.();
+      routeLoaders['/admin/quotations']?.();
+      routeLoaders['/crm/leads/new']?.();
+    };
+
+    if ('requestIdleCallback' in window) {
+      window.requestIdleCallback(preloadCommon, { timeout: 2500 });
+    } else {
+      setTimeout(preloadCommon, 1200);
+    }
+  }, []);
   return (
     <>
       <Toaster

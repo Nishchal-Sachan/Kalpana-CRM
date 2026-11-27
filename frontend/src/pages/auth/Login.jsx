@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { preloadRoute } from '../../App';
 import toast from 'react-hot-toast';
 import { showApiError } from '../../utils/apiError';
 import { Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
@@ -16,6 +17,7 @@ export default function Login() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    preloadRoute('/crm');
     if (user) {
       navigate('/crm', { replace: true });
     }

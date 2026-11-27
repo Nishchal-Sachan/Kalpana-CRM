@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import api from '../api/axios';
 import { hashPassword } from '../api/crypto';
 import {
@@ -46,17 +46,17 @@ export function AuthProvider({ children }) {
     setUser(userFromToken(token) || fallbackUser || null);
   }, []);
 
-  const login = async (email, password) => {
+  const login = useCallback(async (email, password) => {
     const hashed = await hashPassword(password);
     const res = await api.post('/auth/login', { email, password: hashed });
     applyToken(res.data.token, res.data.user);
     return res.data.user;
-  };
+  }, [applyToken]);
 
-  const logout = () => {
+  const logout = useCallback(() => {
     clearToken();
     setUser(null);
-  };
+  }, []);
 
   const updateSessionUser = useCallback((patch) => {
     setUser((prev) => (prev ? { ...prev, ...patch } : prev));
@@ -64,29 +64,31 @@ export function AuthProvider({ children }) {
 
   const role = user?.role;
 
+  const authValue = useMemo(() => ({
+    user,
+    loading,
+    login,
+    logout,
+    updateSessionUser,
+    isAdmin: role === 'admin',
+    isEmployee: role === 'user',
+    isSalesManager: role === 'manager',
+    isStockManager: role === 'stock_manager',
+    isManager: role === 'manager',
+    canViewAllLeads: ALL_LEADS_ROLES.includes(role),
+    canViewTeam: TEAM_VIEW_ROLES.includes(role),
+    canAccessStock: STOCK_ACCESS_ROLES.includes(role),
+    canTransactStock: STOCK_ACCESS_ROLES.includes(role),
+    canManageStockItems: role === 'admin',
+    canForwardLead: ALL_LEADS_ROLES.includes(role),
+    canManageStock: STOCK_ACCESS_ROLES.includes(role),
+    canAccessComplaints: role === 'admin' || Boolean(user?.handlesComplaints),
+    canAccessQuotations: role === 'admin' || Boolean(user?.canAccessQuotations),
+    canManageAllComplaints: role === 'admin',
+  }), [user, loading, login, logout, updateSessionUser, role]);
+
   return (
-    <AuthContext.Provider value={{
-      user,
-      loading,
-      login,
-      logout,
-      updateSessionUser,
-      isAdmin: role === 'admin',
-      isEmployee: role === 'user',
-      isSalesManager: role === 'manager',
-      isStockManager: role === 'stock_manager',
-      isManager: role === 'manager',
-      canViewAllLeads: ALL_LEADS_ROLES.includes(role),
-      canViewTeam: TEAM_VIEW_ROLES.includes(role),
-      canAccessStock: STOCK_ACCESS_ROLES.includes(role),
-      canTransactStock: STOCK_ACCESS_ROLES.includes(role),
-      canManageStockItems: role === 'admin',
-      canForwardLead: ALL_LEADS_ROLES.includes(role),
-      canManageStock: STOCK_ACCESS_ROLES.includes(role),
-      canAccessComplaints: role === 'admin' || Boolean(user?.handlesComplaints),
-      canAccessQuotations: role === 'admin' || Boolean(user?.canAccessQuotations),
-      canManageAllComplaints: role === 'admin',
-    }}>
+    <AuthContext.Provider value={authValue}>
       {children}
     </AuthContext.Provider>
   );
