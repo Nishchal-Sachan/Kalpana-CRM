@@ -84,6 +84,7 @@ export function AuthProvider({ children }) {
       canForwardLead: ALL_LEADS_ROLES.includes(role),
       canManageStock: STOCK_ACCESS_ROLES.includes(role),
       canAccessComplaints: role === 'admin' || Boolean(user?.handlesComplaints),
+      canAccessQuotations: role === 'admin' || Boolean(user?.canAccessQuotations),
       canManageAllComplaints: role === 'admin',
     }}>
       {children}

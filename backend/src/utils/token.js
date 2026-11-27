@@ -11,6 +11,7 @@ function signUserToken(user) {
       empCode: user.empCode || '',
       points: user.points ?? 0,
       handlesComplaints: Boolean(user.handlesComplaints),
+      canAccessQuotations: Boolean(user.canAccessQuotations),
     },
     process.env.JWT_SECRET,
     { expiresIn: '7d' },
@@ -30,6 +31,7 @@ function tokenPayloadForUser(user) {
       empCode: user.empCode,
       points: user.points ?? 0,
       handlesComplaints: Boolean(user.handlesComplaints),
+      canAccessQuotations: Boolean(user.canAccessQuotations),
     },
   };
 }

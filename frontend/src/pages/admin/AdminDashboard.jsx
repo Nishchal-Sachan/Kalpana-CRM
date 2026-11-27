@@ -20,7 +20,7 @@ const QUICK = [
   { label:'Manage Users',        desc:'Create & manage CRM team',  icon:Users,   color:'#6366f1', path:'/crm/users'  },
   { label:'Service Complaints',  desc:'View & assign complaints',  icon:AlertCircle, color:'#ea580c', path:'/crm/complaints' },
   { label:'Stock Inventory',     desc:'Add & edit stock items',    icon:Layers,  color:'#10b981', path:'/stock/items'},
-  { label:'Quotation Generator', desc:'Generate solar estimates',  icon:Sun,     color:BLUE,    path:'/quotation'  },
+  { label:'Quotation Generator', desc:'Generate solar estimates',  icon:Sun,     color:BLUE,    path:'/admin/quotations'  },
 ];
 
 export default function AdminDashboard() {

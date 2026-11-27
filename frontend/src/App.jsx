@@ -88,7 +88,8 @@ export default function App() {
         <Route path="/stock/vouchers" element={<LazyPage stockOnly><VoucherList /></LazyPage>} />
         <Route path="/stock/vouchers/:id/preview" element={<LazyPage stockOnly><VoucherPreview /></LazyPage>} />
         <Route path="/admin" element={<LazyPage adminOnly><AdminDashboard /></LazyPage>} />
-        <Route path="/admin/quotations" element={<LazyPage adminOnly><AdminQuotations /></LazyPage>} />
+        <Route path="/admin/quotations" element={<LazyPage quotationsOnly><AdminQuotations /></LazyPage>} />
+        <Route path="/crm/quotations" element={<Navigate to="/admin/quotations" replace />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>

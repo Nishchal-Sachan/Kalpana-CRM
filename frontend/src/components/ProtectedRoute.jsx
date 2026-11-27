@@ -1,8 +1,8 @@
-﻿import { Navigate } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-export default function ProtectedRoute({ children, adminOnly = false, stockOnly = false, teamView = false, complaintsOnly = false }) {
-  const { user, loading, canAccessStock, canViewTeam, canAccessComplaints } = useAuth();
+export default function ProtectedRoute({ children, adminOnly = false, stockOnly = false, teamView = false, complaintsOnly = false, quotationsOnly = false }) {
+  const { user, loading, canAccessStock, canViewTeam, canAccessComplaints, canAccessQuotations } = useAuth();
 
   if (loading) {
     return (
@@ -17,6 +17,7 @@ export default function ProtectedRoute({ children, adminOnly = false, stockOnly 
   if (stockOnly && !canAccessStock) return <Navigate to="/crm" replace />;
   if (teamView && !canViewTeam) return <Navigate to="/crm" replace />;
   if (complaintsOnly && !canAccessComplaints) return <Navigate to="/crm" replace />;
+  if (quotationsOnly && !canAccessQuotations) return <Navigate to="/crm" replace />;
 
   return children;
 }

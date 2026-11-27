@@ -96,7 +96,7 @@ router.post('/:id/reset-points', protect, adminOnly, async (req, res) => {
 
 router.post('/', protect, adminOnly, async (req, res) => {
   try {
-    const { name, email, password, role, phone, handlesComplaints, empCode } = req.body;
+    const { name, email, password, role, phone, handlesComplaints, canAccessQuotations, empCode } = req.body;
     const exists = await User.findOne({ email });
     if (exists) return res.status(400).json({ message: 'Email already registered' });
 
@@ -104,12 +104,14 @@ router.post('/', protect, adminOnly, async (req, res) => {
       name, email, password, role: role || 'user', phone,
       empCode: empCode ? empCode.trim() : undefined,
       handlesComplaints: Boolean(handlesComplaints),
+      canAccessQuotations: Boolean(canAccessQuotations),
     });
     dashCache.invalidateAdmin();
     res.status(201).json({
       _id: user._id, name: user.name, email: user.email, role: user.role, phone: user.phone,
       empCode: user.empCode,
       handlesComplaints: user.handlesComplaints,
+      canAccessQuotations: user.canAccessQuotations,
     });
   } catch (err) {
     sendError(res, err);
@@ -118,7 +120,7 @@ router.post('/', protect, adminOnly, async (req, res) => {
 
 router.put('/:id', protect, adminOnly, async (req, res) => {
   try {
-    const { name, email, role, phone, isActive, password, handlesComplaints, empCode } = req.body;
+    const { name, email, role, phone, isActive, password, handlesComplaints, canAccessQuotations, empCode } = req.body;
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ message: 'User not found' });
 
@@ -129,6 +131,7 @@ router.put('/:id', protect, adminOnly, async (req, res) => {
     if (empCode !== undefined) user.empCode = empCode ? empCode.trim() : undefined;
     if (isActive !== undefined) user.isActive = isActive;
     if (handlesComplaints !== undefined) user.handlesComplaints = Boolean(handlesComplaints);
+    if (canAccessQuotations !== undefined) user.canAccessQuotations = Boolean(canAccessQuotations);
     if (password) user.password = password;
 
     await user.save();
@@ -142,6 +145,7 @@ router.put('/:id', protect, adminOnly, async (req, res) => {
       empCode: user.empCode,
       isActive: user.isActive,
       handlesComplaints: user.handlesComplaints,
+      canAccessQuotations: user.canAccessQuotations,
     };
     if (String(user._id) === String(req.user._id)) {
       Object.assign(json, tokenPayloadForUser(user));

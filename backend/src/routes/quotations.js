@@ -2,13 +2,13 @@ const express = require('express');
 const router = express.Router();
 const QuotationTemplate = require('../models/QuotationTemplate');
 const Quotation = require('../models/Quotation');
-const { protect, adminOnly } = require('../middleware/auth');
+const { protect, adminOnly, quotationsAccess } = require('../middleware/auth');
 
 const { sendError } = require('../utils/sendError');
 
 // --- Quotations History ---
 
-router.get('/', protect, async (req, res) => {
+router.get('/', protect, quotationsAccess, async (req, res) => {
   try {
     const quotations = await Quotation.find()
       .populate('createdBy', 'name')
@@ -19,7 +19,7 @@ router.get('/', protect, async (req, res) => {
   }
 });
 
-router.post('/', protect, async (req, res) => {
+router.post('/', protect, quotationsAccess, async (req, res) => {
   try {
     const quotation = await Quotation.create({
       ...req.body,

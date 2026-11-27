@@ -40,6 +40,12 @@ const canAccessComplaints = (user) => {
   return Boolean(user?.handlesComplaints);
 };
 
+/** Quotation generator — admin or employees enabled by admin */
+const canAccessQuotations = (user) => {
+  if (isAdmin(user)) return true;
+  return Boolean(user?.canAccessQuotations);
+};
+
 function userFromToken(decoded) {
   if (!decoded?.id || !decoded?.role) return null;
   return {
@@ -50,6 +56,7 @@ function userFromToken(decoded) {
     phone: decoded.phone || '',
     points: typeof decoded.points === 'number' ? decoded.points : 0,
     handlesComplaints: Boolean(decoded.handlesComplaints),
+    canAccessQuotations: Boolean(decoded.canAccessQuotations),
   };
 }
 
@@ -109,6 +116,11 @@ const complaintsAccess = (req, res, next) => {
   return res.status(403).json({ message: 'Complaint access not enabled for this account' });
 };
 
+const quotationsAccess = (req, res, next) => {
+  if (canAccessQuotations(req.user)) return next();
+  return res.status(403).json({ message: 'Quotation generator access not enabled for this account' });
+};
+
 module.exports = {
   protect,
   adminOnly,
@@ -130,6 +142,8 @@ module.exports = {
   canManageAllComplaints,
   canAccessComplaints,
   complaintsAccess,
+  canAccessQuotations,
+  quotationsAccess,
   /** @deprecated use canAccessStock */
   canManageStock: canAccessStock,
   /** @deprecated use isSalesManager */

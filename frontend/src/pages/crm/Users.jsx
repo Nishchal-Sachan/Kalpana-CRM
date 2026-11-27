@@ -26,7 +26,7 @@ export default function Users() {
   const { user: currentUser } = useAuth();
   const { invalidateDashboardCrm, invalidateAssignees } = useDataCache();
 
-  const emptyForm = { name: '', email: '', password: '', role: 'user', phone: '', empCode: '', isActive: true, handlesComplaints: false };
+  const emptyForm = { name: '', email: '', password: '', role: 'user', phone: '', empCode: '', isActive: true, handlesComplaints: false, canAccessQuotations: false };
   const [form, setForm] = useState(emptyForm);
 
   useEffect(() => {
@@ -60,7 +60,7 @@ export default function Users() {
   const openCreate = () => { setEditing(null); setForm(emptyForm); setShowModal(true); };
   const openEdit = (u) => {
     setEditing(u);
-    setForm({ name: u.name, email: u.email, password: '', role: u.role, phone: u.phone || '', empCode: u.empCode || '', isActive: u.isActive, handlesComplaints: Boolean(u.handlesComplaints) });
+    setForm({ name: u.name, email: u.email, password: '', role: u.role, phone: u.phone || '', empCode: u.empCode || '', isActive: u.isActive, handlesComplaints: Boolean(u.handlesComplaints), canAccessQuotations: Boolean(u.canAccessQuotations) });
     setShowModal(true);
   };
 
@@ -171,6 +171,7 @@ export default function Users() {
                       <th className="text-left py-3 px-3 font-semibold text-gray-600">Phone</th>
                       <th className="text-left py-3 px-3 font-semibold text-gray-600">Role</th>
                       <th className="text-left py-3 px-3 font-semibold text-gray-600">Complaints</th>
+                      <th className="text-left py-3 px-3 font-semibold text-gray-600">Quotations</th>
                       <th className="text-left py-3 px-3 font-semibold text-gray-600">Points</th>
                       <th className="text-left py-3 px-3 font-semibold text-gray-600">Status</th>
                       <th className="text-left py-3 px-3 font-semibold text-gray-600">Actions</th>
@@ -203,6 +204,11 @@ export default function Users() {
                         <td className="py-3 px-3">
                           <span className={`badge ${u.handlesComplaints ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-500'}`}>
                             {u.handlesComplaints ? 'Enabled' : '—'}
+                          </span>
+                        </td>
+                        <td className="py-3 px-3">
+                          <span className={`badge ${u.canAccessQuotations ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-500'}`}>
+                            {u.canAccessQuotations ? 'Enabled' : '—'}
                           </span>
                         </td>
                         <td className="py-3 px-3">
@@ -323,6 +329,18 @@ export default function Users() {
                   />
                   <label htmlFor="handlesComplaints" className="text-sm text-gray-700">
                     Service complaints access (can receive &amp; handle customer complaints)
+                  </label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="canAccessQuotations"
+                    checked={form.canAccessQuotations}
+                    onChange={e => f('canAccessQuotations', e.target.checked)}
+                    className="w-4 h-4 text-solar-500"
+                  />
+                  <label htmlFor="canAccessQuotations" className="text-sm text-gray-700">
+                    Quotation Generator access (can generate &amp; view quotations)
                   </label>
                 </div>
                 <div className="flex gap-3 pt-2">

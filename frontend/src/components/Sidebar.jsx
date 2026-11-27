@@ -14,6 +14,7 @@ const CRM_LINKS = [
   { to:'/crm/first-paid',      label:'First Paid',        icon:CreditCard },
   { to:'/crm/pending-balance', label:'Pending Balance',   icon:Receipt },
   { to:'/crm/leads/new',       label:'New Lead',          icon:PlusCircle },
+  { to:'/admin/quotations',    label:'Quotations',        icon:FileText },
   { to:'/crm/complaints',      label:'Complaints',        icon:AlertCircle },
   { to:'/crm/orders',          label:'Shop Orders',       icon:ShoppingCart },
   { to:'/crm/attendance',      label:'Attendance',        icon:Clock },
@@ -79,10 +80,11 @@ function NavBtn({ onClick, label, icon:Icon }) {
 }
 
 export default function Sidebar({ module, onNavigate, onCloseMobile }) {
-  const { user, logout, isAdmin, canViewTeam, canAccessStock, canAccessComplaints } = useAuth();
+  const { user, logout, isAdmin, canViewTeam, canAccessStock, canAccessComplaints, canAccessQuotations } = useAuth();
   const navigate = useNavigate();
   const links = (module === 'stock' ? STOCK_LINKS : CRM_LINKS).filter(
     (l) => (l.to !== '/crm/complaints' || canAccessComplaints) &&
+           (l.to !== '/admin/quotations' || canAccessQuotations) &&
            (l.to !== '/stock/voucher/add' || isAdmin) &&
            (l.to !== '/stock/voucher/expense' || isAdmin)
   );
@@ -140,7 +142,6 @@ export default function Sidebar({ module, onNavigate, onCloseMobile }) {
             <div style={{ height:12 }} />
             <SectionLabel t="Admin" />
             {CRM_ADMIN.map(l => <SLink key={l.to} {...l} onNavigate={onNavigate} />)}
-            <SLink to="/admin/quotations" label="Admin Quotations" icon={FileText} onNavigate={onNavigate} />
             <SLink to="/admin" label="Admin Panel" icon={Settings} onNavigate={onNavigate} />
           </>
         )}

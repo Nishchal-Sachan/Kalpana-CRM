@@ -10,6 +10,7 @@ const userSchema = new mongoose.Schema({
   empCode: { type: String, trim: true },
   isActive: { type: Boolean, default: true },
   handlesComplaints: { type: Boolean, default: false },
+  canAccessQuotations: { type: Boolean, default: false },
   points: { type: Number, default: 0 },
 }, { timestamps: true });
 
@@ -25,5 +26,6 @@ userSchema.methods.matchPassword = async function (entered) {
 userSchema.index({ isActive: 1, points: -1 });
 userSchema.index({ role: 1 });
 userSchema.index({ isActive: 1, handlesComplaints: 1 });
+userSchema.index({ isActive: 1, canAccessQuotations: 1 });
 
 module.exports = mongoose.model('User', userSchema);

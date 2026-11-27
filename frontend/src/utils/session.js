@@ -49,6 +49,7 @@ export function userFromToken(token) {
       phone: payload.phone || '',
       points: typeof payload.points === 'number' ? payload.points : undefined,
       handlesComplaints: Boolean(payload.handlesComplaints),
+      canAccessQuotations: Boolean(payload.canAccessQuotations),
     };
   } catch {
     return null;
